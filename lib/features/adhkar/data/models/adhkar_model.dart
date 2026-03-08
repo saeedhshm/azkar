@@ -10,6 +10,7 @@ class AdhkarModel extends Adhkar {
     required super.description,
   });
 
+
   factory AdhkarModel.fromJson(Map<String, dynamic> json) {
     return AdhkarModel(
       id: json['id'] as int,
