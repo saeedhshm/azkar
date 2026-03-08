@@ -1,0 +1,159 @@
+{
+  "app": {
+    "name": "Adhkar App"
+  },
+  "common": {
+    "favorites": "Favorites",
+    "favorite": "Favorite",
+    "settings": "Settings",
+    "search_adhkar": "Search adhkar...",
+    "failed_load_adhkar": "Failed to load adhkar.",
+    "failed_load_favorites": "Failed to load favorites.",
+    "no_adhkar_in_category": "No adhkar found for this category.",
+    "no_favorites": "No favorite adhkar yet.",
+    "tasbeeh_counter": "Tasbeeh Counter",
+    "copy": "Copy",
+    "share": "Share",
+    "next": "Next",
+    "previous": "Previous",
+    "reset": "Reset",
+    "count": "Count"
+  },
+  "home": {
+    "sections": {
+      "daily": {
+        "title": "Daily Adhkar",
+        "subtitle": "Daily remembrance"
+      },
+      "prayer": {
+        "title": "Prayer Adhkar",
+        "subtitle": "Remembrance around prayer"
+      },
+      "general": {
+        "title": "General Dhikr",
+        "subtitle": "General remembrance"
+      },
+      "quran": {
+        "title": "Duas from Quran",
+        "subtitle": "Supplications from Quran"
+      },
+      "life": {
+        "title": "Life Situations",
+        "subtitle": "Adhkar for daily situations"
+      }
+    }
+  },
+  "categories": {
+    "morning_adhkar": {
+      "title": "Morning Adhkar",
+      "subtitle": "Morning remembrance"
+    },
+    "evening_adhkar": {
+      "title": "Evening Adhkar",
+      "subtitle": "Evening remembrance"
+    },
+    "sleep_adhkar": {
+      "title": "Sleep Adhkar",
+      "subtitle": "Before sleep"
+    },
+    "waking_up": {
+      "title": "Waking Up",
+      "subtitle": "After waking up"
+    },
+    "after_prayer": {
+      "title": "After Prayer",
+      "subtitle": "Post-prayer adhkar"
+    },
+    "after_wudu": {
+      "title": "After Wudu",
+      "subtitle": "After ablution"
+    },
+    "after_adhan": {
+      "title": "After Adhan",
+      "subtitle": "After call to prayer"
+    },
+    "tasbeeh": {
+      "title": "Tasbeeh",
+      "subtitle": "Glorification"
+    },
+    "istighfar": {
+      "title": "Istighfar",
+      "subtitle": "Seeking forgiveness"
+    },
+    "salawat_on_prophet": {
+      "title": "Salawat on Prophet",
+      "subtitle": "Peace and blessings"
+    },
+    "duas_from_quran": {
+      "title": "Quranic Duas",
+      "subtitle": "Supplications from Quran"
+    },
+    "entering_home": {
+      "title": "Entering Home",
+      "subtitle": "When entering home"
+    },
+    "leaving_home": {
+      "title": "Leaving Home",
+      "subtitle": "When leaving home"
+    },
+    "entering_mosque": {
+      "title": "Entering Mosque",
+      "subtitle": "When entering mosque"
+    },
+    "leaving_mosque": {
+      "title": "Leaving Mosque",
+      "subtitle": "When leaving mosque"
+    },
+    "travel": {
+      "title": "Travel",
+      "subtitle": "Travel adhkar"
+    },
+    "rain": {
+      "title": "Rain",
+      "subtitle": "Rain supplications"
+    },
+    "illness": {
+      "title": "Illness",
+      "subtitle": "Supplications for illness"
+    },
+    "distress": {
+      "title": "Distress",
+      "subtitle": "Supplications for hardship"
+    },
+    "gratitude": {
+      "title": "Gratitude",
+      "subtitle": "Thanks and praise"
+    }
+  },
+  "reader": {
+    "title": "Dhikr Reader",
+    "failed_open": "Failed to open reader.",
+    "no_dhikr": "No dhikr available.",
+    "progress": "Progress",
+    "remaining": "Remaining",
+    "completed": "Completed",
+    "copied": "Dhikr copied to clipboard."
+  },
+  "settings": {
+    "saved": "Settings saved.",
+    "language": {
+      "title": "Language",
+      "label": "Choose language",
+      "en": "English",
+      "ar": "Arabic",
+      "tr": "Turkish",
+      "id": "Indonesian"
+    },
+    "appearance": "Appearance",
+    "dark_mode": "Dark mode",
+    "reminders": "Daily reminders",
+    "enable_notifications": "Enable notifications",
+    "morning_reminder": "Morning reminder",
+    "evening_reminder": "Evening reminder",
+    "save_notifications": "Save notification settings"
+  },
+  "tasbeeh": {
+    "default_phrase": "SubhanAllah",
+    "tap_to_count": "Tap to Count"
+  }
+}

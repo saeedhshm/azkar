@@ -1,0 +1,159 @@
+{
+  "app": {
+    "name": "Zikir Uygulaması"
+  },
+  "common": {
+    "favorites": "Favoriler",
+    "favorite": "Favori",
+    "settings": "Ayarlar",
+    "search_adhkar": "Zikir ara...",
+    "failed_load_adhkar": "Zikirler yüklenemedi.",
+    "failed_load_favorites": "Favoriler yüklenemedi.",
+    "no_adhkar_in_category": "Bu kategoride zikir bulunamadı.",
+    "no_favorites": "Henüz favori zikir yok.",
+    "tasbeeh_counter": "Tesbih Sayacı",
+    "copy": "Kopyala",
+    "share": "Paylaş",
+    "next": "Sonraki",
+    "previous": "Önceki",
+    "reset": "Sıfırla",
+    "count": "Adet"
+  },
+  "home": {
+    "sections": {
+      "daily": {
+        "title": "Günlük Zikirler",
+        "subtitle": "Günlük hatırlatmalar"
+      },
+      "prayer": {
+        "title": "Namaz Zikirleri",
+        "subtitle": "Namazla ilgili zikirler"
+      },
+      "general": {
+        "title": "Genel Zikir",
+        "subtitle": "Genel hatırlatmalar"
+      },
+      "quran": {
+        "title": "Kur'an Duaları",
+        "subtitle": "Kur'an'dan dualar"
+      },
+      "life": {
+        "title": "Hayat Durumları",
+        "subtitle": "Günlük durumlar için dualar"
+      }
+    }
+  },
+  "categories": {
+    "morning_adhkar": {
+      "title": "Sabah Zikirleri",
+      "subtitle": "Sabah okunacaklar"
+    },
+    "evening_adhkar": {
+      "title": "Akşam Zikirleri",
+      "subtitle": "Akşam okunacaklar"
+    },
+    "sleep_adhkar": {
+      "title": "Uyku Zikirleri",
+      "subtitle": "Uyumadan önce"
+    },
+    "waking_up": {
+      "title": "Uyanınca",
+      "subtitle": "Uyanınca okunacaklar"
+    },
+    "after_prayer": {
+      "title": "Namazdan Sonra",
+      "subtitle": "Namaz sonrası zikir"
+    },
+    "after_wudu": {
+      "title": "Abdestten Sonra",
+      "subtitle": "Abdest sonrası zikir"
+    },
+    "after_adhan": {
+      "title": "Ezandan Sonra",
+      "subtitle": "Ezan sonrası dua"
+    },
+    "tasbeeh": {
+      "title": "Tesbih",
+      "subtitle": "Tesbihat"
+    },
+    "istighfar": {
+      "title": "İstiğfar",
+      "subtitle": "Bağışlanma dileme"
+    },
+    "salawat_on_prophet": {
+      "title": "Peygambere Salavat",
+      "subtitle": "Salat ve selam"
+    },
+    "duas_from_quran": {
+      "title": "Kur'an Duaları",
+      "subtitle": "Kur'an'dan dualar"
+    },
+    "entering_home": {
+      "title": "Eve Girerken",
+      "subtitle": "Eve giriş duası"
+    },
+    "leaving_home": {
+      "title": "Evden Çıkarken",
+      "subtitle": "Evden çıkış duası"
+    },
+    "entering_mosque": {
+      "title": "Camiye Girerken",
+      "subtitle": "Camiye giriş duası"
+    },
+    "leaving_mosque": {
+      "title": "Camiden Çıkarken",
+      "subtitle": "Camiden çıkış duası"
+    },
+    "travel": {
+      "title": "Seyahat",
+      "subtitle": "Yolculuk zikirleri"
+    },
+    "rain": {
+      "title": "Yağmur",
+      "subtitle": "Yağmur duaları"
+    },
+    "illness": {
+      "title": "Hastalık",
+      "subtitle": "Şifa duaları"
+    },
+    "distress": {
+      "title": "Sıkıntı",
+      "subtitle": "Zorluk duaları"
+    },
+    "gratitude": {
+      "title": "Şükür",
+      "subtitle": "Hamd ve şükür"
+    }
+  },
+  "reader": {
+    "title": "Zikir Okuyucu",
+    "failed_open": "Okuyucu açılamadı.",
+    "no_dhikr": "Zikir bulunamadı.",
+    "progress": "İlerleme",
+    "remaining": "Kalan",
+    "completed": "Tamamlandı",
+    "copied": "Zikir panoya kopyalandı."
+  },
+  "settings": {
+    "saved": "Ayarlar kaydedildi.",
+    "language": {
+      "title": "Dil",
+      "label": "Dil seç",
+      "en": "İngilizce",
+      "ar": "Arapça",
+      "tr": "Türkçe",
+      "id": "Endonezce"
+    },
+    "appearance": "Görünüm",
+    "dark_mode": "Karanlık mod",
+    "reminders": "Günlük hatırlatmalar",
+    "enable_notifications": "Bildirimleri etkinleştir",
+    "morning_reminder": "Sabah hatırlatması",
+    "evening_reminder": "Akşam hatırlatması",
+    "save_notifications": "Bildirim ayarlarını kaydet"
+  },
+  "tasbeeh": {
+    "default_phrase": "Sübhanallah",
+    "tap_to_count": "Saymak için dokun"
+  }
+}

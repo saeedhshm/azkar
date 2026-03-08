@@ -1,0 +1,159 @@
+{
+  "app": {
+    "name": "Aplikasi Adhkar"
+  },
+  "common": {
+    "favorites": "Favorit",
+    "favorite": "Favorit",
+    "settings": "Pengaturan",
+    "search_adhkar": "Cari adhkar...",
+    "failed_load_adhkar": "Gagal memuat adhkar.",
+    "failed_load_favorites": "Gagal memuat favorit.",
+    "no_adhkar_in_category": "Tidak ada adhkar pada kategori ini.",
+    "no_favorites": "Belum ada adhkar favorit.",
+    "tasbeeh_counter": "Penghitung Tasbih",
+    "copy": "Salin",
+    "share": "Bagikan",
+    "next": "Berikutnya",
+    "previous": "Sebelumnya",
+    "reset": "Atur Ulang",
+    "count": "Jumlah"
+  },
+  "home": {
+    "sections": {
+      "daily": {
+        "title": "Adhkar Harian",
+        "subtitle": "Dzikir harian"
+      },
+      "prayer": {
+        "title": "Adhkar Shalat",
+        "subtitle": "Dzikir terkait shalat"
+      },
+      "general": {
+        "title": "Dzikir Umum",
+        "subtitle": "Dzikir umum"
+      },
+      "quran": {
+        "title": "Doa dari Quran",
+        "subtitle": "Doa dalam Al-Quran"
+      },
+      "life": {
+        "title": "Situasi Kehidupan",
+        "subtitle": "Doa untuk keseharian"
+      }
+    }
+  },
+  "categories": {
+    "morning_adhkar": {
+      "title": "Adhkar Pagi",
+      "subtitle": "Dzikir pagi"
+    },
+    "evening_adhkar": {
+      "title": "Adhkar Petang",
+      "subtitle": "Dzikir petang"
+    },
+    "sleep_adhkar": {
+      "title": "Adhkar Tidur",
+      "subtitle": "Sebelum tidur"
+    },
+    "waking_up": {
+      "title": "Bangun Tidur",
+      "subtitle": "Setelah bangun tidur"
+    },
+    "after_prayer": {
+      "title": "Setelah Shalat",
+      "subtitle": "Dzikir setelah shalat"
+    },
+    "after_wudu": {
+      "title": "Setelah Wudhu",
+      "subtitle": "Dzikir setelah wudhu"
+    },
+    "after_adhan": {
+      "title": "Setelah Adzan",
+      "subtitle": "Doa setelah adzan"
+    },
+    "tasbeeh": {
+      "title": "Tasbih",
+      "subtitle": "Dzikir tasbih"
+    },
+    "istighfar": {
+      "title": "Istighfar",
+      "subtitle": "Memohon ampun"
+    },
+    "salawat_on_prophet": {
+      "title": "Shalawat Nabi",
+      "subtitle": "Shalawat dan salam"
+    },
+    "duas_from_quran": {
+      "title": "Doa Quran",
+      "subtitle": "Doa dari Al-Quran"
+    },
+    "entering_home": {
+      "title": "Masuk Rumah",
+      "subtitle": "Doa masuk rumah"
+    },
+    "leaving_home": {
+      "title": "Keluar Rumah",
+      "subtitle": "Doa keluar rumah"
+    },
+    "entering_mosque": {
+      "title": "Masuk Masjid",
+      "subtitle": "Doa masuk masjid"
+    },
+    "leaving_mosque": {
+      "title": "Keluar Masjid",
+      "subtitle": "Doa keluar masjid"
+    },
+    "travel": {
+      "title": "Perjalanan",
+      "subtitle": "Dzikir perjalanan"
+    },
+    "rain": {
+      "title": "Hujan",
+      "subtitle": "Doa hujan"
+    },
+    "illness": {
+      "title": "Sakit",
+      "subtitle": "Doa saat sakit"
+    },
+    "distress": {
+      "title": "Kesulitan",
+      "subtitle": "Doa saat sempit"
+    },
+    "gratitude": {
+      "title": "Syukur",
+      "subtitle": "Hamd dan syukur"
+    }
+  },
+  "reader": {
+    "title": "Pembaca Dzikir",
+    "failed_open": "Gagal membuka pembaca.",
+    "no_dhikr": "Tidak ada dzikir tersedia.",
+    "progress": "Progres",
+    "remaining": "Sisa",
+    "completed": "Selesai",
+    "copied": "Dzikir disalin ke clipboard."
+  },
+  "settings": {
+    "saved": "Pengaturan tersimpan.",
+    "language": {
+      "title": "Bahasa",
+      "label": "Pilih bahasa",
+      "en": "Inggris",
+      "ar": "Arab",
+      "tr": "Turki",
+      "id": "Indonesia"
+    },
+    "appearance": "Tampilan",
+    "dark_mode": "Mode gelap",
+    "reminders": "Pengingat harian",
+    "enable_notifications": "Aktifkan notifikasi",
+    "morning_reminder": "Pengingat pagi",
+    "evening_reminder": "Pengingat petang",
+    "save_notifications": "Simpan pengaturan notifikasi"
+  },
+  "tasbeeh": {
+    "default_phrase": "Subhanallah",
+    "tap_to_count": "Ketuk untuk menghitung"
+  }
+}

@@ -1,0 +1,107 @@
+import 'package:hive_flutter/hive_flutter.dart';
+
+import '../constants/app_constants.dart';
+
+class LocalStorageService {
+  late final Box<dynamic> _box;
+
+  Future<void> init() async {
+    await Hive.initFlutter();
+    _box = await Hive.openBox<dynamic>(AppConstants.appBox);
+  }
+
+  Set<int> getFavoriteIds() {
+    final raw = _box.get(AppConstants.favoritesKey, defaultValue: <dynamic>[]);
+
+    if (raw is! List) {
+      return <int>{};
+    }
+
+    return raw.whereType<int>().toSet();
+  }
+
+  Future<void> saveFavoriteIds(Set<int> ids) async {
+    await _box.put(AppConstants.favoritesKey, ids.toList(growable: false));
+  }
+
+  int getTasbeehCount() {
+    return _box.get(AppConstants.tasbeehCountKey, defaultValue: 0) as int;
+  }
+
+  Future<void> saveTasbeehCount(int value) async {
+    await _box.put(AppConstants.tasbeehCountKey, value);
+  }
+
+  String getThemeMode() {
+    return _box.get(AppConstants.themeModeKey, defaultValue: 'system')
+        as String;
+  }
+
+  Future<void> saveThemeMode(String value) async {
+    await _box.put(AppConstants.themeModeKey, value);
+  }
+
+  String? getLocaleCode() {
+    final value = _box.get(AppConstants.localeCodeKey);
+    if (value is String && value.isNotEmpty) {
+      return value;
+    }
+    return null;
+  }
+
+  Future<void> saveLocaleCode(String localeCode) async {
+    await _box.put(AppConstants.localeCodeKey, localeCode);
+  }
+
+  bool getNotificationsEnabled() {
+    return _box.get(AppConstants.notificationsEnabledKey, defaultValue: true)
+        as bool;
+  }
+
+  Future<void> saveNotificationsEnabled(bool enabled) async {
+    await _box.put(AppConstants.notificationsEnabledKey, enabled);
+  }
+
+  String getMorningReminderTime() {
+    return _box.get(
+          AppConstants.morningReminderKey,
+          defaultValue: AppConstants.defaultMorningReminder,
+        )
+        as String;
+  }
+
+  Future<void> saveMorningReminderTime(String time) async {
+    await _box.put(AppConstants.morningReminderKey, time);
+  }
+
+  String getEveningReminderTime() {
+    return _box.get(
+          AppConstants.eveningReminderKey,
+          defaultValue: AppConstants.defaultEveningReminder,
+        )
+        as String;
+  }
+
+  Future<void> saveEveningReminderTime(String time) async {
+    await _box.put(AppConstants.eveningReminderKey, time);
+  }
+
+  Map<String, dynamic>? getReaderProgress(String categoryKey) {
+    final raw = _box.get('reader_progress_$categoryKey');
+    if (raw is Map) {
+      return Map<String, dynamic>.from(raw);
+    }
+    return null;
+  }
+
+  Future<void> saveReaderProgress({
+    required String categoryKey,
+    required int index,
+    required int remainingCount,
+  }) async {
+    await _box.put('reader_progress_$categoryKey', {
+      'index': index,
+      'remainingCount': remainingCount,
+    });
+  }
+}

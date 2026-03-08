@@ -1,0 +1,159 @@
+{
+  "app": {
+    "name": "تطبيق الأذكار"
+  },
+  "common": {
+    "favorites": "المفضلة",
+    "favorite": "مفضلة",
+    "settings": "الإعدادات",
+    "search_adhkar": "ابحث في الأذكار...",
+    "failed_load_adhkar": "تعذر تحميل الأذكار.",
+    "failed_load_favorites": "تعذر تحميل المفضلة.",
+    "no_adhkar_in_category": "لا توجد أذكار في هذا القسم.",
+    "no_favorites": "لا توجد أذكار مفضلة بعد.",
+    "tasbeeh_counter": "عداد التسبيح",
+    "copy": "نسخ",
+    "share": "مشاركة",
+    "next": "التالي",
+    "previous": "السابق",
+    "reset": "إعادة تعيين",
+    "count": "العدد"
+  },
+  "home": {
+    "sections": {
+      "daily": {
+        "title": "أذكار يومية",
+        "subtitle": "ورد اليوم والليلة"
+      },
+      "prayer": {
+        "title": "أذكار الصلاة",
+        "subtitle": "أذكار مرتبطة بالصلاة"
+      },
+      "general": {
+        "title": "أذكار عامة",
+        "subtitle": "تسبيح واستغفار وصلوات"
+      },
+      "quran": {
+        "title": "أدعية من القرآن",
+        "subtitle": "آيات دعاء من القرآن الكريم"
+      },
+      "life": {
+        "title": "مواقف الحياة",
+        "subtitle": "أذكار وأدعية للمواقف اليومية"
+      }
+    }
+  },
+  "categories": {
+    "morning_adhkar": {
+      "title": "أذكار الصباح",
+      "subtitle": "ورد الصباح"
+    },
+    "evening_adhkar": {
+      "title": "أذكار المساء",
+      "subtitle": "ورد المساء"
+    },
+    "sleep_adhkar": {
+      "title": "أذكار النوم",
+      "subtitle": "قبل النوم"
+    },
+    "waking_up": {
+      "title": "أذكار الاستيقاظ",
+      "subtitle": "بعد الاستيقاظ"
+    },
+    "after_prayer": {
+      "title": "أذكار بعد الصلاة",
+      "subtitle": "بعد السلام من الصلاة"
+    },
+    "after_wudu": {
+      "title": "أذكار بعد الوضوء",
+      "subtitle": "ذكر بعد الطهارة"
+    },
+    "after_adhan": {
+      "title": "أذكار بعد الأذان",
+      "subtitle": "دعاء ما بعد الأذان"
+    },
+    "tasbeeh": {
+      "title": "التسبيح",
+      "subtitle": "سبحان الله والحمد لله"
+    },
+    "istighfar": {
+      "title": "الاستغفار",
+      "subtitle": "التوبة وطلب المغفرة"
+    },
+    "salawat_on_prophet": {
+      "title": "الصلاة على النبي ﷺ",
+      "subtitle": "صلوات وسلام"
+    },
+    "duas_from_quran": {
+      "title": "أدعية من القرآن",
+      "subtitle": "دعوات قرآنية"
+    },
+    "entering_home": {
+      "title": "دخول المنزل",
+      "subtitle": "دعاء الدخول"
+    },
+    "leaving_home": {
+      "title": "الخروج من المنزل",
+      "subtitle": "دعاء الخروج"
+    },
+    "entering_mosque": {
+      "title": "دخول المسجد",
+      "subtitle": "دعاء الدخول للمسجد"
+    },
+    "leaving_mosque": {
+      "title": "الخروج من المسجد",
+      "subtitle": "دعاء الخروج من المسجد"
+    },
+    "travel": {
+      "title": "السفر",
+      "subtitle": "أذكار السفر"
+    },
+    "rain": {
+      "title": "المطر",
+      "subtitle": "أدعية المطر والريح"
+    },
+    "illness": {
+      "title": "المرض",
+      "subtitle": "أدعية المرض والشفاء"
+    },
+    "distress": {
+      "title": "الكرب",
+      "subtitle": "أدعية الهم والضيق"
+    },
+    "gratitude": {
+      "title": "الشكر",
+      "subtitle": "الحمد وشكر النعم"
+    }
+  },
+  "reader": {
+    "title": "قارئ الذكر",
+    "failed_open": "تعذر فتح القارئ.",
+    "no_dhikr": "لا يوجد ذكر متاح.",
+    "progress": "التقدم",
+    "remaining": "المتبقي",
+    "completed": "تم",
+    "copied": "تم نسخ الذكر."
+  },
+  "settings": {
+    "saved": "تم حفظ الإعدادات.",
+    "language": {
+      "title": "اللغة",
+      "label": "اختر اللغة",
+      "en": "الإنجليزية",
+      "ar": "العربية",
+      "tr": "التركية",
+      "id": "الإندونيسية"
+    },
+    "appearance": "المظهر",
+    "dark_mode": "الوضع الداكن",
+    "reminders": "التذكيرات اليومية",
+    "enable_notifications": "تفعيل الإشعارات",
+    "morning_reminder": "تذكير الصباح",
+    "evening_reminder": "تذكير المساء",
+    "save_notifications": "حفظ إعدادات التذكير"
+  },
+  "tasbeeh": {
+    "default_phrase": "سبحان الله",
+    "tap_to_count": "اضغط للعد"
+  }
+}
