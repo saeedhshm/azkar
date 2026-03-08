@@ -10,15 +10,17 @@ class AdhkarModel extends Adhkar {
     required super.description,
   });
 
-
   factory AdhkarModel.fromJson(Map<String, dynamic> json) {
+    final rawId = json['id'];
+    final rawCount = json['count'];
+
     return AdhkarModel(
-      id: json['id'] as int,
-      category: json['category'] as String,
-      text: json['text'] as String,
-      count: (json['count'] as num).toInt(),
-      reference: (json['reference'] as String?) ?? '',
-      description: (json['description'] as String?) ?? '',
+      id: rawId is num ? rawId.toInt() : 0,
+      category: json['category']?.toString() ?? '',
+      text: json['text']?.toString() ?? '',
+      count: rawCount is num ? rawCount.toInt() : 1,
+      reference: json['reference']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
     );
   }
 }
