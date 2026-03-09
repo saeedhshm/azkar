@@ -24,6 +24,7 @@ dependencies:
   share_plus: ^12.0.0
   timezone: ^0.10.1
   easy_localization: ^3.0.8
+  audioplayers: ^6.1.0
 
 dev_dependencies:
   flutter_test:
@@ -34,4 +35,5 @@ flutter:
   uses-material-design: true
   assets:
     - assets/data/adhkar_1500.json
+    - assets/audio/
     - assets/translations/

@@ -132,7 +132,11 @@
     "progress": "Progres",
     "remaining": "Sisa",
     "completed": "Selesai",
-    "copied": "Dzikir disalin ke clipboard."
+    "copied": "Dzikir disalin ke clipboard.",
+    "play_audio": "Putar Audio",
+    "stop_audio": "Hentikan Audio",
+    "audio_unavailable": "Audio tidak tersedia untuk dzikir ini.",
+    "audio_failed": "Gagal memutar audio."
   },
   "settings": {
     "saved": "Pengaturan tersimpan.",

@@ -132,7 +132,11 @@
     "progress": "Progress",
     "remaining": "Remaining",
     "completed": "Completed",
-    "copied": "Dhikr copied to clipboard."
+    "copied": "Dhikr copied to clipboard.",
+    "play_audio": "Play Audio",
+    "stop_audio": "Stop Audio",
+    "audio_unavailable": "No audio available for this dhikr.",
+    "audio_failed": "Failed to play audio."
   },
   "settings": {
     "saved": "Settings saved.",

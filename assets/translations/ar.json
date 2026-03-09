@@ -132,7 +132,11 @@
     "progress": "التقدم",
     "remaining": "المتبقي",
     "completed": "تم",
-    "copied": "تم نسخ الذكر."
+    "copied": "تم نسخ الذكر.",
+    "play_audio": "تشغيل الصوت",
+    "stop_audio": "إيقاف الصوت",
+    "audio_unavailable": "لا يوجد ملف صوتي لهذا الذكر.",
+    "audio_failed": "تعذر تشغيل الصوت."
   },
   "settings": {
     "saved": "تم حفظ الإعدادات.",

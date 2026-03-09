@@ -8,6 +8,7 @@ class Adhkar extends Equatable {
     required this.count,
     required this.reference,
     required this.description,
+    required this.audioPath,
   });
 
   final int id;
@@ -16,6 +17,7 @@ class Adhkar extends Equatable {
   final int count;
   final String reference;
   final String description;
+  final String audioPath;
 
   @override
   List<Object?> get props => [
@@ -25,5 +27,6 @@ class Adhkar extends Equatable {
     count,
     reference,
     description,
+    audioPath,
   ];
 }

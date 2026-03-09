@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -8,7 +9,7 @@ import '../../../../core/di/service_locator.dart';
 import '../cubit/reader_cubit.dart';
 import '../cubit/reader_state.dart';
 
-class DhikrReaderScreen extends StatelessWidget {
+class DhikrReaderScreen extends StatefulWidget {
   const DhikrReaderScreen({
     super.key,
     required this.categoryKey,
@@ -19,6 +20,43 @@ class DhikrReaderScreen extends StatelessWidget {
   final String categoryKey;
   final int startIndex;
   final int? initialAdhkarId;
+
+  @override
+  State<DhikrReaderScreen> createState() => _DhikrReaderScreenState();
+}
+
+class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  bool _isPlaying = false;
+  String? _activeAudioPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer.onPlayerStateChanged.listen((state) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _isPlaying = state == PlayerState.playing;
+      });
+    });
+    _audioPlayer.onPlayerComplete.listen((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _isPlaying = false;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
+  }
 
   Future<void> _copyText(BuildContext context, String text) async {
     await Clipboard.setData(ClipboardData(text: text));
@@ -33,14 +71,58 @@ class DhikrReaderScreen extends StatelessWidget {
     return SharePlus.instance.share(ShareParams(text: text));
   }
 
+  Future<void> _toggleAudio(BuildContext context, String audioPath) async {
+    if (audioPath.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('reader.audio_unavailable'.tr())));
+      return;
+    }
+
+    try {
+      final isSameTrack = _activeAudioPath == audioPath;
+
+      if (_isPlaying && isSameTrack) {
+        await _audioPlayer.stop();
+        if (mounted) {
+          setState(() {
+            _isPlaying = false;
+          });
+        }
+        return;
+      }
+
+      await _audioPlayer.stop();
+      try {
+        await _audioPlayer.play(AssetSource(audioPath));
+      } catch (_) {
+        final bundleBytes = await rootBundle.load('assets/$audioPath');
+        await _audioPlayer.play(BytesSource(bundleBytes.buffer.asUint8List()));
+      }
+
+      if (mounted) {
+        setState(() {
+          _isPlaying = true;
+          _activeAudioPath = audioPath;
+        });
+      }
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('reader.audio_failed'.tr())));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ReaderCubit>(
       create: (_) => getIt<ReaderCubit>()
         ..initialize(
-          categoryKey: categoryKey,
-          startIndex: startIndex,
-          initialAdhkarId: initialAdhkarId,
+          categoryKey: widget.categoryKey,
+          startIndex: widget.startIndex,
+          initialAdhkarId: widget.initialAdhkarId,
         ),
       child: Scaffold(
         appBar: AppBar(title: Text('reader.title'.tr())),
@@ -65,6 +147,8 @@ class DhikrReaderScreen extends StatelessWidget {
             final total = current.count;
             final done = (total - state.remainingCount).clamp(0, total);
             final progress = total == 0 ? 0.0 : done / total;
+            final isCurrentAudioPlaying =
+                _isPlaying && _activeAudioPath == current.audioPath;
 
             return LayoutBuilder(
               builder: (context, constraints) {
@@ -147,6 +231,22 @@ class DhikrReaderScreen extends StatelessWidget {
                           ),
                           style: FilledButton.styleFrom(
                             minimumSize: const Size.fromHeight(56),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: current.audioPath.isNotEmpty
+                              ? () => _toggleAudio(context, current.audioPath)
+                              : null,
+                          icon: Icon(
+                            isCurrentAudioPlaying
+                                ? Icons.stop_circle_outlined
+                                : Icons.play_circle_outline,
+                          ),
+                          label: Text(
+                            isCurrentAudioPlaying
+                                ? 'reader.stop_audio'.tr()
+                                : 'reader.play_audio'.tr(),
                           ),
                         ),
                         const SizedBox(height: 12),

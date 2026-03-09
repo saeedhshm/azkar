@@ -8,6 +8,7 @@ class AdhkarModel extends Adhkar {
     required super.count,
     required super.reference,
     required super.description,
+    required super.audioPath,
   });
 
   factory AdhkarModel.fromJson(Map<String, dynamic> json) {
@@ -21,6 +22,7 @@ class AdhkarModel extends Adhkar {
       count: rawCount is num ? rawCount.toInt() : 1,
       reference: json['reference']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
+      audioPath: json['audio']?.toString() ?? '',
     );
   }
 }

@@ -132,7 +132,11 @@
     "progress": "İlerleme",
     "remaining": "Kalan",
     "completed": "Tamamlandı",
-    "copied": "Zikir panoya kopyalandı."
+    "copied": "Zikir panoya kopyalandı.",
+    "play_audio": "Sesi Oynat",
+    "stop_audio": "Sesi Durdur",
+    "audio_unavailable": "Bu zikir için ses dosyası yok.",
+    "audio_failed": "Ses oynatılamadı."
   },
   "settings": {
     "saved": "Ayarlar kaydedildi.",
