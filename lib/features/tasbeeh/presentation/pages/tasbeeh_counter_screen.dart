@@ -23,51 +23,54 @@ class TasbeehCounterScreen extends StatelessWidget {
 
             return Padding(
               padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  const Spacer(),
-                  Text(
-                    'tasbeeh.default_phrase'.tr(),
-                    style: Theme.of(context).textTheme.displaySmall,
-                  ),
-                  const SizedBox(height: 24),
-                  Container(
-                    width: 220,
-                    height: 220,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [
-                          Theme.of(context).colorScheme.primary,
-                          Theme.of(context).colorScheme.tertiary,
-                        ],
+              child: SizedBox(
+                width: double.infinity,
+                child: Column(
+                  children: [
+                    const Spacer(),
+                    Text(
+                      'tasbeeh.default_phrase'.tr(),
+                      style: Theme.of(context).textTheme.displaySmall,
+                    ),
+                    const SizedBox(height: 24),
+                    Container(
+                      width: 220,
+                      height: 220,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          colors: [
+                            Theme.of(context).colorScheme.primary,
+                            Theme.of(context).colorScheme.tertiary,
+                          ],
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          '${state.count}',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.displayLarge?.copyWith(color: Colors.white),
+                        ),
                       ),
                     ),
-                    child: Center(
-                      child: Text(
-                        '${state.count}',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.displayLarge?.copyWith(color: Colors.white),
+                    const SizedBox(height: 24),
+                    FilledButton(
+                      onPressed: () => context.read<TasbeehCubit>().increment(),
+                      style: FilledButton.styleFrom(
+                        minimumSize: const Size(220, 56),
                       ),
+                      child: Text('tasbeeh.tap_to_count'.tr()),
                     ),
-                  ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: () => context.read<TasbeehCubit>().increment(),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size(220, 56),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: () => context.read<TasbeehCubit>().reset(),
+                      icon: const Icon(Icons.refresh),
+                      label: Text('common.reset'.tr()),
                     ),
-                    child: Text('tasbeeh.tap_to_count'.tr()),
-                  ),
-                  const SizedBox(height: 12),
-                  OutlinedButton.icon(
-                    onPressed: () => context.read<TasbeehCubit>().reset(),
-                    icon: const Icon(Icons.refresh),
-                    label: Text('common.reset'.tr()),
-                  ),
-                  const Spacer(),
-                ],
+                    const Spacer(),
+                  ],
+                ),
               ),
             );
           },
