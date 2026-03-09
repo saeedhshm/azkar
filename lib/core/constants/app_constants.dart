@@ -6,6 +6,7 @@ class AppConstants {
 
   static const appBox = 'adhkar_app_box';
   static const favoritesKey = 'favorites';
+  static const adhkarProgressKey = 'adhkar_progress';
   static const tasbeehCountKey = 'tasbeeh_count';
   static const themeModeKey = 'theme_mode';
   static const localeCodeKey = 'locale_code';

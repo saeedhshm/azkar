@@ -9,6 +9,7 @@ class AdhkarState extends Equatable {
     this.status = AdhkarStatus.initial,
     this.items = const <Adhkar>[],
     this.favoriteIds = const <int>{},
+    this.remainingByAdhkarId = const <int, int>{},
     this.query = '',
     this.errorMessage,
   });
@@ -16,6 +17,7 @@ class AdhkarState extends Equatable {
   final AdhkarStatus status;
   final List<Adhkar> items;
   final Set<int> favoriteIds;
+  final Map<int, int> remainingByAdhkarId;
   final String query;
   final String? errorMessage;
 
@@ -23,6 +25,7 @@ class AdhkarState extends Equatable {
     AdhkarStatus? status,
     List<Adhkar>? items,
     Set<int>? favoriteIds,
+    Map<int, int>? remainingByAdhkarId,
     String? query,
     String? errorMessage,
   }) {
@@ -30,11 +33,19 @@ class AdhkarState extends Equatable {
       status: status ?? this.status,
       items: items ?? this.items,
       favoriteIds: favoriteIds ?? this.favoriteIds,
+      remainingByAdhkarId: remainingByAdhkarId ?? this.remainingByAdhkarId,
       query: query ?? this.query,
       errorMessage: errorMessage,
     );
   }
 
   @override
-  List<Object?> get props => [status, items, favoriteIds, query, errorMessage];
+  List<Object?> get props => [
+    status,
+    items,
+    favoriteIds,
+    remainingByAdhkarId,
+    query,
+    errorMessage,
+  ];
 }

@@ -10,6 +10,7 @@ class ReaderCubit extends Cubit<ReaderState> {
   final AdhkarRepository _repository;
 
   String _categoryKey = 'morning_adhkar';
+  Map<int, int> _remainingByAdhkarId = <int, int>{};
 
   Future<void> initialize({
     required String categoryKey,
@@ -45,15 +46,20 @@ class ReaderCubit extends Cubit<ReaderState> {
       }
 
       final favoriteIds = await _repository.getFavoriteIds();
+      _remainingByAdhkarId = await _repository.getAdhkarProgressMap();
 
       final savedProgressApplies =
           savedProgress != null &&
           savedProgress.index == resolvedIndex &&
           savedProgress.remainingCount > 0;
 
-      final remainingCount = savedProgressApplies
-          ? savedProgress.remainingCount
-          : items[resolvedIndex].count;
+      final currentId = items[resolvedIndex].id;
+      final storedRemaining = _remainingByAdhkarId[currentId];
+      final remainingCount =
+          storedRemaining ??
+          (savedProgressApplies
+              ? savedProgress.remainingCount
+              : items[resolvedIndex].count);
 
       final nextState = state.copyWith(
         status: ReaderStatus.loaded,
@@ -84,12 +90,22 @@ class ReaderCubit extends Cubit<ReaderState> {
 
     final updatedRemaining = state.remainingCount - 1;
     final hasNext = state.currentIndex < state.items.length - 1;
+    final currentAdhkarId = state.items[state.currentIndex].id;
+
+    _remainingByAdhkarId[currentAdhkarId] = updatedRemaining;
+    await _repository.saveAdhkarRemainingCount(
+      adhkarId: currentAdhkarId,
+      remainingCount: updatedRemaining,
+    );
+
+    final nextIndex = state.currentIndex + 1;
+    final nextRemaining = hasNext
+        ? _remainingByAdhkarId[state.items[nextIndex].id] ??
+              state.items[nextIndex].count
+        : 0;
 
     final nextState = updatedRemaining == 0 && hasNext
-        ? state.copyWith(
-            currentIndex: state.currentIndex + 1,
-            remainingCount: state.items[state.currentIndex + 1].count,
-          )
+        ? state.copyWith(currentIndex: nextIndex, remainingCount: nextRemaining)
         : state.copyWith(remainingCount: updatedRemaining);
 
     emit(nextState);
@@ -105,7 +121,9 @@ class ReaderCubit extends Cubit<ReaderState> {
     final index = state.currentIndex + 1;
     final nextState = state.copyWith(
       currentIndex: index,
-      remainingCount: state.items[index].count,
+      remainingCount:
+          _remainingByAdhkarId[state.items[index].id] ??
+          state.items[index].count,
     );
 
     emit(nextState);
@@ -120,7 +138,9 @@ class ReaderCubit extends Cubit<ReaderState> {
     final index = state.currentIndex - 1;
     final nextState = state.copyWith(
       currentIndex: index,
-      remainingCount: state.items[index].count,
+      remainingCount:
+          _remainingByAdhkarId[state.items[index].id] ??
+          state.items[index].count,
     );
 
     emit(nextState);

@@ -87,13 +87,25 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
               itemBuilder: (context, index) {
                 final item = state.items[index];
                 final isFavorite = state.favoriteIds.contains(item.id);
+                final remainingCount =
+                    state.remainingByAdhkarId[item.id] ?? item.count;
 
                 return AdhkarTile(
                   adhkar: item,
                   isFavorite: isFavorite,
-                  onTap: () => context.push(
-                    '/reader/${widget.categoryKey}?id=${item.id}&index=$index',
-                  ),
+                  remainingCount: remainingCount,
+                  onTap: () async {
+                    final cubit = context.read<AdhkarCubit>();
+                    await context.push(
+                      '/reader/${widget.categoryKey}?id=${item.id}&index=$index',
+                    );
+
+                    if (!mounted) {
+                      return;
+                    }
+
+                    await cubit.loadCategory(widget.categoryKey);
+                  },
                   onFavoriteTap: () {
                     context.read<AdhkarCubit>().toggleFavorite(item.id);
                   },

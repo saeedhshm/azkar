@@ -8,17 +8,25 @@ class AdhkarTile extends StatelessWidget {
     super.key,
     required this.adhkar,
     required this.isFavorite,
+    required this.remainingCount,
     required this.onTap,
     required this.onFavoriteTap,
   });
 
   final Adhkar adhkar;
   final bool isFavorite;
+  final int remainingCount;
   final VoidCallback onTap;
   final VoidCallback onFavoriteTap;
 
   @override
   Widget build(BuildContext context) {
+    final normalizedRemaining = remainingCount.clamp(0, adhkar.count);
+    final isCompleted = normalizedRemaining == 0;
+    final progressValue = adhkar.count == 0
+        ? 0.0
+        : (adhkar.count - normalizedRemaining) / adhkar.count;
+
     return Card(
       child: ListTile(
         contentPadding: const EdgeInsets.all(16),
@@ -48,8 +56,18 @@ class AdhkarTile extends StatelessWidget {
                       label: Text(adhkar.reference),
                       visualDensity: VisualDensity.compact,
                     ),
+                  Chip(
+                    label: Text(
+                      isCompleted
+                          ? 'common.completed'.tr()
+                          : '${'common.remaining'.tr()}: $normalizedRemaining',
+                    ),
+                    visualDensity: VisualDensity.compact,
+                  ),
                 ],
               ),
+              const SizedBox(height: 8),
+              LinearProgressIndicator(value: progressValue),
               if (adhkar.description.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: 8),

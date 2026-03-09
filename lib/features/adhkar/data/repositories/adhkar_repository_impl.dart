@@ -71,6 +71,22 @@ class AdhkarRepositoryImpl implements AdhkarRepository {
   }
 
   @override
+  Future<Map<int, int>> getAdhkarProgressMap() async {
+    return _localStorage.getAdhkarProgressMap();
+  }
+
+  @override
+  Future<void> saveAdhkarRemainingCount({
+    required int adhkarId,
+    required int remainingCount,
+  }) {
+    return _localStorage.saveAdhkarRemainingCount(
+      adhkarId: adhkarId,
+      remainingCount: remainingCount,
+    );
+  }
+
+  @override
   Future<ReaderProgress?> getReaderProgress(String categoryKey) async {
     final raw = _localStorage.getReaderProgress(categoryKey);
     if (raw == null) {

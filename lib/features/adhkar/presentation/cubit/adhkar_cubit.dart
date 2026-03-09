@@ -30,12 +30,14 @@ class AdhkarCubit extends Cubit<AdhkarState> {
     try {
       _baseItems = await _getAdhkarByCategoryUseCase(categoryKey);
       final favoriteIds = await _repository.getFavoriteIds();
+      final remainingByAdhkarId = await _repository.getAdhkarProgressMap();
 
       emit(
         state.copyWith(
           status: AdhkarStatus.success,
           items: _baseItems,
           favoriteIds: favoriteIds,
+          remainingByAdhkarId: remainingByAdhkarId,
           query: '',
         ),
       );

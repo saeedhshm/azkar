@@ -24,6 +24,48 @@ class LocalStorageService {
     await _box.put(AppConstants.favoritesKey, ids.toList(growable: false));
   }
 
+  Map<int, int> getAdhkarProgressMap() {
+    final raw = _box.get(
+      AppConstants.adhkarProgressKey,
+      defaultValue: <String, dynamic>{},
+    );
+    if (raw is! Map) {
+      return <int, int>{};
+    }
+
+    final parsed = <int, int>{};
+    for (final entry in raw.entries) {
+      final id = int.tryParse(entry.key.toString());
+      final remaining = entry.value is num
+          ? (entry.value as num).toInt()
+          : null;
+
+      if (id != null && remaining != null) {
+        parsed[id] = remaining;
+      }
+    }
+
+    return parsed;
+  }
+
+  Future<void> saveAdhkarProgressMap(Map<int, int> progressMap) async {
+    final payload = <String, int>{};
+    for (final entry in progressMap.entries) {
+      payload[entry.key.toString()] = entry.value;
+    }
+
+    await _box.put(AppConstants.adhkarProgressKey, payload);
+  }
+
+  Future<void> saveAdhkarRemainingCount({
+    required int adhkarId,
+    required int remainingCount,
+  }) async {
+    final progressMap = getAdhkarProgressMap();
+    progressMap[adhkarId] = remainingCount < 0 ? 0 : remainingCount;
+    await saveAdhkarProgressMap(progressMap);
+  }
+
   int getTasbeehCount() {
     return _box.get(AppConstants.tasbeehCountKey, defaultValue: 0) as int;
   }

@@ -14,6 +14,13 @@ abstract class AdhkarRepository {
 
   Future<List<Adhkar>> getFavorites();
 
+  Future<Map<int, int>> getAdhkarProgressMap();
+
+  Future<void> saveAdhkarRemainingCount({
+    required int adhkarId,
+    required int remainingCount,
+  });
+
   Future<ReaderProgress?> getReaderProgress(String categoryKey);
 
   Future<void> saveReaderProgress({
