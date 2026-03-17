@@ -291,7 +291,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                 label: Text(
                                   'reader.tasbeeh_button'.tr(),
                                   style: theme.textTheme.titleMedium?.copyWith(
-                                    color: const Color(0xFF6EE7E8),
+                                    color: isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -554,6 +554,18 @@ class _GlowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final glowColor = isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
+    final metallicStart = isDark 
+        ? const Color(0xFF4A5568).withValues(alpha: 0.9)
+        : const Color(0xFFF5E6D3).withValues(alpha: 0.95);
+    final metallicMid = isDark
+        ? const Color(0xFF2D3748).withValues(alpha: 0.95)
+        : const Color(0xFFE8D4B8).withValues(alpha: 0.98);
+    final metallicEnd = isDark
+        ? const Color(0xFF1A202C).withValues(alpha: 0.9)
+        : const Color(0xFFD4B896).withValues(alpha: 0.95);
+    
     return SizedBox(
       height: 70,
       child: Stack(
@@ -566,12 +578,12 @@ class _GlowButton extends StatelessWidget {
                 borderRadius: BorderRadius.circular(44),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF6EE7E8).withValues(alpha: 0.25),
+                    color: glowColor.withValues(alpha: 0.25),
                     blurRadius: 12,
                     offset: const Offset(0, 4),
                   ),
                   BoxShadow(
-                    color: const Color(0xFF6EE7E8).withValues(alpha: 0.1),
+                    color: glowColor.withValues(alpha: 0.1),
                     blurRadius: 20,
                   ),
                 ],
@@ -583,7 +595,7 @@ class _GlowButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(44),
               border: Border.all(
                 color: enabled
-                    ? const Color(0xFF6EE7E8).withValues(alpha: 0.8)
+                    ? glowColor.withValues(alpha: 0.8)
                     : Colors.grey.withValues(alpha: 0.6),
                 width: 2,
               ),
@@ -599,11 +611,7 @@ class _GlowButton extends StatelessWidget {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: enabled
-                            ? [
-                                const Color(0xFF4A5568).withValues(alpha: 0.9),
-                                const Color(0xFF2D3748).withValues(alpha: 0.95),
-                                const Color(0xFF1A202C).withValues(alpha: 0.9),
-                              ]
+                            ? [metallicStart, metallicMid, metallicEnd]
                             : [
                                 Colors.grey.shade400.withValues(alpha: 0.8),
                                 Colors.grey.shade500.withValues(alpha: 0.85),
@@ -621,7 +629,7 @@ class _GlowButton extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withValues(alpha: enabled ? 0.3 : 0.15),
+                            Colors.white.withValues(alpha: enabled ? (isDark ? 0.3 : 0.4) : 0.15),
                             Colors.transparent,
                           ],
                           begin: Alignment.topCenter,
@@ -643,7 +651,7 @@ class _GlowButton extends StatelessWidget {
                       borderRadius: BorderRadius.circular(36),
                       border: Border.all(
                         color: enabled
-                            ? const Color(0xFF6EE7E8).withValues(alpha: 0.3)
+                            ? glowColor.withValues(alpha: 0.3)
                             : Colors.grey.withValues(alpha: 0.2),
                         width: 1,
                       ),
@@ -659,7 +667,7 @@ class _GlowButton extends StatelessWidget {
                         child: DefaultTextStyle(
                           style: TextStyle(
                             color: enabled
-                                ? const Color(0xFF6EE7E8)
+                                ? glowColor
                                 : Colors.grey.shade400,
                             fontWeight: FontWeight.w600,
                             fontSize: 18,
@@ -694,6 +702,17 @@ class _ActionCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final glowColor = isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
+    final metallicStart = isDark 
+        ? const Color(0xFF4A5568).withValues(alpha: 0.9)
+        : const Color(0xFFF5E6D3).withValues(alpha: 0.95);
+    final metallicMid = isDark
+        ? const Color(0xFF2D3748).withValues(alpha: 0.95)
+        : const Color(0xFFE8D4B8).withValues(alpha: 0.98);
+    final metallicEnd = isDark
+        ? const Color(0xFF1A202C).withValues(alpha: 0.9)
+        : const Color(0xFFD4B896).withValues(alpha: 0.95);
+    
     return SizedBox(
       height: 56,
       width: 56,
@@ -706,12 +725,12 @@ class _ActionCircle extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.25),
+                  color: glowColor.withValues(alpha: 0.25),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
                 BoxShadow(
-                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.1),
+                  color: glowColor.withValues(alpha: 0.1),
                   blurRadius: 20,
                 ),
               ],
@@ -722,7 +741,7 @@ class _ActionCircle extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               border: Border.all(
-                color: const Color(0xFF6EE7E8).withValues(alpha: 0.8),
+                color: glowColor.withValues(alpha: 0.8),
                 width: 2,
               ),
             ),
@@ -735,11 +754,7 @@ class _ActionCircle extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFF4A5568).withValues(alpha: 0.9),
-                          const Color(0xFF2D3748).withValues(alpha: 0.95),
-                          const Color(0xFF1A202C).withValues(alpha: 0.9),
-                        ],
+                        colors: [metallicStart, metallicMid, metallicEnd],
                       ),
                     ),
                   ),
@@ -752,7 +767,7 @@ class _ActionCircle extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: RadialGradient(
                           colors: [
-                            Colors.white.withValues(alpha: 0.3),
+                            Colors.white.withValues(alpha: isDark ? 0.3 : 0.4),
                             Colors.transparent,
                           ],
                         ),
@@ -771,7 +786,7 @@ class _ActionCircle extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFF6EE7E8).withValues(alpha: 0.3),
+                        color: glowColor.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -785,7 +800,7 @@ class _ActionCircle extends StatelessWidget {
                       child: Center(
                         child: Icon(
                           icon,
-                          color: const Color(0xFF6EE7E8),
+                          color: glowColor,
                           size: 24,
                         ),
                       ),
@@ -816,6 +831,17 @@ class _NavigationPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final glowColor = isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
+    final metallicStart = isDark 
+        ? const Color(0xFF4A5568).withValues(alpha: 0.9)
+        : const Color(0xFFF5E6D3).withValues(alpha: 0.95);
+    final metallicMid = isDark
+        ? const Color(0xFF2D3748).withValues(alpha: 0.95)
+        : const Color(0xFFE8D4B8).withValues(alpha: 0.98);
+    final metallicEnd = isDark
+        ? const Color(0xFF1A202C).withValues(alpha: 0.9)
+        : const Color(0xFFD4B896).withValues(alpha: 0.95);
+    
     return SizedBox(
       height: isCompact ? 54 : 58,
       child: Stack(
@@ -827,12 +853,12 @@ class _NavigationPill extends StatelessWidget {
               borderRadius: BorderRadius.circular(30),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.2),
+                  color: glowColor.withValues(alpha: 0.2),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
                 BoxShadow(
-                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.08),
+                  color: glowColor.withValues(alpha: 0.08),
                   blurRadius: 20,
                 ),
               ],
@@ -843,7 +869,7 @@ class _NavigationPill extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(30),
               border: Border.all(
-                color: const Color(0xFF6EE7E8).withValues(alpha: 0.8),
+                color: glowColor.withValues(alpha: 0.8),
                 width: 2,
               ),
             ),
@@ -857,11 +883,7 @@ class _NavigationPill extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [
-                          const Color(0xFF4A5568).withValues(alpha: 0.9),
-                          const Color(0xFF2D3748).withValues(alpha: 0.95),
-                          const Color(0xFF1A202C).withValues(alpha: 0.9),
-                        ],
+                        colors: [metallicStart, metallicMid, metallicEnd],
                       ),
                     ),
                   ),
@@ -874,7 +896,7 @@ class _NavigationPill extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withValues(alpha: 0.25),
+                            Colors.white.withValues(alpha: isDark ? 0.25 : 0.35),
                             Colors.transparent,
                           ],
                           begin: Alignment.topCenter,
@@ -895,7 +917,7 @@ class _NavigationPill extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(26),
                       border: Border.all(
-                        color: const Color(0xFF6EE7E8).withValues(alpha: 0.3),
+                        color: glowColor.withValues(alpha: 0.3),
                         width: 1,
                       ),
                     ),
@@ -918,14 +940,14 @@ class _NavigationPill extends StatelessWidget {
                                 children: [
                                   Icon(
                                     Icons.arrow_back,
-                                    color: const Color(0xFF6EE7E8),
+                                    color: glowColor,
                                     size: 20,
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
                                     'common.previous'.tr(),
                                     style: TextStyle(
-                                      color: const Color(0xFF6EE7E8),
+                                      color: glowColor,
                                       fontWeight: FontWeight.w500,
                                       fontSize: isCompact ? 14 : 15,
                                     ),
@@ -939,7 +961,7 @@ class _NavigationPill extends StatelessWidget {
                       Container(
                         width: 1,
                         height: isCompact ? 30 : 34,
-                        color: const Color(0xFF6EE7E8).withValues(alpha: 0.4),
+                        color: glowColor.withValues(alpha: 0.4),
                       ),
                       Expanded(
                         child: Material(
@@ -957,7 +979,7 @@ class _NavigationPill extends StatelessWidget {
                                   Text(
                                     'common.next'.tr(),
                                     style: TextStyle(
-                                      color: const Color(0xFF6EE7E8),
+                                      color: glowColor,
                                       fontWeight: FontWeight.w500,
                                       fontSize: isCompact ? 14 : 15,
                                     ),
@@ -965,7 +987,7 @@ class _NavigationPill extends StatelessWidget {
                                   const SizedBox(width: 8),
                                   Icon(
                                     Icons.arrow_forward,
-                                    color: const Color(0xFF6EE7E8),
+                                    color: glowColor,
                                     size: 20,
                                   ),
                                 ],
