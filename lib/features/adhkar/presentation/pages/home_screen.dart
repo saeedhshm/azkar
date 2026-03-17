@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -39,125 +40,241 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text('app.name'.tr()),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        actions: [
-          IconButton(
-            tooltip: 'common.favorites'.tr(),
-            onPressed: () => context.push('/favorites'),
-            icon: const Icon(Icons.bookmark_outline),
-          ),
-          IconButton(
-            tooltip: 'common.tasbeeh_counter'.tr(),
-            onPressed: () => context.push('/tasbeeh'),
-            icon: const Icon(Icons.touch_app_outlined),
-          ),
-          IconButton(
-            tooltip: 'common.settings'.tr(),
-            onPressed: () => context.push('/settings'),
-            icon: const Icon(Icons.settings_outlined),
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          _HomeBackground(
-            isDark: Theme.of(context).brightness == Brightness.dark,
-          ),
-          SafeArea(
-            child: FutureBuilder<Map<String, int>>(
-              future: _countsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accentColor =
+        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFC58B55);
+    final unselectedColor = isDark
+        ? Colors.white.withValues(alpha: 0.7)
+        : const Color(0xFF7A5A35);
 
-                final counts = snapshot.data ?? <String, int>{};
-
-                return ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
-                  itemCount: AppCategories.sections.length,
-                  itemBuilder: (context, sectionIndex) {
-                    final section = AppCategories.sections[sectionIndex];
-                    final sectionItems = AppCategories.itemsBySection(
-                      section.key,
-                    );
-
-                    if (sectionItems.isEmpty) {
-                      return const SizedBox.shrink();
-                    }
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 10),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  section.titleKey.tr(),
-                                  style: Theme.of(context).textTheme.titleLarge
-                                      ?.copyWith(fontWeight: FontWeight.w700),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  section.subtitleKey.tr(),
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ],
-                            ),
-                          ),
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final width = constraints.maxWidth;
-                              final crossAxisCount = width >= 1000
-                                  ? 4
-                                  : width >= 700
-                                  ? 3
-                                  : 2;
-
-                              return GridView.builder(
-                                shrinkWrap: true,
-                                physics: const NeverScrollableScrollPhysics(),
-                                itemCount: sectionItems.length,
-                                gridDelegate:
-                                    SliverGridDelegateWithFixedCrossAxisCount(
-                                      crossAxisCount: crossAxisCount,
-                                      crossAxisSpacing: 12,
-                                      mainAxisSpacing: 12,
-                                      childAspectRatio: 1.05,
-                                    ),
-                                itemBuilder: (context, itemIndex) {
-                                  final category = sectionItems[itemIndex];
-
-                                  return CategoryCard(
-                                    category: category,
-                                    index: itemIndex,
-                                    itemCount: counts[category.key] ?? 0,
-                                    onTap: () {
-                                      context.push('/adhkar/${category.key}');
-                                    },
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                );
-              },
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          title: Text('app.name'.tr()),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          actions: [
+            IconButton(
+              tooltip: 'common.favorites'.tr(),
+              onPressed: () => context.push('/favorites'),
+              icon: const Icon(Icons.bookmark_outline),
+            ),
+            IconButton(
+              tooltip: 'common.tasbeeh_counter'.tr(),
+              onPressed: () => context.push('/tasbeeh'),
+              icon: const Icon(Icons.touch_app_outlined),
+            ),
+            IconButton(
+              tooltip: 'common.settings'.tr(),
+              onPressed: () => context.push('/settings'),
+              icon: const Icon(Icons.settings_outlined),
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(48),
+            child: TabBar(
+              labelColor: accentColor,
+              unselectedLabelColor: unselectedColor,
+              indicator: UnderlineTabIndicator(
+                borderSide: BorderSide(color: accentColor, width: 3),
+                insets: const EdgeInsets.symmetric(horizontal: 24),
+              ),
+              tabs: [
+                Tab(text: 'home.tabs.prayer_times'.tr()),
+                Tab(text: 'home.tabs.adhkar'.tr()),
+                Tab(text: 'home.tabs.quran'.tr()),
+              ],
             ),
           ),
-        ],
+        ),
+        body: Stack(
+          children: [
+            _HomeBackground(isDark: isDark),
+            SafeArea(
+              child: TabBarView(
+                children: [
+                  _PlaceholderTab(
+                    title: 'home.tabs.prayer_times'.tr(),
+                    icon: Icons.access_time_rounded,
+                    isDark: isDark,
+                  ),
+                  _AdhkarTab(countsFuture: _countsFuture),
+                  _PlaceholderTab(
+                    title: 'home.tabs.quran'.tr(),
+                    icon: Icons.menu_book_rounded,
+                    isDark: isDark,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AdhkarTab extends StatelessWidget {
+  const _AdhkarTab({required this.countsFuture});
+
+  final Future<Map<String, int>> countsFuture;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Map<String, int>>(
+      future: countsFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final counts = snapshot.data ?? <String, int>{};
+
+        return ListView.builder(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
+          itemCount: AppCategories.sections.length,
+          itemBuilder: (context, sectionIndex) {
+            final section = AppCategories.sections[sectionIndex];
+            final sectionItems = AppCategories.itemsBySection(section.key);
+
+            if (sectionItems.isEmpty) {
+              return const SizedBox.shrink();
+            }
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          section.titleKey.tr(),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleLarge
+                              ?.copyWith(fontWeight: FontWeight.w700),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          section.subtitleKey.tr(),
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final width = constraints.maxWidth;
+                      final crossAxisCount =
+                          width >= 1000 ? 4 : width >= 700 ? 3 : 2;
+
+                      return GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: sectionItems.length,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: crossAxisCount,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.05,
+                        ),
+                        itemBuilder: (context, itemIndex) {
+                          final category = sectionItems[itemIndex];
+
+                          return CategoryCard(
+                            category: category,
+                            index: itemIndex,
+                            itemCount: counts[category.key] ?? 0,
+                            onTap: () {
+                              context.push('/adhkar/${category.key}');
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+class _PlaceholderTab extends StatelessWidget {
+  const _PlaceholderTab({
+    required this.title,
+    required this.icon,
+    required this.isDark,
+  });
+
+  final String title;
+  final IconData icon;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final accentColor =
+        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFC58B55);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(26),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.06)
+                    : Colors.white.withValues(alpha: 0.55),
+                borderRadius: BorderRadius.circular(26),
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.15)
+                      : const Color(0xFFBFA272).withValues(alpha: 0.35),
+                  width: 1.2,
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 26,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(icon, size: 42, color: accentColor),
+                    const SizedBox(height: 12),
+                    Text(
+                      title,
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleLarge
+                          ?.copyWith(fontWeight: FontWeight.w700),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'home.placeholder'.tr(),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

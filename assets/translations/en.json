@@ -44,7 +44,13 @@
         "title": "Life Situations",
         "subtitle": "Adhkar for daily situations"
       }
-    }
+    },
+    "tabs": {
+      "prayer_times": "Prayer Times",
+      "adhkar": "Adhkar",
+      "quran": "Quran"
+    },
+    "placeholder": "Coming soon"
   },
   "categories": {
     "morning_adhkar": {

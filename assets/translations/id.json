@@ -44,7 +44,13 @@
         "title": "Situasi Kehidupan",
         "subtitle": "Doa untuk keseharian"
       }
-    }
+    },
+    "tabs": {
+      "prayer_times": "Waktu Salat",
+      "adhkar": "Dzikir",
+      "quran": "Al-Qur'an"
+    },
+    "placeholder": "Segera hadir"
   },
   "categories": {
     "morning_adhkar": {
