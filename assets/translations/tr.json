@@ -17,7 +17,8 @@
     "next": "Sonraki",
     "previous": "Önceki",
     "reset": "Sıfırla",
-    "count": "Adet"
+    "count": "Adet",
+    "completed": "Tamamlandı"
   },
   "home": {
     "sections": {
