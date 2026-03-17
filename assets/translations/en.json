@@ -18,7 +18,9 @@
     "previous": "Previous",
     "reset": "Reset",
     "count": "Count",
-    "completed": "Completed"
+    "completed": "Completed",
+    "reset_progress": "Reset progress",
+    "progress_reset": "Progress reset."
   },
   "home": {
     "sections": {

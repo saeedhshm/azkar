@@ -37,99 +37,116 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
 
     return BlocProvider<AdhkarCubit>(
       create: (_) => getIt<AdhkarCubit>()..loadCategory(widget.categoryKey),
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          title: _isSearching
-              ? _SearchField(
-                  controller: _searchController,
-                  onChanged: (value) =>
-                      context.read<AdhkarCubit>().search(value),
-                )
-              : Text(category.titleKey.tr()),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          actions: [
-            IconButton(
-              icon: Icon(_isSearching ? Icons.close : Icons.search),
-              onPressed: () {
-                setState(() => _isSearching = !_isSearching);
+      child: Builder(
+        builder: (context) => Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            title: _isSearching
+                ? _SearchField(
+                    controller: _searchController,
+                    onChanged: (value) =>
+                        context.read<AdhkarCubit>().search(value),
+                  )
+                : Text(category.titleKey.tr()),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            actions: [
+              IconButton(
+                icon: Icon(_isSearching ? Icons.close : Icons.search),
+                onPressed: () {
+                  setState(() => _isSearching = !_isSearching);
 
-                if (!_isSearching) {
-                  _searchController.clear();
-                  context.read<AdhkarCubit>().search('');
-                }
-              },
-            ),
-          ],
-        ),
-        body: Stack(
-          children: [
-            _ListBackground(
-              isDark: Theme.of(context).brightness == Brightness.dark,
-            ),
-            SafeArea(
-              child: BlocBuilder<AdhkarCubit, AdhkarState>(
-                builder: (context, state) {
-                  if (state.status == AdhkarStatus.loading) {
-                    return const Center(child: CircularProgressIndicator());
+                  if (!_isSearching) {
+                    _searchController.clear();
+                    context.read<AdhkarCubit>().search('');
                   }
-
-                  if (state.status == AdhkarStatus.failure) {
-                    return Center(
-                      child: Text(
-                        state.errorMessage ?? 'common.failed_load_adhkar'.tr(),
-                      ),
-                    );
+                },
+              ),
+              IconButton(
+                tooltip: 'common.reset_progress'.tr(),
+                icon: const Icon(Icons.restart_alt),
+                onPressed: () async {
+                  await context.read<AdhkarCubit>().resetProgress();
+                  if (!context.mounted) {
+                    return;
                   }
-
-                  if (state.items.isEmpty) {
-                    return Center(
-                      child: Text('common.no_adhkar_in_category'.tr()),
-                    );
-                  }
-
-                  final accent = category.colors.isNotEmpty
-                      ? category.colors.first
-                      : Theme.of(context).colorScheme.primary;
-
-                  return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
-                    itemCount: state.items.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final item = state.items[index];
-                      final isFavorite = state.favoriteIds.contains(item.id);
-                      final remainingCount =
-                          state.remainingByAdhkarId[item.id] ?? item.count;
-
-                      return _AdhkarGlassTile(
-                        adhkar: item,
-                        accent: accent,
-                        isFavorite: isFavorite,
-                        remainingCount: remainingCount,
-                        onTap: () async {
-                          final cubit = context.read<AdhkarCubit>();
-                          await context.push(
-                            '/reader/${widget.categoryKey}?id=${item.id}&index=$index',
-                          );
-
-                          if (!mounted) {
-                            return;
-                          }
-
-                          await cubit.loadCategory(widget.categoryKey);
-                        },
-                        onFavoriteTap: () {
-                          context.read<AdhkarCubit>().toggleFavorite(item.id);
-                        },
-                      );
-                    },
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('common.progress_reset'.tr())),
                   );
                 },
               ),
-            ),
-          ],
+            ],
+          ),
+          body: Stack(
+            children: [
+              _ListBackground(
+                isDark: Theme.of(context).brightness == Brightness.dark,
+              ),
+              SafeArea(
+                child: BlocBuilder<AdhkarCubit, AdhkarState>(
+                  builder: (context, state) {
+                    if (state.status == AdhkarStatus.loading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (state.status == AdhkarStatus.failure) {
+                      return Center(
+                        child: Text(
+                          state.errorMessage ??
+                              'common.failed_load_adhkar'.tr(),
+                        ),
+                      );
+                    }
+
+                    if (state.items.isEmpty) {
+                      return Center(
+                        child: Text('common.no_adhkar_in_category'.tr()),
+                      );
+                    }
+
+                    final accent = category.colors.isNotEmpty
+                        ? category.colors.first
+                        : Theme.of(context).colorScheme.primary;
+
+                    return ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+                      itemCount: state.items.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final item = state.items[index];
+                        final isFavorite =
+                            state.favoriteIds.contains(item.id);
+                        final remainingCount =
+                            state.remainingByAdhkarId[item.id] ?? item.count;
+
+                        return _AdhkarGlassTile(
+                          adhkar: item,
+                          accent: accent,
+                          isFavorite: isFavorite,
+                          remainingCount: remainingCount,
+                          onTap: () async {
+                            final cubit = context.read<AdhkarCubit>();
+                            await context.push(
+                              '/reader/${widget.categoryKey}?id=${item.id}&index=$index',
+                            );
+
+                            if (!mounted) {
+                              return;
+                            }
+
+                            await cubit.loadCategory(widget.categoryKey);
+                          },
+                          onFavoriteTap: () {
+                            context.read<AdhkarCubit>().toggleFavorite(item.id);
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

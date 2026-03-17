@@ -18,7 +18,9 @@
     "previous": "السابق",
     "reset": "إعادة تعيين",
     "count": "العدد",
-    "completed": "تم"
+    "completed": "تم",
+    "reset_progress": "إعادة الضبط",
+    "progress_reset": "تمت إعادة ضبط التقدّم."
   },
   "home": {
     "sections": {

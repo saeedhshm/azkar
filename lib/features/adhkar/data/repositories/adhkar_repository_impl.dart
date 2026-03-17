@@ -87,6 +87,14 @@ class AdhkarRepositoryImpl implements AdhkarRepository {
   }
 
   @override
+  Future<void> resetCategoryProgress(String categoryKey) async {
+    final items = await getAdhkarByCategory(categoryKey);
+    final ids = items.map((item) => item.id).toSet();
+    await _localStorage.removeAdhkarProgressForIds(ids);
+    await _localStorage.clearReaderProgress(categoryKey);
+  }
+
+  @override
   Future<ReaderProgress?> getReaderProgress(String categoryKey) async {
     final raw = _localStorage.getReaderProgress(categoryKey);
     if (raw == null) {

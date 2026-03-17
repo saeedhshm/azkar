@@ -70,4 +70,13 @@ class AdhkarCubit extends Cubit<AdhkarState> {
     final favoriteIds = await _repository.getFavoriteIds();
     emit(state.copyWith(favoriteIds: favoriteIds));
   }
+
+  Future<void> resetProgress() async {
+    if (state.status == AdhkarStatus.loading) {
+      return;
+    }
+
+    await _repository.resetCategoryProgress(_categoryKey);
+    await loadCategory(_categoryKey);
+  }
 }

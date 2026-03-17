@@ -18,7 +18,9 @@
     "previous": "Sebelumnya",
     "reset": "Atur Ulang",
     "count": "Jumlah",
-    "completed": "Selesai"
+    "completed": "Selesai",
+    "reset_progress": "Reset progres",
+    "progress_reset": "Progres direset."
   },
   "home": {
     "sections": {

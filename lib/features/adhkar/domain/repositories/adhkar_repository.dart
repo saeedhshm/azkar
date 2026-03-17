@@ -21,6 +21,8 @@ abstract class AdhkarRepository {
     required int remainingCount,
   });
 
+  Future<void> resetCategoryProgress(String categoryKey);
+
   Future<ReaderProgress?> getReaderProgress(String categoryKey);
 
   Future<void> saveReaderProgress({

@@ -18,7 +18,9 @@
     "previous": "Önceki",
     "reset": "Sıfırla",
     "count": "Adet",
-    "completed": "Tamamlandı"
+    "completed": "Tamamlandı",
+    "reset_progress": "İlerlemeyi sıfırla",
+    "progress_reset": "İlerleme sıfırlandı."
   },
   "home": {
     "sections": {

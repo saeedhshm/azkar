@@ -66,6 +66,14 @@ class LocalStorageService {
     await saveAdhkarProgressMap(progressMap);
   }
 
+  Future<void> removeAdhkarProgressForIds(Iterable<int> ids) async {
+    final progressMap = getAdhkarProgressMap();
+    for (final id in ids) {
+      progressMap.remove(id);
+    }
+    await saveAdhkarProgressMap(progressMap);
+  }
+
   int getTasbeehCount() {
     return _box.get(AppConstants.tasbeehCountKey, defaultValue: 0) as int;
   }
@@ -145,5 +153,9 @@ class LocalStorageService {
       'index': index,
       'remainingCount': remainingCount,
     });
+  }
+
+  Future<void> clearReaderProgress(String categoryKey) async {
+    await _box.delete('reader_progress_$categoryKey');
   }
 }
