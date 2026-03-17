@@ -22,8 +22,8 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final lightText = const Color(0xFFF4E1C1);
-    final lightTextStrong = const Color(0xFFF8E8CD);
+    final lightText = const Color(0xFF8A5A23);
+    final lightTextStrong = const Color(0xFF7A4D1D);
     final lightBorder = const Color(0xFFD7A66C);
     final lightChipBg = const Color(0xFFEAD1AC);
     return TweenAnimationBuilder<double>(
