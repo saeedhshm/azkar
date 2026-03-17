@@ -554,36 +554,146 @@ class _GlowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = LinearGradient(
-      colors: enabled
-          ? [accent.withValues(alpha: 0.9), accentDeep.withValues(alpha: 0.9)]
-          : [Colors.grey.shade400, Colors.grey.shade500],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lightTop = const Color(0xFFF0D2A0);
+    final lightMid = const Color(0xFFD7A769);
+    final lightBottom = const Color(0xFFB47B44);
+    final warmGold = const Color(0xFFC58B55);
+    final warmGoldSoft = const Color(0xFFE9D2A8);
 
-    return Container(
-      height: 64,
-      decoration: BoxDecoration(
-        gradient: background,
-        borderRadius: BorderRadius.circular(36),
-        boxShadow: enabled
-            ? [
-                BoxShadow(
-                  color: accent.withValues(alpha: 0.35),
-                  blurRadius: 24,
-                  offset: const Offset(0, 10),
-                ),
-              ]
-            : [],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(36),
-          onTap: enabled ? onTap : null,
-          child: Center(child: label),
-        ),
+    final baseGradient = LinearGradient(
+      colors: enabled
+          ? isDark
+                ? [
+                    const Color(0xFF7DE5E1).withValues(alpha: 0.85),
+                    const Color(0xFF42B9B2).withValues(alpha: 0.9),
+                    const Color(0xFF2A9F9B).withValues(alpha: 0.95),
+                  ]
+                : [
+                    lightTop.withValues(alpha: 0.95),
+                    lightMid.withValues(alpha: 0.95),
+                    lightBottom.withValues(alpha: 0.98),
+                  ]
+          : [Colors.grey.shade400, Colors.grey.shade500],
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+    );
+    final rimOuter = enabled
+        ? (isDark
+              ? const Color(0xFF7DE5E1).withValues(alpha: 0.6)
+              : warmGoldSoft.withValues(alpha: 0.7))
+        : Colors.grey.shade600.withValues(alpha: 0.6);
+    final rimInner = enabled
+        ? (isDark
+              ? const Color(0xFF0FB9B1).withValues(alpha: 0.5)
+              : warmGold.withValues(alpha: 0.6))
+        : Colors.grey.shade500.withValues(alpha: 0.5);
+
+    return SizedBox(
+      height: 70,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          if (enabled)
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(44),
+                boxShadow: [
+                  BoxShadow(
+                    color: (isDark ? const Color(0xFF6EE7E8) : warmGold)
+                        .withValues(alpha: isDark ? 0.45 : 0.35),
+                    blurRadius: isDark ? 36 : 28,
+                    offset: const Offset(0, 14),
+                  ),
+                  BoxShadow(
+                    color: (isDark ? const Color(0xFF6EE7E8) : warmGoldSoft)
+                        .withValues(alpha: isDark ? 0.25 : 0.28),
+                    blurRadius: isDark ? 80 : 60,
+                  ),
+                ],
+              ),
+            ),
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(44),
+              border: Border.all(color: rimOuter, width: 2),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(42),
+              child: Stack(
+                children: [
+                  DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: baseGradient,
+                      borderRadius: BorderRadius.circular(42),
+                    ),
+                    child: const SizedBox.expand(),
+                  ),
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      height: 20,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withValues(
+                              alpha: isDark ? 0.35 : 0.45,
+                            ),
+                            Colors.transparent,
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      height: 28,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.black.withValues(
+                              alpha: isDark ? 0.18 : 0.12,
+                            ),
+                            Colors.transparent,
+                          ],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(36),
+                      border: Border.all(color: rimInner, width: 1),
+                    ),
+                  ),
+                  Container(
+                    margin: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(32),
+                      color: Colors.white.withValues(
+                        alpha: isDark ? 0.05 : 0.08,
+                      ),
+                    ),
+                  ),
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(42),
+                      onTap: enabled ? onTap : null,
+                      child: Center(child: label),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
