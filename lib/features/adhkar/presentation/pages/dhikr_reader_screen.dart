@@ -291,7 +291,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                 label: Text(
                                   'reader.tasbeeh_button'.tr(),
                                   style: theme.textTheme.titleMedium?.copyWith(
-                                    color: isDark ? Colors.black : Colors.white,
+                                    color: const Color(0xFF6EE7E8),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -554,91 +554,74 @@ class _GlowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final lightTop = const Color(0xFFF0D2A0);
-    final lightMid = const Color(0xFFD7A769);
-    final lightBottom = const Color(0xFFB47B44);
-    final warmGold = const Color(0xFFC58B55);
-    final warmGoldSoft = const Color(0xFFE9D2A8);
-
-    final baseGradient = LinearGradient(
-      colors: enabled
-          ? isDark
-                ? [
-                    const Color(0xFF7DE5E1).withValues(alpha: 0.85),
-                    const Color(0xFF42B9B2).withValues(alpha: 0.9),
-                    const Color(0xFF2A9F9B).withValues(alpha: 0.95),
-                  ]
-                : [
-                    lightTop.withValues(alpha: 0.95),
-                    lightMid.withValues(alpha: 0.95),
-                    lightBottom.withValues(alpha: 0.98),
-                  ]
-          : [Colors.grey.shade400, Colors.grey.shade500],
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-    );
-    final rimOuter = enabled
-        ? (isDark
-              ? const Color(0xFF7DE5E1).withValues(alpha: 0.6)
-              : warmGoldSoft.withValues(alpha: 0.7))
-        : Colors.grey.shade600.withValues(alpha: 0.6);
-    final rimInner = enabled
-        ? (isDark
-              ? const Color(0xFF0FB9B1).withValues(alpha: 0.5)
-              : warmGold.withValues(alpha: 0.6))
-        : Colors.grey.shade500.withValues(alpha: 0.5);
-
     return SizedBox(
       height: 70,
       child: Stack(
         alignment: Alignment.center,
         children: [
+          // Glowing outer shadow
           if (enabled)
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(44),
                 boxShadow: [
                   BoxShadow(
-                    color: (isDark ? const Color(0xFF6EE7E8) : warmGold)
-                        .withValues(alpha: isDark ? 0.45 : 0.35),
-                    blurRadius: isDark ? 36 : 28,
-                    offset: const Offset(0, 14),
+                    color: const Color(0xFF6EE7E8).withValues(alpha: 0.25),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                   BoxShadow(
-                    color: (isDark ? const Color(0xFF6EE7E8) : warmGoldSoft)
-                        .withValues(alpha: isDark ? 0.25 : 0.28),
-                    blurRadius: isDark ? 80 : 60,
+                    color: const Color(0xFF6EE7E8).withValues(alpha: 0.1),
+                    blurRadius: 20,
                   ),
                 ],
               ),
             ),
+          // Main metallic button
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(44),
-              border: Border.all(color: rimOuter, width: 2),
+              border: Border.all(
+                color: enabled
+                    ? const Color(0xFF6EE7E8).withValues(alpha: 0.8)
+                    : Colors.grey.withValues(alpha: 0.6),
+                width: 2,
+              ),
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(42),
               child: Stack(
                 children: [
-                  DecoratedBox(
+                  // Metallic gradient background
+                  Container(
                     decoration: BoxDecoration(
-                      gradient: baseGradient,
-                      borderRadius: BorderRadius.circular(42),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: enabled
+                            ? [
+                                const Color(0xFF4A5568).withValues(alpha: 0.9),
+                                const Color(0xFF2D3748).withValues(alpha: 0.95),
+                                const Color(0xFF1A202C).withValues(alpha: 0.9),
+                              ]
+                            : [
+                                Colors.grey.shade400.withValues(alpha: 0.8),
+                                Colors.grey.shade500.withValues(alpha: 0.85),
+                                Colors.grey.shade600.withValues(alpha: 0.8),
+                              ],
+                      ),
                     ),
-                    child: const SizedBox.expand(),
                   ),
+                  // Metallic highlight effect
                   Align(
-                    alignment: Alignment.topCenter,
+                    alignment: Alignment.topLeft,
                     child: Container(
-                      height: 20,
+                      width: double.infinity,
+                      height: 25,
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withValues(
-                              alpha: isDark ? 0.35 : 0.45,
-                            ),
+                            Colors.white.withValues(alpha: enabled ? 0.3 : 0.15),
                             Colors.transparent,
                           ],
                           begin: Alignment.topCenter,
@@ -647,46 +630,43 @@ class _GlowButton extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      height: 28,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.black.withValues(
-                              alpha: isDark ? 0.18 : 0.12,
-                            ),
-                            Colors.transparent,
-                          ],
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                        ),
-                      ),
+                  // Subtle texture overlay
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
                     ),
                   ),
+                  // Inner border
                   Container(
                     margin: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(36),
-                      border: Border.all(color: rimInner, width: 1),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(32),
-                      color: Colors.white.withValues(
-                        alpha: isDark ? 0.05 : 0.08,
+                      border: Border.all(
+                        color: enabled
+                            ? const Color(0xFF6EE7E8).withValues(alpha: 0.3)
+                            : Colors.grey.withValues(alpha: 0.2),
+                        width: 1,
                       ),
                     ),
                   ),
+                  // Touch area
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
                       borderRadius: BorderRadius.circular(42),
                       onTap: enabled ? onTap : null,
-                      child: Center(child: label),
+                      child: Center(
+                        child: DefaultTextStyle(
+                          style: TextStyle(
+                            color: enabled
+                                ? const Color(0xFF6EE7E8)
+                                : Colors.grey.shade400,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 18,
+                          ),
+                          child: label,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -726,13 +706,13 @@ class _ActionCircle extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.4),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
+                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.25),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
                 BoxShadow(
-                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.2),
-                  blurRadius: 40,
+                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.1),
+                  blurRadius: 20,
                 ),
               ],
             ),
@@ -847,13 +827,13 @@ class _NavigationPill extends StatelessWidget {
               borderRadius: BorderRadius.circular(30),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
+                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
                 ),
                 BoxShadow(
-                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.15),
-                  blurRadius: 40,
+                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.08),
+                  blurRadius: 20,
                 ),
               ],
             ),
