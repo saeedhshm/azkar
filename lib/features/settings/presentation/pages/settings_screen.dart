@@ -196,6 +196,66 @@ class SettingsScreen extends StatelessWidget {
                                     },
                                   ),
                                 ),
+                                _MetallicListTile(
+                                  isDark: isDarkMode,
+                                  title: Text('settings.sleep_reminder'.tr()),
+                                  subtitle: Text(state.sleep.format(context)),
+                                  trailing: Icon(
+                                    Icons.schedule,
+                                    color: isDarkMode
+                                        ? const Color(0xFF6EE7E8)
+                                        : const Color(0xFFC58B55),
+                                  ),
+                                  onTap: () => _pickTime(
+                                    context,
+                                    initial: state.sleep,
+                                    onSelected: (value) {
+                                      context
+                                          .read<NotificationSettingsCubit>()
+                                          .setSleep(value);
+                                    },
+                                  ),
+                                ),
+                                _MetallicListTile(
+                                  isDark: isDarkMode,
+                                  title: Text('settings.waking_reminder'.tr()),
+                                  subtitle: Text(state.waking.format(context)),
+                                  trailing: Icon(
+                                    Icons.schedule,
+                                    color: isDarkMode
+                                        ? const Color(0xFF6EE7E8)
+                                        : const Color(0xFFC58B55),
+                                  ),
+                                  onTap: () => _pickTime(
+                                    context,
+                                    initial: state.waking,
+                                    onSelected: (value) {
+                                      context
+                                          .read<NotificationSettingsCubit>()
+                                          .setWaking(value);
+                                    },
+                                  ),
+                                ),
+                                _MetallicListTile(
+                                  isDark: isDarkMode,
+                                  title: Text('settings.friday_reminder'.tr()),
+                                  subtitle: Text(state.friday.format(context)),
+                                  trailing: Icon(
+                                    Icons.schedule,
+                                    color: isDarkMode
+                                        ? const Color(0xFF6EE7E8)
+                                        : const Color(0xFFC58B55),
+                                  ),
+                                  onTap: () => _pickTime(
+                                    context,
+                                    initial: state.friday,
+                                    onSelected: (value) {
+                                      context
+                                          .read<NotificationSettingsCubit>()
+                                          .setFriday(value);
+                                    },
+                                  ),
+                                ),
                                 const SizedBox(height: 8),
                                 _MetallicButton(
                                   isDark: isDarkMode,

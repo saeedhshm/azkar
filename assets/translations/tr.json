@@ -155,10 +155,13 @@
     },
     "appearance": "Görünüm",
     "dark_mode": "Karanlık mod",
-    "reminders": "Günlük hatırlatmalar",
+    "reminders": "Hatırlatmalar",
     "enable_notifications": "Bildirimleri etkinleştir",
     "morning_reminder": "Sabah hatırlatması",
     "evening_reminder": "Akşam hatırlatması",
+    "sleep_reminder": "Uyku hatırlatması",
+    "waking_reminder": "Uyanma hatırlatması",
+    "friday_reminder": "Cuma hatırlatması",
     "save_notifications": "Bildirim ayarlarını kaydet"
   },
   "tasbeeh": {

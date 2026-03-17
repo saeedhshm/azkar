@@ -13,10 +13,19 @@ class AppConstants {
   static const notificationsEnabledKey = 'notifications_enabled';
   static const morningReminderKey = 'morning_reminder';
   static const eveningReminderKey = 'evening_reminder';
+  static const sleepReminderKey = 'sleep_reminder';
+  static const wakingReminderKey = 'waking_reminder';
+  static const fridayReminderKey = 'friday_reminder';
 
   static const defaultMorningReminder = '06:00';
   static const defaultEveningReminder = '18:00';
+  static const defaultSleepReminder = '22:00';
+  static const defaultWakingReminder = '07:00';
+  static const defaultFridayReminder = '10:00';
 
   static const morningReminderNotificationId = 1001;
   static const eveningReminderNotificationId = 1002;
+  static const sleepReminderNotificationId = 1003;
+  static const wakingReminderNotificationId = 1004;
+  static const fridayReminderNotificationId = 1005;
 }

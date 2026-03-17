@@ -136,6 +136,42 @@ class LocalStorageService {
     await _box.put(AppConstants.eveningReminderKey, time);
   }
 
+  String getSleepReminderTime() {
+    return _box.get(
+          AppConstants.sleepReminderKey,
+          defaultValue: AppConstants.defaultSleepReminder,
+        )
+        as String;
+  }
+
+  Future<void> saveSleepReminderTime(String time) async {
+    await _box.put(AppConstants.sleepReminderKey, time);
+  }
+
+  String getWakingReminderTime() {
+    return _box.get(
+          AppConstants.wakingReminderKey,
+          defaultValue: AppConstants.defaultWakingReminder,
+        )
+        as String;
+  }
+
+  Future<void> saveWakingReminderTime(String time) async {
+    await _box.put(AppConstants.wakingReminderKey, time);
+  }
+
+  String getFridayReminderTime() {
+    return _box.get(
+          AppConstants.fridayReminderKey,
+          defaultValue: AppConstants.defaultFridayReminder,
+        )
+        as String;
+  }
+
+  Future<void> saveFridayReminderTime(String time) async {
+    await _box.put(AppConstants.fridayReminderKey, time);
+  }
+
   Map<String, dynamic>? getReaderProgress(String categoryKey) {
     final raw = _box.get('reader_progress_$categoryKey');
     if (raw is Map) {

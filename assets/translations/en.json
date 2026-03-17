@@ -155,10 +155,13 @@
     },
     "appearance": "Appearance",
     "dark_mode": "Dark mode",
-    "reminders": "Daily reminders",
+    "reminders": "Reminders",
     "enable_notifications": "Enable notifications",
     "morning_reminder": "Morning reminder",
     "evening_reminder": "Evening reminder",
+    "sleep_reminder": "Sleep reminder",
+    "waking_reminder": "Waking reminder",
+    "friday_reminder": "Friday reminder",
     "save_notifications": "Save notification settings"
   },
   "tasbeeh": {

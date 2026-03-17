@@ -155,10 +155,13 @@
     },
     "appearance": "Tampilan",
     "dark_mode": "Mode gelap",
-    "reminders": "Pengingat harian",
+    "reminders": "Pengingat",
     "enable_notifications": "Aktifkan notifikasi",
     "morning_reminder": "Pengingat pagi",
     "evening_reminder": "Pengingat petang",
+    "sleep_reminder": "Pengingat tidur",
+    "waking_reminder": "Pengingat bangun",
+    "friday_reminder": "Pengingat Jumat",
     "save_notifications": "Simpan pengaturan notifikasi"
   },
   "tasbeeh": {

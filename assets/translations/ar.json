@@ -155,10 +155,13 @@
     },
     "appearance": "المظهر",
     "dark_mode": "الوضع الداكن",
-    "reminders": "التذكيرات اليومية",
+    "reminders": "التذكيرات",
     "enable_notifications": "تفعيل الإشعارات",
     "morning_reminder": "تذكير الصباح",
     "evening_reminder": "تذكير المساء",
+    "sleep_reminder": "تذكير النوم",
+    "waking_reminder": "تذكير الاستيقاظ",
+    "friday_reminder": "تذكير الجمعة",
     "save_notifications": "حفظ إعدادات التذكير"
   },
   "tasbeeh": {
