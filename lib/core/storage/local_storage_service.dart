@@ -83,7 +83,7 @@ class LocalStorageService {
   }
 
   String getThemeMode() {
-    return _box.get(AppConstants.themeModeKey, defaultValue: 'system')
+    return _box.get(AppConstants.themeModeKey, defaultValue: 'dark')
         as String;
   }
 
