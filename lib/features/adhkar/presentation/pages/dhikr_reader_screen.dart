@@ -321,8 +321,8 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                           )
                                         : null,
                                     icon: isCurrentAudioPlaying
-                                        ? Icons.stop_circle_outlined
-                                        : Icons.volume_up_outlined,
+                                        ? Icons.stop_circle
+                                        : Icons.volume_up_rounded,
                                     accent: accent,
                                     isDark: isDark,
                                   ),
@@ -333,21 +333,21 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                           .toggleFavorite();
                                     },
                                     icon: isFavorite
-                                        ? Icons.bookmark
-                                        : Icons.bookmark_border_outlined,
+                                        ? Icons.star_rounded
+                                        : Icons.star_border_rounded,
                                     accent: accent,
                                     isDark: isDark,
                                   ),
                                   _ActionCircle(
                                     onTap: () =>
                                         _copyText(context, current.text),
-                                    icon: Icons.copy_outlined,
+                                    icon: Icons.copy_all_rounded,
                                     accent: accent,
                                     isDark: isDark,
                                   ),
                                   _ActionCircle(
                                     onTap: () => _shareText(current.text),
-                                    icon: Icons.share_outlined,
+                                    icon: Icons.share_rounded,
                                     accent: accent,
                                     isDark: isDark,
                                   ),
@@ -714,36 +714,108 @@ class _ActionCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : Colors.white.withValues(alpha: 0.7);
-    final border = isDark
-        ? Colors.white.withValues(alpha: 0.2)
-        : Colors.black.withValues(alpha: 0.08);
-
-    return Container(
-      height: 50,
-      width: 50,
-      decoration: BoxDecoration(
-        color: background,
-        shape: BoxShape.circle,
-        border: Border.all(color: border),
-        boxShadow: [
-          BoxShadow(
-            color: accent.withValues(alpha: 0.2),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+    return SizedBox(
+      height: 56,
+      width: 56,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Glowing outer shadow
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.4),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.2),
+                  blurRadius: 40,
+                ),
+              ],
+            ),
+          ),
+          // Main metallic button
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: const Color(0xFF6EE7E8).withValues(alpha: 0.8),
+                width: 2,
+              ),
+            ),
+            child: ClipOval(
+              child: Stack(
+                children: [
+                  // Metallic gradient background
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color(0xFF4A5568).withValues(alpha: 0.9),
+                          const Color(0xFF2D3748).withValues(alpha: 0.95),
+                          const Color(0xFF1A202C).withValues(alpha: 0.9),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Metallic highlight effect
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      width: 28,
+                      height: 28,
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          colors: [
+                            Colors.white.withValues(alpha: 0.3),
+                            Colors.transparent,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Subtle texture overlay
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                    ),
+                  ),
+                  // Inner border
+                  Container(
+                    margin: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFF6EE7E8).withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  // Touch area
+                  Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onTap,
+                      customBorder: const CircleBorder(),
+                      child: Center(
+                        child: Icon(
+                          icon,
+                          color: const Color(0xFF6EE7E8),
+                          size: 24,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        shape: const CircleBorder(),
-        child: InkWell(
-          onTap: onTap,
-          customBorder: const CircleBorder(),
-          child: Icon(icon, color: accent),
-        ),
       ),
     );
   }
@@ -764,44 +836,167 @@ class _NavigationPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final background = isDark
-        ? Colors.white.withValues(alpha: 0.08)
-        : Colors.white.withValues(alpha: 0.65);
-    final border = isDark
-        ? Colors.white.withValues(alpha: 0.2)
-        : Colors.black.withValues(alpha: 0.08);
-
-    return Container(
+    return SizedBox(
       height: isCompact ? 54 : 58,
-      decoration: BoxDecoration(
-        color: background,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: border),
-      ),
-      child: Row(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Expanded(
-            child: TextButton.icon(
-              onPressed: onPrevious,
-              icon: const Icon(Icons.arrow_back),
-              label: Text('common.previous'.tr()),
-              style: TextButton.styleFrom(
-                foregroundColor: isDark
-                    ? Colors.white
-                    : const Color(0xFF1D2530),
-              ),
+          // Glowing outer shadow
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.3),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+                BoxShadow(
+                  color: const Color(0xFF6EE7E8).withValues(alpha: 0.15),
+                  blurRadius: 40,
+                ),
+              ],
             ),
           ),
-          Container(width: 1, color: border),
-          Expanded(
-            child: TextButton.icon(
-              onPressed: onNext,
-              icon: const Icon(Icons.arrow_forward),
-              label: Text('common.next'.tr()),
-              style: TextButton.styleFrom(
-                foregroundColor: isDark
-                    ? Colors.white
-                    : const Color(0xFF1D2530),
+          // Main metallic pill
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(30),
+              border: Border.all(
+                color: const Color(0xFF6EE7E8).withValues(alpha: 0.8),
+                width: 2,
+              ),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: Stack(
+                children: [
+                  // Metallic gradient background
+                  Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color(0xFF4A5568).withValues(alpha: 0.9),
+                          const Color(0xFF2D3748).withValues(alpha: 0.95),
+                          const Color(0xFF1A202C).withValues(alpha: 0.9),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Metallic highlight effect
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      width: double.infinity,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            Colors.white.withValues(alpha: 0.25),
+                            Colors.transparent,
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Subtle texture overlay
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.05),
+                    ),
+                  ),
+                  // Inner border
+                  Container(
+                    margin: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(26),
+                      border: Border.all(
+                        color: const Color(0xFF6EE7E8).withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  // Navigation buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: onPrevious,
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(28),
+                              bottomLeft: Radius.circular(28),
+                            ),
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.arrow_back,
+                                    color: const Color(0xFF6EE7E8),
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'common.previous'.tr(),
+                                    style: TextStyle(
+                                      color: const Color(0xFF6EE7E8),
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: isCompact ? 14 : 15,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        width: 1,
+                        height: isCompact ? 30 : 34,
+                        color: const Color(0xFF6EE7E8).withValues(alpha: 0.4),
+                      ),
+                      Expanded(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            onTap: onNext,
+                            borderRadius: const BorderRadius.only(
+                              topRight: Radius.circular(28),
+                              bottomRight: Radius.circular(28),
+                            ),
+                            child: Center(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    'common.next'.tr(),
+                                    style: TextStyle(
+                                      color: const Color(0xFF6EE7E8),
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: isCompact ? 14 : 15,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Icon(
+                                    Icons.arrow_forward,
+                                    color: const Color(0xFF6EE7E8),
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
