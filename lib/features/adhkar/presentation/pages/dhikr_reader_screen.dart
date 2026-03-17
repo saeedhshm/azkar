@@ -1,7 +1,6 @@
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:audioplayers/audioplayers.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,37 +28,6 @@ class DhikrReaderScreen extends StatefulWidget {
 }
 
 class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
-  final AudioPlayer _audioPlayer = AudioPlayer();
-  bool _isPlaying = false;
-  String? _activeAudioPath;
-
-  @override
-  void initState() {
-    super.initState();
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _isPlaying = state == PlayerState.playing;
-      });
-    });
-    _audioPlayer.onPlayerComplete.listen((_) {
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _isPlaying = false;
-      });
-    });
-  }
-
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
   Future<void> _copyText(BuildContext context, String text) async {
     await Clipboard.setData(ClipboardData(text: text));
     if (context.mounted) {
@@ -71,50 +39,6 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
 
   Future<void> _shareText(String text) {
     return SharePlus.instance.share(ShareParams(text: text));
-  }
-
-  Future<void> _toggleAudio(BuildContext context, String audioPath) async {
-    if (audioPath.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('reader.audio_unavailable'.tr())));
-      return;
-    }
-
-    try {
-      final isSameTrack = _activeAudioPath == audioPath;
-
-      if (_isPlaying && isSameTrack) {
-        await _audioPlayer.stop();
-        if (mounted) {
-          setState(() {
-            _isPlaying = false;
-          });
-        }
-        return;
-      }
-
-      await _audioPlayer.stop();
-      try {
-        await _audioPlayer.play(AssetSource(audioPath));
-      } catch (_) {
-        final bundleBytes = await rootBundle.load('assets/$audioPath');
-        await _audioPlayer.play(BytesSource(bundleBytes.buffer.asUint8List()));
-      }
-
-      if (mounted) {
-        setState(() {
-          _isPlaying = true;
-          _activeAudioPath = audioPath;
-        });
-      }
-    } catch (_) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('reader.audio_failed'.tr())));
-      }
-    }
   }
 
   @override
@@ -164,8 +88,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                   final done = (total - state.remainingCount).clamp(0, total);
                   final progress = total == 0 ? 0.0 : done / total;
                   final percent = (progress * 100).clamp(0, 100).round();
-                  final isCurrentAudioPlaying =
-                      _isPlaying && _activeAudioPath == current.audioPath;
+                  const isCurrentAudioPlaying = false;
 
                   final accent = isDark
                       ? const Color(0xFF6EE7E8)
@@ -314,12 +237,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
                                   _ActionCircle(
-                                    onTap: current.audioPath.isNotEmpty
-                                        ? () => _toggleAudio(
-                                            context,
-                                            current.audioPath,
-                                          )
-                                        : null,
+                                    onTap: null,
                                     icon: isCurrentAudioPlaying
                                         ? Icons.stop_circle
                                         : Icons.volume_up_rounded,
