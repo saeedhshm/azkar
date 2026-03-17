@@ -136,7 +136,9 @@
     "play_audio": "تشغيل الصوت",
     "stop_audio": "إيقاف الصوت",
     "audio_unavailable": "لا يوجد ملف صوتي لهذا الذكر.",
-    "audio_failed": "تعذر تشغيل الصوت."
+    "audio_failed": "تعذر تشغيل الصوت.",
+    "repeat_label": "كرر {count} مرة",
+    "tasbeeh_button": "سبّح"
   },
   "settings": {
     "saved": "تم حفظ الإعدادات.",

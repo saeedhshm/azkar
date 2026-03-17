@@ -62,3 +62,4 @@ android/key.properties
 
 # Accidental local dataset scratch files
 assets/data/adhkarفغفغ.json
+/ios/Podfile.lock

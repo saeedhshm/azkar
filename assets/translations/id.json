@@ -136,7 +136,9 @@
     "play_audio": "Putar Audio",
     "stop_audio": "Hentikan Audio",
     "audio_unavailable": "Audio tidak tersedia untuk dzikir ini.",
-    "audio_failed": "Gagal memutar audio."
+    "audio_failed": "Gagal memutar audio.",
+    "repeat_label": "Ulangi {count} kali",
+    "tasbeeh_button": "Tasbih"
   },
   "settings": {
     "saved": "Pengaturan tersimpan.",

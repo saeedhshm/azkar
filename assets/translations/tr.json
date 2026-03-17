@@ -136,7 +136,9 @@
     "play_audio": "Sesi Oynat",
     "stop_audio": "Sesi Durdur",
     "audio_unavailable": "Bu zikir için ses dosyası yok.",
-    "audio_failed": "Ses oynatılamadı."
+    "audio_failed": "Ses oynatılamadı.",
+    "repeat_label": "{count} kez tekrarla",
+    "tasbeeh_button": "Tesbih"
   },
   "settings": {
     "saved": "Ayarlar kaydedildi.",

@@ -136,7 +136,9 @@
     "play_audio": "Play Audio",
     "stop_audio": "Stop Audio",
     "audio_unavailable": "No audio available for this dhikr.",
-    "audio_failed": "Failed to play audio."
+    "audio_failed": "Failed to play audio.",
+    "repeat_label": "Repeat {count} times",
+    "tasbeeh_button": "Tasbeeh"
   },
   "settings": {
     "saved": "Settings saved.",

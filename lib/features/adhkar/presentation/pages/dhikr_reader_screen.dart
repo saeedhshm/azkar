@@ -1,3 +1,6 @@
+import 'dart:math';
+import 'dart:ui';
+
 import 'package:audioplayers/audioplayers.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
@@ -37,7 +40,6 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
       if (!mounted) {
         return;
       }
-
       setState(() {
         _isPlaying = state == PlayerState.playing;
       });
@@ -117,6 +119,9 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return BlocProvider<ReaderCubit>(
       create: (_) => getIt<ReaderCubit>()
         ..initialize(
@@ -125,246 +130,572 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
           initialAdhkarId: widget.initialAdhkarId,
         ),
       child: Scaffold(
-        appBar: AppBar(title: Text('reader.title'.tr())),
-        body: BlocBuilder<ReaderCubit, ReaderState>(
-          builder: (context, state) {
-            if (state.status == ReaderStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          title: Text('reader.title'.tr()),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+        ),
+        body: Stack(
+          children: [
+            _ReaderBackground(isDark: isDark),
+            SafeArea(
+              child: BlocBuilder<ReaderCubit, ReaderState>(
+                builder: (context, state) {
+                  if (state.status == ReaderStatus.loading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-            if (state.status == ReaderStatus.failure) {
-              return Center(
-                child: Text(state.errorMessage ?? 'reader.failed_open'.tr()),
-              );
-            }
+                  if (state.status == ReaderStatus.failure) {
+                    return Center(
+                      child: Text(
+                        state.errorMessage ?? 'reader.failed_open'.tr(),
+                      ),
+                    );
+                  }
 
-            final current = state.currentAdhkar;
-            if (current == null) {
-              return Center(child: Text('reader.no_dhikr'.tr()));
-            }
+                  final current = state.currentAdhkar;
+                  if (current == null) {
+                    return Center(child: Text('reader.no_dhikr'.tr()));
+                  }
 
-            final isFavorite = state.favoriteIds.contains(current.id);
-            final total = current.count;
-            final done = (total - state.remainingCount).clamp(0, total);
-            final progress = total == 0 ? 0.0 : done / total;
-            final isCurrentAudioPlaying =
-                _isPlaying && _activeAudioPath == current.audioPath;
+                  final isFavorite = state.favoriteIds.contains(current.id);
+                  final total = current.count;
+                  final done = (total - state.remainingCount).clamp(0, total);
+                  final progress = total == 0 ? 0.0 : done / total;
+                  final percent = (progress * 100).clamp(0, 100).round();
+                  final isCurrentAudioPlaying =
+                      _isPlaying && _activeAudioPath == current.audioPath;
 
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                final isCompact = constraints.maxWidth < 390;
+                  final accent = isDark
+                      ? const Color(0xFF6EE7E8)
+                      : const Color(0xFFB8862B);
+                  final accentDeep = isDark
+                      ? const Color(0xFF0FB9B1)
+                      : const Color(0xFF8A6422);
 
-                return SingleChildScrollView(
-                  padding: const EdgeInsets.all(16),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight - 32,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              children: [
-                                Text(
-                                  '${state.currentIndex + 1} / ${state.items.length}',
-                                  style: Theme.of(context).textTheme.labelLarge,
-                                ),
-                                const SizedBox(height: 10),
-                                AnimatedSwitcher(
-                                  duration: const Duration(milliseconds: 280),
-                                  child: Text(
-                                    current.text,
-                                    key: ValueKey<int>(current.id),
-                                    textAlign: TextAlign.center,
-                                    textDirection: TextDirection.rtl,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .headlineSmall
-                                        ?.copyWith(height: 1.8),
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                if (current.description.isNotEmpty)
-                                  Text(
-                                    current.description,
-                                    textAlign: TextAlign.center,
-                                    style: Theme.of(
-                                      context,
-                                    ).textTheme.bodyMedium,
-                                  ),
-                                if (current.reference.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8),
-                                    child: Text(
-                                      current.reference,
-                                      style: Theme.of(
-                                        context,
-                                      ).textTheme.bodySmall,
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      final isCompact = constraints.maxWidth < 390;
+
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(
+                            minHeight: constraints.maxHeight - 36,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              _GlassCard(
+                                isDark: isDark,
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      '${state.currentIndex + 1} / ${state.items.length}',
+                                      style: theme.textTheme.titleSmall
+                                          ?.copyWith(
+                                            letterSpacing: 1.2,
+                                            color: isDark
+                                                ? Colors.white70
+                                                : Colors.black54,
+                                          ),
                                     ),
+                                    const SizedBox(height: 12),
+                                    AnimatedSwitcher(
+                                      duration: const Duration(
+                                        milliseconds: 280,
+                                      ),
+                                      child: Text(
+                                        current.text,
+                                        key: ValueKey<int>(current.id),
+                                        textAlign: TextAlign.center,
+                                        textDirection: TextDirection.rtl,
+                                        style: theme.textTheme.headlineSmall
+                                            ?.copyWith(
+                                              height: 1.8,
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : const Color(0xFF1D2530),
+                                            ),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Text(
+                                      'reader.repeat_label'.tr(
+                                        namedArgs: {'count': total.toString()},
+                                      ),
+                                      style: theme.textTheme.bodyMedium
+                                          ?.copyWith(
+                                            color: isDark
+                                                ? Colors.white70
+                                                : Colors.black54,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 18),
+                                    _ProgressBar(
+                                      progress: progress,
+                                      accent: accent,
+                                      isDark: isDark,
+                                    ),
+                                    const SizedBox(height: 10),
+                                    Text(
+                                      '$percent%',
+                                      style: theme.textTheme.titleMedium
+                                          ?.copyWith(
+                                            color: isDark
+                                                ? Colors.white70
+                                                : Colors.black54,
+                                          ),
+                                    ),
+                                    if (current.description.isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 16),
+                                        child: Text(
+                                          current.description,
+                                          textAlign: TextAlign.center,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color: isDark
+                                                    ? Colors.white60
+                                                    : Colors.black45,
+                                              ),
+                                        ),
+                                      ),
+                                    if (current.reference.isNotEmpty)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 6),
+                                        child: Text(
+                                          current.reference,
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                                color: isDark
+                                                    ? Colors.white60
+                                                    : Colors.black45,
+                                              ),
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                              _GlowButton(
+                                enabled: state.remainingCount > 0,
+                                onTap: state.remainingCount > 0
+                                    ? () => context
+                                          .read<ReaderCubit>()
+                                          .decrementCounter()
+                                    : null,
+                                accent: accent,
+                                accentDeep: accentDeep,
+                                label: Text(
+                                  'reader.tasbeeh_button'.tr(),
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: isDark ? Colors.black : Colors.white,
+                                    fontWeight: FontWeight.w600,
                                   ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        LinearProgressIndicator(value: progress),
-                        const SizedBox(height: 6),
-                        Text(
-                          '${'reader.progress'.tr()}: $done / $total',
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 20),
-                        FilledButton.icon(
-                          onPressed: state.remainingCount > 0
-                              ? () => context
-                                    .read<ReaderCubit>()
-                                    .decrementCounter()
-                              : null,
-                          icon: const Icon(Icons.exposure_minus_1),
-                          label: Text(
-                            state.remainingCount > 0
-                                ? '${'reader.remaining'.tr()}: ${state.remainingCount}'
-                                : 'reader.completed'.tr(),
-                          ),
-                          style: FilledButton.styleFrom(
-                            minimumSize: const Size.fromHeight(56),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        OutlinedButton.icon(
-                          onPressed: current.audioPath.isNotEmpty
-                              ? () => _toggleAudio(context, current.audioPath)
-                              : null,
-                          icon: Icon(
-                            isCurrentAudioPlaying
-                                ? Icons.stop_circle_outlined
-                                : Icons.play_circle_outline,
-                          ),
-                          label: Text(
-                            isCurrentAudioPlaying
-                                ? 'reader.stop_audio'.tr()
-                                : 'reader.play_audio'.tr(),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        if (isCompact) ...[
-                          OutlinedButton.icon(
-                            onPressed: state.currentIndex > 0
-                                ? () => context.read<ReaderCubit>().previous()
-                                : null,
-                            icon: const Icon(Icons.arrow_back),
-                            label: Text('common.previous'.tr()),
-                          ),
-                          const SizedBox(height: 10),
-                          OutlinedButton.icon(
-                            onPressed:
-                                state.currentIndex < state.items.length - 1
-                                ? () => context.read<ReaderCubit>().next()
-                                : null,
-                            icon: const Icon(Icons.arrow_forward),
-                            label: Text('common.next'.tr()),
-                          ),
-                        ] else
-                          Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: state.currentIndex > 0
-                                      ? () => context
-                                            .read<ReaderCubit>()
-                                            .previous()
-                                      : null,
-                                  icon: const Icon(Icons.arrow_back),
-                                  label: Text('common.previous'.tr()),
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed:
-                                      state.currentIndex <
-                                          state.items.length - 1
-                                      ? () => context.read<ReaderCubit>().next()
-                                      : null,
-                                  icon: const Icon(Icons.arrow_forward),
-                                  label: Text('common.next'.tr()),
+                              const SizedBox(height: 10),
+                              Text(
+                                state.remainingCount > 0
+                                    ? '${'reader.remaining'.tr()}: ${state.remainingCount}'
+                                    : 'reader.completed'.tr(),
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: isDark
+                                      ? Colors.white70
+                                      : Colors.black54,
                                 ),
                               ),
-                            ],
-                          ),
-                        const SizedBox(height: 12),
-                        if (isCompact) ...[
-                          OutlinedButton.icon(
-                            onPressed: () {
-                              context.read<ReaderCubit>().toggleFavorite();
-                            },
-                            icon: Icon(
-                              isFavorite
-                                  ? Icons.bookmark
-                                  : Icons.bookmark_border_outlined,
-                            ),
-                            label: Text('common.favorite'.tr()),
-                          ),
-                          const SizedBox(height: 10),
-                          OutlinedButton.icon(
-                            onPressed: () => _copyText(context, current.text),
-                            icon: const Icon(Icons.copy_outlined),
-                            label: Text('common.copy'.tr()),
-                          ),
-                          const SizedBox(height: 10),
-                          OutlinedButton.icon(
-                            onPressed: () => _shareText(current.text),
-                            icon: const Icon(Icons.share_outlined),
-                            label: Text('common.share'.tr()),
-                          ),
-                        ] else
-                          Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: () {
-                                    context
-                                        .read<ReaderCubit>()
-                                        .toggleFavorite();
-                                  },
-                                  icon: Icon(
-                                    isFavorite
+                              const SizedBox(height: 18),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  _ActionCircle(
+                                    onTap: current.audioPath.isNotEmpty
+                                        ? () => _toggleAudio(
+                                            context,
+                                            current.audioPath,
+                                          )
+                                        : null,
+                                    icon: isCurrentAudioPlaying
+                                        ? Icons.stop_circle_outlined
+                                        : Icons.volume_up_outlined,
+                                    accent: accent,
+                                    isDark: isDark,
+                                  ),
+                                  _ActionCircle(
+                                    onTap: () {
+                                      context
+                                          .read<ReaderCubit>()
+                                          .toggleFavorite();
+                                    },
+                                    icon: isFavorite
                                         ? Icons.bookmark
                                         : Icons.bookmark_border_outlined,
+                                    accent: accent,
+                                    isDark: isDark,
                                   ),
-                                  label: Text('common.favorite'.tr()),
-                                ),
+                                  _ActionCircle(
+                                    onTap: () =>
+                                        _copyText(context, current.text),
+                                    icon: Icons.copy_outlined,
+                                    accent: accent,
+                                    isDark: isDark,
+                                  ),
+                                  _ActionCircle(
+                                    onTap: () => _shareText(current.text),
+                                    icon: Icons.share_outlined,
+                                    accent: accent,
+                                    isDark: isDark,
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: () =>
-                                      _copyText(context, current.text),
-                                  icon: const Icon(Icons.copy_outlined),
-                                  label: Text('common.copy'.tr()),
-                                ),
+                              const SizedBox(height: 18),
+                              _NavigationPill(
+                                isDark: isDark,
+                                onPrevious: state.currentIndex > 0
+                                    ? () =>
+                                          context.read<ReaderCubit>().previous()
+                                    : null,
+                                onNext:
+                                    state.currentIndex < state.items.length - 1
+                                    ? () => context.read<ReaderCubit>().next()
+                                    : null,
+                                isCompact: isCompact,
                               ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: OutlinedButton.icon(
-                                  onPressed: () => _shareText(current.text),
-                                  icon: const Icon(Icons.share_outlined),
-                                  label: Text('common.share'.tr()),
-                                ),
-                              ),
+                              const SizedBox(height: 16),
                             ],
                           ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+class _ReaderBackground extends StatelessWidget {
+  const _ReaderBackground({required this.isDark});
+
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final gradient = isDark
+        ? const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF0A1220), Color(0xFF0F1C2E), Color(0xFF071A1B)],
+          )
+        : const LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF6F0E5), Color(0xFFF2E7D6), Color(0xFFEADCC4)],
+          );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(gradient: gradient),
+      child: CustomPaint(
+        painter: _StarFieldPainter(isDark: isDark),
+        child: Container(),
+      ),
+    );
+  }
+}
+
+class _StarFieldPainter extends CustomPainter {
+  _StarFieldPainter({required this.isDark});
+
+  final bool isDark;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = Random(7);
+    final starCount = isDark ? 120 : 60;
+    final baseOpacity = isDark ? 0.45 : 0.2;
+
+    for (var i = 0; i < starCount; i++) {
+      final dx = random.nextDouble() * size.width;
+      final dy = random.nextDouble() * size.height;
+      final radius = random.nextDouble() * 1.4 + 0.3;
+      final opacity = baseOpacity + random.nextDouble() * 0.4;
+      final paint = Paint()
+        ..color = (isDark ? Colors.white : const Color(0xFFB48A45)).withValues(
+          alpha: opacity,
+        );
+      canvas.drawCircle(Offset(dx, dy), radius, paint);
+    }
+
+    final glowPaint = Paint()
+      ..shader =
+          RadialGradient(
+            colors: isDark
+                ? [
+                    const Color(0xFF3BE8E8).withValues(alpha: 0.18),
+                    Colors.transparent,
+                  ]
+                : [
+                    const Color(0xFFB8862B).withValues(alpha: 0.2),
+                    Colors.transparent,
+                  ],
+          ).createShader(
+            Rect.fromCircle(
+              center: Offset(size.width * 0.5, size.height * 0.7),
+              radius: size.width * 0.8,
+            ),
+          );
+    canvas.drawRect(Offset.zero & size, glowPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _GlassCard extends StatelessWidget {
+  const _GlassCard({required this.child, required this.isDark});
+
+  final Widget child;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final borderColor = isDark
+        ? Colors.white.withValues(alpha: 0.15)
+        : const Color(0xFFBFA272).withValues(alpha: 0.35);
+    final background = isDark
+        ? Colors.white.withValues(alpha: 0.06)
+        : Colors.white.withValues(alpha: 0.55);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(26),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: background,
+            borderRadius: BorderRadius.circular(26),
+            border: Border.all(color: borderColor, width: 1.2),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({
+    required this.progress,
+    required this.accent,
+    required this.isDark,
+  });
+
+  final double progress;
+  final Color accent;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final background = isDark
+        ? Colors.white.withValues(alpha: 0.12)
+        : Colors.black.withValues(alpha: 0.08);
+    final gradient = LinearGradient(
+      colors: [accent.withValues(alpha: 0.9), accent.withValues(alpha: 0.6)],
+    );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(50),
+      child: SizedBox(
+        height: 10,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            ColoredBox(color: background),
+            FractionallySizedBox(
+              alignment: Alignment.centerLeft,
+              widthFactor: progress,
+              child: DecoratedBox(
+                decoration: BoxDecoration(gradient: gradient),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _GlowButton extends StatelessWidget {
+  const _GlowButton({
+    required this.enabled,
+    required this.onTap,
+    required this.accent,
+    required this.accentDeep,
+    required this.label,
+  });
+
+  final bool enabled;
+  final VoidCallback? onTap;
+  final Color accent;
+  final Color accentDeep;
+  final Widget label;
+
+  @override
+  Widget build(BuildContext context) {
+    final background = LinearGradient(
+      colors: enabled
+          ? [accent.withValues(alpha: 0.9), accentDeep.withValues(alpha: 0.9)]
+          : [Colors.grey.shade400, Colors.grey.shade500],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+
+    return Container(
+      height: 64,
+      decoration: BoxDecoration(
+        gradient: background,
+        borderRadius: BorderRadius.circular(36),
+        boxShadow: enabled
+            ? [
+                BoxShadow(
+                  color: accent.withValues(alpha: 0.35),
+                  blurRadius: 24,
+                  offset: const Offset(0, 10),
+                ),
+              ]
+            : [],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(36),
+          onTap: enabled ? onTap : null,
+          child: Center(child: label),
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionCircle extends StatelessWidget {
+  const _ActionCircle({
+    required this.onTap,
+    required this.icon,
+    required this.accent,
+    required this.isDark,
+  });
+
+  final VoidCallback? onTap;
+  final IconData icon;
+  final Color accent;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final background = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.white.withValues(alpha: 0.7);
+    final border = isDark
+        ? Colors.white.withValues(alpha: 0.2)
+        : Colors.black.withValues(alpha: 0.08);
+
+    return Container(
+      height: 50,
+      width: 50,
+      decoration: BoxDecoration(
+        color: background,
+        shape: BoxShape.circle,
+        border: Border.all(color: border),
+        boxShadow: [
+          BoxShadow(
+            color: accent.withValues(alpha: 0.2),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          child: Icon(icon, color: accent),
+        ),
+      ),
+    );
+  }
+}
+
+class _NavigationPill extends StatelessWidget {
+  const _NavigationPill({
+    required this.isDark,
+    required this.onPrevious,
+    required this.onNext,
+    required this.isCompact,
+  });
+
+  final bool isDark;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
+  final bool isCompact;
+
+  @override
+  Widget build(BuildContext context) {
+    final background = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.white.withValues(alpha: 0.65);
+    final border = isDark
+        ? Colors.white.withValues(alpha: 0.2)
+        : Colors.black.withValues(alpha: 0.08);
+
+    return Container(
+      height: isCompact ? 54 : 58,
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(30),
+        border: Border.all(color: border),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextButton.icon(
+              onPressed: onPrevious,
+              icon: const Icon(Icons.arrow_back),
+              label: Text('common.previous'.tr()),
+              style: TextButton.styleFrom(
+                foregroundColor: isDark
+                    ? Colors.white
+                    : const Color(0xFF1D2530),
+              ),
+            ),
+          ),
+          Container(width: 1, color: border),
+          Expanded(
+            child: TextButton.icon(
+              onPressed: onNext,
+              icon: const Icon(Icons.arrow_forward),
+              label: Text('common.next'.tr()),
+              style: TextButton.styleFrom(
+                foregroundColor: isDark
+                    ? Colors.white
+                    : const Color(0xFF1D2530),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
