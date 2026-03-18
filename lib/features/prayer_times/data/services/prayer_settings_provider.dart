@@ -72,7 +72,7 @@ class PrayerSettingsProvider {
 
     for (final entry in settings.offsets.entries) {
       await _prefs.setInt(
-        '${_offsetPrefix}${_prayerKey(entry.key)}',
+        '$_offsetPrefix${_prayerKey(entry.key)}',
         entry.value,
       );
     }

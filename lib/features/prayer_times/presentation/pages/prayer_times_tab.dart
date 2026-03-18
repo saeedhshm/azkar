@@ -920,7 +920,7 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
             height: 320,
             child: ListView.separated(
               itemCount: _results.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final city = _results[index];
                 return ListTile(
@@ -1461,7 +1461,7 @@ class _DropdownField<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       items: items,
       onChanged: onChanged,
       decoration: InputDecoration(labelText: label),

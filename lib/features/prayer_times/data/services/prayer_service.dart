@@ -52,7 +52,7 @@ class PrayerService {
     }
 
     final currentPrayer = times.currentPrayer();
-    final countdown = nextTime != null ? nextTime.difference(now) : null;
+    final countdown = nextTime?.difference(now);
 
     return PrayerTimeSummary(
       prayerTimes: times,
