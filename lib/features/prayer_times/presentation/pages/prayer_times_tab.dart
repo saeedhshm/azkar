@@ -210,23 +210,7 @@ class _PrayerTimesContent extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 14),
-        _GlassCard(
-          isDark: isDark,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'prayer_times.qibla'.tr(),
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 12),
-              _QiblaCompass(isDark: isDark),
-            ],
-          ),
-        ),
+        _QiblaSection(isDark: isDark),
       ],
     );
   }
@@ -690,6 +674,43 @@ class _QiblaCompass extends StatelessWidget {
           );
         },
       ),
+    );
+  }
+}
+
+class _QiblaSection extends StatelessWidget {
+  const _QiblaSection({required this.isDark});
+
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool?>(
+      future: FlutterQiblah.androidDeviceSensorSupport(),
+      builder: (context, snapshot) {
+        final supported = snapshot.data ?? false;
+        if (!supported) {
+          return const SizedBox.shrink();
+        }
+
+        return _GlassCard(
+          isDark: isDark,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'prayer_times.qibla'.tr(),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleMedium
+                    ?.copyWith(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              _QiblaCompass(isDark: isDark),
+            ],
+          ),
+        );
+      },
     );
   }
 }
