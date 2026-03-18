@@ -15,30 +15,30 @@ class CityDatabaseService {
 
   static const _citiesUrl =
       'https://raw.githubusercontent.com/dr5hn/countries-states-cities-database/master/json/cities.json';
+  static const _citiesUrlFallback =
+      'https://cdn.jsdelivr.net/gh/dr5hn/countries-states-cities-database@master/json/cities.json';
   static const _fileName = 'cities_db.json';
 
   List<CityEntry>? _cache;
 
   Future<bool> isDownloaded() async {
-    final file = await _citiesFile();
+    final file = await _citiesFilePath();
     return file.exists();
   }
 
-  Future<void> ensureDownloaded() async {
+  Future<bool> ensureDownloaded() async {
     if (await isDownloaded()) {
-      return;
+      return true;
     }
-    final online = await _networkService.isOnline();
-    if (!online) {
-      return;
+    final urls = [_citiesUrl, _citiesUrlFallback];
+    for (final url in urls) {
+      final success = await _downloadToFile(url);
+      if (success) {
+        _cache = null;
+        return true;
+      }
     }
-
-    final response = await http.get(Uri.parse(_citiesUrl));
-    if (response.statusCode == 200) {
-      final file = await _citiesFile();
-      await file.writeAsString(response.body);
-      _cache = null;
-    }
+    return false;
   }
 
   Future<List<CityEntry>> search(String query, {int limit = 25}) async {
@@ -69,20 +69,42 @@ class CityDatabaseService {
       return _cache!;
     }
 
-    final file = await _citiesFile();
+    final file = await _citiesFilePath();
     if (!await file.exists()) {
       return const [];
     }
 
     final raw = await file.readAsString();
-    final parsed = await compute(_decodeCities, raw);
+    final parsed = await compute<String, List<CityEntry>>(_decodeCities, raw);
     _cache = parsed;
     return parsed;
   }
 
-  Future<File> _citiesFile() async {
+  static Future<File> _citiesFilePath() async {
     final dir = await getApplicationSupportDirectory();
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
     return File('${dir.path}/$_fileName');
+  }
+}
+
+Future<bool> _downloadToFile(String url) async {
+  try {
+    final request = http.Request('GET', Uri.parse(url));
+    final response = await request.send().timeout(const Duration(seconds: 60));
+    if (response.statusCode != 200) {
+      return false;
+    }
+
+    final file = await CityDatabaseService._citiesFilePath();
+    final sink = file.openWrite();
+    await response.stream.pipe(sink);
+    await sink.flush();
+    await sink.close();
+    return await file.exists();
+  } catch (_) {
+    return false;
   }
 }
 

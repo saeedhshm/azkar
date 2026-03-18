@@ -235,12 +235,8 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     if (await _cityDatabaseService.isDownloaded()) {
       return true;
     }
-    final online = await _networkService.isOnline();
-    if (!online) {
-      return false;
-    }
-    await _cityDatabaseService.ensureDownloaded();
-    return _cityDatabaseService.isDownloaded();
+    final downloaded = await _cityDatabaseService.ensureDownloaded();
+    return downloaded;
   }
 
   Future<List<CityEntry>> searchCities(String query) {
