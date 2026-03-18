@@ -204,7 +204,7 @@ class _PrayerTimesContent extends StatelessWidget {
                   ),
                 ),
                 SizedBox(
-                  width: constraints.maxWidth,
+                  width: tileWidth,
                   child: _PrayerTile(
                     item: items[5],
                     isDark: isDark,
