@@ -1,3 +1,4 @@
+import 'package:adhan/adhan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -181,5 +182,116 @@ class NotificationService {
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
       payload: 'adhkar_reminder',
     );
+  }
+
+  Future<void> schedulePrayerNotifications({
+    required PrayerTimes prayerTimes,
+    String? soundName,
+  }) async {
+    await _plugin.cancel(AppConstants.fajrNotificationId);
+    await _plugin.cancel(AppConstants.dhuhrNotificationId);
+    await _plugin.cancel(AppConstants.asrNotificationId);
+    await _plugin.cancel(AppConstants.maghribNotificationId);
+    await _plugin.cancel(AppConstants.ishaNotificationId);
+
+    await _schedulePrayerNotification(
+      id: AppConstants.fajrNotificationId,
+      prayer: Prayer.fajr,
+      time: prayerTimes.fajr,
+      soundName: soundName,
+    );
+    await _schedulePrayerNotification(
+      id: AppConstants.dhuhrNotificationId,
+      prayer: Prayer.dhuhr,
+      time: prayerTimes.dhuhr,
+      soundName: soundName,
+    );
+    await _schedulePrayerNotification(
+      id: AppConstants.asrNotificationId,
+      prayer: Prayer.asr,
+      time: prayerTimes.asr,
+      soundName: soundName,
+    );
+    await _schedulePrayerNotification(
+      id: AppConstants.maghribNotificationId,
+      prayer: Prayer.maghrib,
+      time: prayerTimes.maghrib,
+      soundName: soundName,
+    );
+    await _schedulePrayerNotification(
+      id: AppConstants.ishaNotificationId,
+      prayer: Prayer.isha,
+      time: prayerTimes.isha,
+      soundName: soundName,
+    );
+  }
+
+  Future<void> _schedulePrayerNotification({
+    required int id,
+    required Prayer prayer,
+    required DateTime time,
+    String? soundName,
+  }) async {
+    final now = tz.TZDateTime.now(tz.local);
+    var schedule = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
+
+    if (schedule.isBefore(now)) {
+      schedule = schedule.add(const Duration(days: 1));
+    }
+
+    final androidDetails = AndroidNotificationDetails(
+      'prayer_channel',
+      'Prayer times',
+      channelDescription: 'Prayer time notifications',
+      importance: Importance.high,
+      priority: Priority.high,
+      sound: soundName != null && soundName.isNotEmpty
+          ? RawResourceAndroidNotificationSound(soundName)
+          : null,
+    );
+
+    final iosDetails = DarwinNotificationDetails(
+      sound: soundName != null && soundName.isNotEmpty ? soundName : null,
+    );
+
+    await _plugin.zonedSchedule(
+      id,
+      _prayerTitle(prayer),
+      _prayerBody(prayer),
+      schedule,
+      NotificationDetails(android: androidDetails, iOS: iosDetails),
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      matchDateTimeComponents: DateTimeComponents.time,
+      payload: 'prayer_time',
+    );
+  }
+
+  String _prayerTitle(Prayer prayer) {
+    return switch (prayer) {
+      Prayer.fajr => 'Fajr Prayer',
+      Prayer.dhuhr => 'Dhuhr Prayer',
+      Prayer.asr => 'Asr Prayer',
+      Prayer.maghrib => 'Maghrib Prayer',
+      Prayer.isha => 'Isha Prayer',
+      _ => 'Prayer Time',
+    };
+  }
+
+  String _prayerBody(Prayer prayer) {
+    return switch (prayer) {
+      Prayer.fajr => 'Time for Fajr prayer.',
+      Prayer.dhuhr => 'Time for Dhuhr prayer.',
+      Prayer.asr => 'Time for Asr prayer.',
+      Prayer.maghrib => 'Time for Maghrib prayer.',
+      Prayer.isha => 'Time for Isha prayer.',
+      _ => 'It is time for prayer.',
+    };
   }
 }

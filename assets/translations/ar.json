@@ -19,6 +19,9 @@
     "reset": "إعادة تعيين",
     "count": "العدد",
     "completed": "تم",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "retry": "إعادة المحاولة",
     "reset_progress": "إعادة الضبط",
     "progress_reset": "تمت إعادة ضبط التقدّم."
   },
@@ -51,6 +54,55 @@
       "quran": "القرآن الكريم"
     },
     "placeholder": "قريبًا"
+  },
+  "prayer_times": {
+    "date": "تاريخ اليوم",
+    "next_prayer": "الصلاة القادمة",
+    "settings": "الإعدادات",
+    "method": "طريقة الحساب",
+    "madhab_label": "المذهب",
+    "offsets": "تعديلات الوقت",
+    "minutes": "دقيقة",
+    "adhan_sound": "صوت الأذان (اسم ملف Android)",
+    "adhan_sound_hint": "اتركه فارغًا لاستخدام الصوت الافتراضي.",
+    "qibla": "اتجاه القبلة",
+    "location": "الموقع",
+    "change_location": "تغيير",
+    "use_device_location": "استخدام موقع الجهاز",
+    "manual_location": "إدخال يدوي للموقع",
+    "city_label": "المدينة",
+    "latitude": "خط العرض",
+    "longitude": "خط الطول",
+    "permission_denied": "تحتاج إلى إذن الموقع لعرض مواقيت الصلاة.",
+    "permission_denied_forever": "تم رفض إذن الموقع نهائياً. فعّل الإذن من الإعدادات أو استخدم موقعاً يدوياً.",
+    "location_services_disabled": "خدمات الموقع غير مفعلة.",
+    "open_settings": "فتح الإعدادات",
+    "prayers": {
+      "fajr": "الفجر",
+      "dhuhr": "الظهر",
+      "asr": "العصر",
+      "maghrib": "المغرب",
+      "isha": "العشاء"
+    },
+    "methods": {
+      "egyptian": "الهيئة المصرية",
+      "mwl": "رابطة العالم الإسلامي",
+      "karachi": "كراتشي",
+      "umm_al_qura": "أم القرى",
+      "dubai": "دبي",
+      "qatar": "قطر",
+      "kuwait": "الكويت",
+      "moonsighting": "لجنة رؤية الهلال",
+      "singapore": "سنغافورة",
+      "turkey": "تركيا",
+      "tehran": "طهران",
+      "north_america": "أمريكا الشمالية",
+      "other": "أخرى"
+    },
+    "madhab": {
+      "shafi": "شافعي",
+      "hanafi": "حنفي"
+    }
   },
   "categories": {
     "morning_adhkar": {

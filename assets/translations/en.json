@@ -19,6 +19,9 @@
     "reset": "Reset",
     "count": "Count",
     "completed": "Completed",
+    "save": "Save",
+    "cancel": "Cancel",
+    "retry": "Retry",
     "reset_progress": "Reset progress",
     "progress_reset": "Progress reset."
   },
@@ -51,6 +54,55 @@
       "quran": "Quran"
     },
     "placeholder": "Coming soon"
+  },
+  "prayer_times": {
+    "date": "Today's date",
+    "next_prayer": "Next prayer",
+    "settings": "Settings",
+    "method": "Calculation method",
+    "madhab_label": "Madhab",
+    "offsets": "Manual adjustments",
+    "minutes": "min",
+    "adhan_sound": "Adhan sound (Android raw name)",
+    "adhan_sound_hint": "Leave empty to use default sound.",
+    "qibla": "Qibla direction",
+    "location": "Location",
+    "change_location": "Change",
+    "use_device_location": "Use device location",
+    "manual_location": "Manual location",
+    "city_label": "City",
+    "latitude": "Latitude",
+    "longitude": "Longitude",
+    "permission_denied": "Location permission is required for prayer times.",
+    "permission_denied_forever": "Location permission is permanently denied. Enable it in settings or set a manual location.",
+    "location_services_disabled": "Location services are disabled.",
+    "open_settings": "Open settings",
+    "prayers": {
+      "fajr": "Fajr",
+      "dhuhr": "Dhuhr",
+      "asr": "Asr",
+      "maghrib": "Maghrib",
+      "isha": "Isha"
+    },
+    "methods": {
+      "egyptian": "Egyptian",
+      "mwl": "Muslim World League",
+      "karachi": "Karachi",
+      "umm_al_qura": "Umm Al-Qura",
+      "dubai": "Dubai",
+      "qatar": "Qatar",
+      "kuwait": "Kuwait",
+      "moonsighting": "Moonsighting Committee",
+      "singapore": "Singapore",
+      "turkey": "Turkey",
+      "tehran": "Tehran",
+      "north_america": "North America",
+      "other": "Other"
+    },
+    "madhab": {
+      "shafi": "Shafi",
+      "hanafi": "Hanafi"
+    }
   },
   "categories": {
     "morning_adhkar": {

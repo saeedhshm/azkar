@@ -19,6 +19,9 @@
     "reset": "Atur Ulang",
     "count": "Jumlah",
     "completed": "Selesai",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "retry": "Coba lagi",
     "reset_progress": "Reset progres",
     "progress_reset": "Progres direset."
   },
@@ -51,6 +54,55 @@
       "quran": "Al-Qur'an"
     },
     "placeholder": "Segera hadir"
+  },
+  "prayer_times": {
+    "date": "Tanggal hari ini",
+    "next_prayer": "Salat berikutnya",
+    "settings": "Pengaturan",
+    "method": "Metode perhitungan",
+    "madhab_label": "Mazhab",
+    "offsets": "Penyesuaian waktu",
+    "minutes": "menit",
+    "adhan_sound": "Suara azan (nama raw Android)",
+    "adhan_sound_hint": "Kosongkan untuk memakai suara default.",
+    "qibla": "Arah kiblat",
+    "location": "Lokasi",
+    "change_location": "Ubah",
+    "use_device_location": "Gunakan lokasi perangkat",
+    "manual_location": "Lokasi manual",
+    "city_label": "Kota",
+    "latitude": "Lintang",
+    "longitude": "Bujur",
+    "permission_denied": "Izin lokasi diperlukan untuk waktu salat.",
+    "permission_denied_forever": "Izin lokasi ditolak secara permanen. Aktifkan di pengaturan atau gunakan lokasi manual.",
+    "location_services_disabled": "Layanan lokasi dinonaktifkan.",
+    "open_settings": "Buka pengaturan",
+    "prayers": {
+      "fajr": "Subuh",
+      "dhuhr": "Zuhur",
+      "asr": "Asar",
+      "maghrib": "Maghrib",
+      "isha": "Isya"
+    },
+    "methods": {
+      "egyptian": "Mesir",
+      "mwl": "Liga Muslim Dunia",
+      "karachi": "Karachi",
+      "umm_al_qura": "Umm Al-Qura",
+      "dubai": "Dubai",
+      "qatar": "Qatar",
+      "kuwait": "Kuwait",
+      "moonsighting": "Komite Rukyah",
+      "singapore": "Singapura",
+      "turkey": "Turki",
+      "tehran": "Tehran",
+      "north_america": "Amerika Utara",
+      "other": "Lainnya"
+    },
+    "madhab": {
+      "shafi": "Syafi'i",
+      "hanafi": "Hanafi"
+    }
   },
   "categories": {
     "morning_adhkar": {

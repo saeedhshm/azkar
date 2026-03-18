@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../features/adhkar/data/datasources/adhkar_local_data_source.dart';
 import '../../features/adhkar/data/repositories/adhkar_repository_impl.dart';
@@ -13,6 +14,10 @@ import '../../features/settings/presentation/cubit/theme_cubit.dart';
 import '../../features/tasbeeh/data/repositories/tasbeeh_repository_impl.dart';
 import '../../features/tasbeeh/domain/repositories/tasbeeh_repository.dart';
 import '../../features/tasbeeh/presentation/cubit/tasbeeh_cubit.dart';
+import '../../features/prayer_times/data/services/location_service.dart';
+import '../../features/prayer_times/data/services/prayer_service.dart';
+import '../../features/prayer_times/data/services/prayer_settings_provider.dart';
+import '../../features/prayer_times/presentation/cubit/prayer_times_cubit.dart';
 import '../notifications/notification_service.dart';
 import '../storage/local_storage_service.dart';
 
@@ -26,6 +31,14 @@ Future<void> setupLocator() async {
   final notifications = NotificationService();
   await notifications.init();
   getIt.registerSingleton<NotificationService>(notifications);
+
+  final prefs = await SharedPreferences.getInstance();
+  getIt.registerSingleton<PrayerSettingsProvider>(
+    PrayerSettingsProvider(prefs),
+  );
+
+  getIt.registerLazySingleton<PrayerService>(PrayerService.new);
+  getIt.registerLazySingleton<LocationService>(LocationService.new);
 
   getIt.registerLazySingleton<AdhkarLocalDataSource>(AdhkarLocalDataSource.new);
 
@@ -75,6 +88,15 @@ Future<void> setupLocator() async {
   getIt.registerFactory<NotificationSettingsCubit>(
     () => NotificationSettingsCubit(
       localStorage: getIt<LocalStorageService>(),
+      notificationService: getIt<NotificationService>(),
+    ),
+  );
+
+  getIt.registerFactory<PrayerTimesCubit>(
+    () => PrayerTimesCubit(
+      prayerService: getIt<PrayerService>(),
+      locationService: getIt<LocationService>(),
+      settingsProvider: getIt<PrayerSettingsProvider>(),
       notificationService: getIt<NotificationService>(),
     ),
   );

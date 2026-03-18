@@ -19,6 +19,9 @@
     "reset": "Sıfırla",
     "count": "Adet",
     "completed": "Tamamlandı",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "retry": "Tekrar dene",
     "reset_progress": "İlerlemeyi sıfırla",
     "progress_reset": "İlerleme sıfırlandı."
   },
@@ -51,6 +54,55 @@
       "quran": "Kur'an-ı Kerim"
     },
     "placeholder": "Yakında"
+  },
+  "prayer_times": {
+    "date": "Bugünün tarihi",
+    "next_prayer": "Sonraki namaz",
+    "settings": "Ayarlar",
+    "method": "Hesaplama yöntemi",
+    "madhab_label": "Mezhep",
+    "offsets": "Zaman ayarları",
+    "minutes": "dk",
+    "adhan_sound": "Ezan sesi (Android raw adı)",
+    "adhan_sound_hint": "Varsayılan sesi kullanmak için boş bırakın.",
+    "qibla": "Kıble yönü",
+    "location": "Konum",
+    "change_location": "Değiştir",
+    "use_device_location": "Cihaz konumunu kullan",
+    "manual_location": "Manuel konum",
+    "city_label": "Şehir",
+    "latitude": "Enlem",
+    "longitude": "Boylam",
+    "permission_denied": "Namaz vakitleri için konum izni gerekiyor.",
+    "permission_denied_forever": "Konum izni kalıcı olarak reddedildi. Ayarlardan etkinleştirin veya manuel konum belirleyin.",
+    "location_services_disabled": "Konum servisleri kapalı.",
+    "open_settings": "Ayarları aç",
+    "prayers": {
+      "fajr": "İmsak",
+      "dhuhr": "Öğle",
+      "asr": "İkindi",
+      "maghrib": "Akşam",
+      "isha": "Yatsı"
+    },
+    "methods": {
+      "egyptian": "Mısır",
+      "mwl": "Dünya İslam Birliği",
+      "karachi": "Karaçi",
+      "umm_al_qura": "Ümmü'l Kura",
+      "dubai": "Dubai",
+      "qatar": "Katar",
+      "kuwait": "Kuveyt",
+      "moonsighting": "Hilal Gözlem Komitesi",
+      "singapore": "Singapur",
+      "turkey": "Türkiye",
+      "tehran": "Tahran",
+      "north_america": "Kuzey Amerika",
+      "other": "Diğer"
+    },
+    "madhab": {
+      "shafi": "Şafii",
+      "hanafi": "Hanefi"
+    }
   },
   "categories": {
     "morning_adhkar": {

@@ -28,4 +28,10 @@ class AppConstants {
   static const sleepReminderNotificationId = 1003;
   static const wakingReminderNotificationId = 1004;
   static const fridayReminderNotificationId = 1005;
+
+  static const fajrNotificationId = 2001;
+  static const dhuhrNotificationId = 2002;
+  static const asrNotificationId = 2003;
+  static const maghribNotificationId = 2004;
+  static const ishaNotificationId = 2005;
 }

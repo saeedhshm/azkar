@@ -9,6 +9,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../core/utils/app_categories.dart';
 import '../../domain/repositories/adhkar_repository.dart';
 import '../widgets/category_card.dart';
+import '../../../prayer_times/presentation/pages/prayer_times_tab.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -93,21 +94,17 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             _HomeBackground(isDark: isDark),
             SafeArea(
-              child: TabBarView(
-                children: [
-                  _PlaceholderTab(
-                    title: 'home.tabs.prayer_times'.tr(),
-                    icon: Icons.access_time_rounded,
-                    isDark: isDark,
-                  ),
-                  _AdhkarTab(countsFuture: _countsFuture),
-                  _PlaceholderTab(
-                    title: 'home.tabs.quran'.tr(),
-                    icon: Icons.menu_book_rounded,
-                    isDark: isDark,
-                  ),
-                ],
-              ),
+                child: TabBarView(
+                  children: [
+                    const PrayerTimesTab(),
+                    _AdhkarTab(countsFuture: _countsFuture),
+                    _PlaceholderTab(
+                      title: 'home.tabs.quran'.tr(),
+                      icon: Icons.menu_book_rounded,
+                      isDark: isDark,
+                    ),
+                  ],
+                ),
             ),
           ],
         ),
