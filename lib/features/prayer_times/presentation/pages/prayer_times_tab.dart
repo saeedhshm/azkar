@@ -714,7 +714,6 @@ class _HeroPrayerCard extends StatelessWidget {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Icon(Icons.location_on_outlined, color: accentColor),
@@ -729,9 +728,12 @@ class _HeroPrayerCard extends StatelessWidget {
                           ),
                         ),
                       ),
-                      TextButton(
-                        onPressed: onChangeLocation,
-                        child: Text('prayer_times.change_location'.tr()),
+                      GestureDetector(
+                        onTap: onChangeLocation,
+                        child: Padding(
+                          padding: const EdgeInsets.all(4.0),
+                          child: Text('prayer_times.change_location'.tr()),
+                        ),
                       ),
                     ],
                   ),
