@@ -219,6 +219,8 @@
     },
     "appearance": "Appearance",
     "dark_mode": "Dark mode",
+    "time_format": "Time format",
+    "use_24h": "24-hour format",
     "reminders": "Reminders",
     "enable_notifications": "Enable notifications",
     "morning_reminder": "Morning reminder",

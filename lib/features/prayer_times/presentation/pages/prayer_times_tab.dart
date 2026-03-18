@@ -10,8 +10,10 @@ import 'package:flutter_qiblah/flutter_qiblah.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/utils/time_formatter.dart';
 import '../../data/models/city_entry.dart';
 import '../../data/services/location_service.dart';
+import '../../../settings/presentation/cubit/time_format_cubit.dart';
 import '../cubit/prayer_times_cubit.dart';
 import '../cubit/prayer_times_state.dart';
 
@@ -83,6 +85,8 @@ class _PrayerTimesContent extends StatelessWidget {
             rawLocation == 'GPS'
         ? 'prayer_times.current_location'.tr()
         : rawLocation;
+    final use24h = context.watch<TimeFormatCubit>().state.use24h;
+    final locale = context.locale.toString();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -96,7 +100,11 @@ class _PrayerTimesContent extends StatelessWidget {
           countdown: _formatCountdown(state.countdown),
           time: state.nextPrayerTime == null
               ? null
-              : DateFormat.Hm().format(state.nextPrayerTime!),
+              : TimeFormatter.formatDateTime(
+                  state.nextPrayerTime!,
+                  use24h: use24h,
+                  locale: locale,
+                ),
           locationLabel: locationText,
           onChangeLocation: () => _showLocationSheet(context, state),
         ),
@@ -134,6 +142,8 @@ class _PrayerTimesContent extends StatelessWidget {
                     label: _prayerLabel(Prayer.fajr),
                     accent: accentColor,
                     isNext: state.nextPrayer == Prayer.fajr,
+                    use24h: use24h,
+                    locale: locale,
                   ),
                 ),
                 SizedBox(
@@ -146,6 +156,8 @@ class _PrayerTimesContent extends StatelessWidget {
                     label: _prayerLabel(Prayer.dhuhr),
                     accent: warmGold,
                     isNext: state.nextPrayer == Prayer.dhuhr,
+                    use24h: use24h,
+                    locale: locale,
                   ),
                 ),
                 SizedBox(
@@ -158,6 +170,8 @@ class _PrayerTimesContent extends StatelessWidget {
                     label: _prayerLabel(Prayer.asr),
                     accent: warmGold,
                     isNext: state.nextPrayer == Prayer.asr,
+                    use24h: use24h,
+                    locale: locale,
                   ),
                 ),
                 SizedBox(
@@ -170,6 +184,8 @@ class _PrayerTimesContent extends StatelessWidget {
                     label: _prayerLabel(Prayer.maghrib),
                     accent: warmGold,
                     isNext: state.nextPrayer == Prayer.maghrib,
+                    use24h: use24h,
+                    locale: locale,
                   ),
                 ),
                 SizedBox(
@@ -182,6 +198,8 @@ class _PrayerTimesContent extends StatelessWidget {
                     label: _prayerLabel(Prayer.isha),
                     accent: accentColor,
                     isNext: state.nextPrayer == Prayer.isha,
+                    use24h: use24h,
+                    locale: locale,
                   ),
                 ),
               ],
@@ -574,7 +592,12 @@ class _PrayerCard extends StatelessWidget {
     final accentColor = isDark
         ? const Color(0xFF6EE7E8)
         : const Color(0xFFC58B55);
-    final timeText = DateFormat.Hm().format(item.time);
+    final use24h = context.watch<TimeFormatCubit>().state.use24h;
+    final timeText = TimeFormatter.formatDateTime(
+      item.time,
+      use24h: use24h,
+      locale: context.locale.toString(),
+    );
 
     return _GlassCard(
       isDark: isDark,
@@ -1004,6 +1027,8 @@ class _PrayerTile extends StatelessWidget {
     required this.style,
     required this.label,
     required this.accent,
+    required this.use24h,
+    required this.locale,
     this.isNext = false,
   });
 
@@ -1013,11 +1038,17 @@ class _PrayerTile extends StatelessWidget {
   final _PrayerCardStyle style;
   final String label;
   final Color accent;
+  final bool use24h;
+  final String locale;
   final bool isNext;
 
   @override
   Widget build(BuildContext context) {
-    final timeText = DateFormat.Hm().format(item.time);
+    final timeText = TimeFormatter.formatDateTime(
+      item.time,
+      use24h: use24h,
+      locale: locale,
+    );
     final titleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
       color: isDark ? Colors.white : const Color(0xFF4B321D),
       fontWeight: FontWeight.w700,
@@ -1052,11 +1083,9 @@ class _PrayerTile extends StatelessWidget {
           //   alignment: Alignment.topRight,
           //   child: Icon(style.icon, color: style.iconColor, size: 35),
           // ),
-
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -1070,28 +1099,27 @@ class _PrayerTile extends StatelessWidget {
               Column(
                 children: [
                   Icon(style.icon, color: style.iconColor, size: 35),
-                  SizedBox(height: 8,),
+                  SizedBox(height: 8),
                   if (isNext)
-
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: accent.withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    // child: Icon(Icons.notifications_active, color: style.iconColor, size: 15),
-                    child: Text(
-                      'common.next'.tr(),
-                      style: TextStyle(
-                        color: isDark ? Colors.black : Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12,
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accent.withValues(alpha: 0.8),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      // child: Icon(Icons.notifications_active, color: style.iconColor, size: 15),
+                      child: Text(
+                        'common.next'.tr(),
+                        style: TextStyle(
+                          color: isDark ? Colors.black : Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ],

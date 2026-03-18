@@ -219,6 +219,8 @@
     },
     "appearance": "المظهر",
     "dark_mode": "الوضع الداكن",
+    "time_format": "تنسيق الوقت",
+    "use_24h": "نظام 24 ساعة",
     "reminders": "التذكيرات",
     "enable_notifications": "تفعيل الإشعارات",
     "morning_reminder": "تذكير الصباح",

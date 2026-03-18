@@ -6,14 +6,22 @@ import 'core/di/service_locator.dart';
 import 'core/routing/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'features/settings/presentation/cubit/theme_cubit.dart';
+import 'features/settings/presentation/cubit/time_format_cubit.dart';
 
 class AdhkarApp extends StatelessWidget {
   const AdhkarApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ThemeCubit>(
-      create: (_) => getIt<ThemeCubit>()..loadTheme(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ThemeCubit>(
+          create: (_) => getIt<ThemeCubit>()..loadTheme(),
+        ),
+        BlocProvider<TimeFormatCubit>(
+          create: (_) => getIt<TimeFormatCubit>()..load(),
+        ),
+      ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {
           return MaterialApp.router(

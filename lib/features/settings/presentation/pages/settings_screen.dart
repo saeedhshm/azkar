@@ -7,9 +7,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/storage/local_storage_service.dart';
+import '../../../../core/utils/time_formatter.dart';
 import '../cubit/notification_settings_cubit.dart';
 import '../cubit/notification_settings_state.dart';
 import '../cubit/theme_cubit.dart';
+import '../cubit/time_format_cubit.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -68,6 +70,10 @@ class SettingsScreen extends StatelessWidget {
                     builder: (context, state) {
                       final isDarkMode =
                           context.watch<ThemeCubit>().state == ThemeMode.dark;
+                      final use24h = context
+                          .watch<TimeFormatCubit>()
+                          .state
+                          .use24h;
                       final currentLanguage = context.locale.languageCode;
 
                       return ListView(
@@ -130,6 +136,17 @@ class SettingsScreen extends StatelessWidget {
                                     );
                                   },
                                 ),
+                                const SizedBox(height: 8),
+                                _MetallicSwitchTile(
+                                  isDark: isDarkMode,
+                                  title: Text('settings.use_24h'.tr()),
+                                  value: use24h,
+                                  onChanged: (value) {
+                                    context.read<TimeFormatCubit>().setUse24h(
+                                      value,
+                                    );
+                                  },
+                                ),
                               ],
                             ),
                           ),
@@ -159,7 +176,13 @@ class SettingsScreen extends StatelessWidget {
                                 _MetallicListTile(
                                   isDark: isDarkMode,
                                   title: Text('settings.morning_reminder'.tr()),
-                                  subtitle: Text(state.morning.format(context)),
+                                  subtitle: Text(
+                                    TimeFormatter.formatTimeOfDay(
+                                      state.morning,
+                                      use24h: use24h,
+                                      locale: context.locale.toString(),
+                                    ),
+                                  ),
                                   trailing: Icon(
                                     Icons.schedule,
                                     color: isDarkMode
@@ -179,7 +202,13 @@ class SettingsScreen extends StatelessWidget {
                                 _MetallicListTile(
                                   isDark: isDarkMode,
                                   title: Text('settings.evening_reminder'.tr()),
-                                  subtitle: Text(state.evening.format(context)),
+                                  subtitle: Text(
+                                    TimeFormatter.formatTimeOfDay(
+                                      state.evening,
+                                      use24h: use24h,
+                                      locale: context.locale.toString(),
+                                    ),
+                                  ),
                                   trailing: Icon(
                                     Icons.schedule,
                                     color: isDarkMode
@@ -199,7 +228,13 @@ class SettingsScreen extends StatelessWidget {
                                 _MetallicListTile(
                                   isDark: isDarkMode,
                                   title: Text('settings.sleep_reminder'.tr()),
-                                  subtitle: Text(state.sleep.format(context)),
+                                  subtitle: Text(
+                                    TimeFormatter.formatTimeOfDay(
+                                      state.sleep,
+                                      use24h: use24h,
+                                      locale: context.locale.toString(),
+                                    ),
+                                  ),
                                   trailing: Icon(
                                     Icons.schedule,
                                     color: isDarkMode
@@ -219,7 +254,13 @@ class SettingsScreen extends StatelessWidget {
                                 _MetallicListTile(
                                   isDark: isDarkMode,
                                   title: Text('settings.waking_reminder'.tr()),
-                                  subtitle: Text(state.waking.format(context)),
+                                  subtitle: Text(
+                                    TimeFormatter.formatTimeOfDay(
+                                      state.waking,
+                                      use24h: use24h,
+                                      locale: context.locale.toString(),
+                                    ),
+                                  ),
                                   trailing: Icon(
                                     Icons.schedule,
                                     color: isDarkMode
@@ -239,7 +280,13 @@ class SettingsScreen extends StatelessWidget {
                                 _MetallicListTile(
                                   isDark: isDarkMode,
                                   title: Text('settings.friday_reminder'.tr()),
-                                  subtitle: Text(state.friday.format(context)),
+                                  subtitle: Text(
+                                    TimeFormatter.formatTimeOfDay(
+                                      state.friday,
+                                      use24h: use24h,
+                                      locale: context.locale.toString(),
+                                    ),
+                                  ),
                                   trailing: Icon(
                                     Icons.schedule,
                                     color: isDarkMode

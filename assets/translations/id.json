@@ -219,6 +219,8 @@
     },
     "appearance": "Tampilan",
     "dark_mode": "Mode gelap",
+    "time_format": "Format waktu",
+    "use_24h": "Format 24 jam",
     "reminders": "Pengingat",
     "enable_notifications": "Aktifkan notifikasi",
     "morning_reminder": "Pengingat pagi",

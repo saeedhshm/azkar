@@ -219,6 +219,8 @@
     },
     "appearance": "Görünüm",
     "dark_mode": "Karanlık mod",
+    "time_format": "Saat biçimi",
+    "use_24h": "24 saat biçimi",
     "reminders": "Hatırlatmalar",
     "enable_notifications": "Bildirimleri etkinleştir",
     "morning_reminder": "Sabah hatırlatması",

@@ -16,6 +16,7 @@ class AppConstants {
   static const sleepReminderKey = 'sleep_reminder';
   static const wakingReminderKey = 'waking_reminder';
   static const fridayReminderKey = 'friday_reminder';
+  static const timeFormatKey = 'time_format_24h';
 
   static const defaultMorningReminder = '06:00';
   static const defaultEveningReminder = '18:00';

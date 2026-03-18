@@ -83,8 +83,7 @@ class LocalStorageService {
   }
 
   String getThemeMode() {
-    return _box.get(AppConstants.themeModeKey, defaultValue: 'dark')
-        as String;
+    return _box.get(AppConstants.themeModeKey, defaultValue: 'dark') as String;
   }
 
   Future<void> saveThemeMode(String value) async {
@@ -170,6 +169,14 @@ class LocalStorageService {
 
   Future<void> saveFridayReminderTime(String time) async {
     await _box.put(AppConstants.fridayReminderKey, time);
+  }
+
+  bool getUse24HourFormat() {
+    return _box.get(AppConstants.timeFormatKey, defaultValue: false) as bool;
+  }
+
+  Future<void> saveUse24HourFormat(bool value) async {
+    await _box.put(AppConstants.timeFormatKey, value);
   }
 
   Map<String, dynamic>? getReaderProgress(String categoryKey) {

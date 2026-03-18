@@ -11,6 +11,7 @@ import '../../features/adhkar/presentation/cubit/favorites_cubit.dart';
 import '../../features/adhkar/presentation/cubit/reader_cubit.dart';
 import '../../features/settings/presentation/cubit/notification_settings_cubit.dart';
 import '../../features/settings/presentation/cubit/theme_cubit.dart';
+import '../../features/settings/presentation/cubit/time_format_cubit.dart';
 import '../../features/tasbeeh/data/repositories/tasbeeh_repository_impl.dart';
 import '../../features/tasbeeh/domain/repositories/tasbeeh_repository.dart';
 import '../../features/tasbeeh/presentation/cubit/tasbeeh_cubit.dart';
@@ -69,6 +70,10 @@ Future<void> setupLocator() async {
 
   getIt.registerFactory<ThemeCubit>(
     () => ThemeCubit(getIt<LocalStorageService>()),
+  );
+
+  getIt.registerFactory<TimeFormatCubit>(
+    () => TimeFormatCubit(getIt<LocalStorageService>()),
   );
 
   getIt.registerFactory<AdhkarCubit>(
