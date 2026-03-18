@@ -133,6 +133,7 @@ class _PrayerTimesContent extends StatelessWidget {
                     style: nightCard,
                     label: _prayerLabel(Prayer.fajr),
                     accent: accentColor,
+                    isNext: state.nextPrayer == Prayer.fajr,
                   ),
                 ),
                 SizedBox(
@@ -156,6 +157,7 @@ class _PrayerTimesContent extends StatelessWidget {
                     style: sunCard,
                     label: _prayerLabel(Prayer.asr),
                     accent: warmGold,
+                    isNext: state.nextPrayer == Prayer.asr,
                   ),
                 ),
                 SizedBox(
@@ -167,6 +169,7 @@ class _PrayerTimesContent extends StatelessWidget {
                     style: sunsetCard,
                     label: _prayerLabel(Prayer.maghrib),
                     accent: warmGold,
+                    isNext: state.nextPrayer == Prayer.maghrib,
                   ),
                 ),
                 SizedBox(
@@ -178,6 +181,7 @@ class _PrayerTimesContent extends StatelessWidget {
                     style: nightCard,
                     label: _prayerLabel(Prayer.isha),
                     accent: accentColor,
+                    isNext: state.nextPrayer == Prayer.isha,
                   ),
                 ),
               ],
@@ -1044,39 +1048,52 @@ class _PrayerTile extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          Align(
-            alignment: Alignment.topRight,
-            child: Icon(style.icon, color: style.iconColor, size: 35),
-          ),
-          if (isNext)
-            Align(
-              alignment: Alignment.topRight,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  'common.next'.tr(),
-                  style: TextStyle(
-                    color: isDark ? Colors.black : Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-            ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          // Align(
+          //   alignment: Alignment.topRight,
+          //   child: Icon(style.icon, color: style.iconColor, size: 35),
+          // ),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 6),
-              Text(label, style: titleStyle, textAlign: TextAlign.center),
-              const SizedBox(height: 6),
-              Text(timeText, style: timeStyle, textAlign: TextAlign.center),
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 6),
+                  Text(label, style: titleStyle, textAlign: TextAlign.center),
+                  const SizedBox(height: 6),
+                  Text(timeText, style: timeStyle, textAlign: TextAlign.center),
+                ],
+              ),
+              Spacer(),
+              Column(
+                children: [
+                  Icon(style.icon, color: style.iconColor, size: 35),
+                  SizedBox(height: 8,),
+                  if (isNext)
+
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: accent.withValues(alpha: 0.8),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    // child: Icon(Icons.notifications_active, color: style.iconColor, size: 15),
+                    child: Text(
+                      'common.next'.tr(),
+                      style: TextStyle(
+                        color: isDark ? Colors.black : Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ],
           ),
         ],
