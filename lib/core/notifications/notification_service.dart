@@ -204,11 +204,9 @@ class NotificationService {
     required PrayerTimes prayerTimes,
     String? soundName,
   }) async {
-    await _plugin.cancel(AppConstants.fajrNotificationId);
-    await _plugin.cancel(AppConstants.dhuhrNotificationId);
-    await _plugin.cancel(AppConstants.asrNotificationId);
-    await _plugin.cancel(AppConstants.maghribNotificationId);
-    await _plugin.cancel(AppConstants.ishaNotificationId);
+    // We intentionally do not call _plugin.cancel() here because cancelling a scheduled
+    // notification also clears it if it is currently active/visible in the status bar.
+    // zonedSchedule will automatically overwrite the pending alarm with the new time.
 
     await _schedulePrayerNotification(
       id: AppConstants.fajrNotificationId,
