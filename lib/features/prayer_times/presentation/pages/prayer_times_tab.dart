@@ -856,7 +856,7 @@ class _PrayerTile extends StatelessWidget {
       child: Stack(
         children: [
           Align(
-            alignment: Alignment.topLeft,
+            alignment: Alignment.topRight,
             child: Icon(style.icon, color: style.iconColor, size: 20),
           ),
           if (isNext)
