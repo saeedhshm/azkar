@@ -14,14 +14,16 @@ class PrayerSettingsProvider {
   static const _manualLatKey = 'prayer_manual_lat';
   static const _manualLngKey = 'prayer_manual_lng';
   static const _manualLabelKey = 'prayer_manual_label';
+  static const _cachedLatKey = 'prayer_cached_lat';
+  static const _cachedLngKey = 'prayer_cached_lng';
+  static const _cachedLabelKey = 'prayer_cached_label';
   static const _customSoundKey = 'prayer_custom_sound';
   static const _offsetPrefix = 'prayer_offset_';
 
   PrayerSettings load() {
     final method = _methodFromKey(_prefs.getString(_methodKey));
     final madhab = _madhabFromKey(_prefs.getString(_madhabKey));
-    final useDeviceLocation =
-        _prefs.getBool(_useDeviceLocationKey) ?? true;
+    final useDeviceLocation = _prefs.getBool(_useDeviceLocationKey) ?? true;
     final manualLat = _prefs.getDouble(_manualLatKey);
     final manualLng = _prefs.getDouble(_manualLngKey);
     final manualLabel = _prefs.getString(_manualLabelKey);
@@ -85,6 +87,30 @@ class PrayerSettingsProvider {
     await _prefs.setDouble(_manualLngKey, longitude);
     await _prefs.setString(_manualLabelKey, label);
     await _prefs.setBool(_useDeviceLocationKey, false);
+  }
+
+  CachedLocation? loadCachedLocation() {
+    final latitude = _prefs.getDouble(_cachedLatKey);
+    final longitude = _prefs.getDouble(_cachedLngKey);
+    final label = _prefs.getString(_cachedLabelKey);
+    if (latitude == null || longitude == null || label == null) {
+      return null;
+    }
+    return CachedLocation(
+      latitude: latitude,
+      longitude: longitude,
+      label: label,
+    );
+  }
+
+  Future<void> saveCachedLocation({
+    required double latitude,
+    required double longitude,
+    required String label,
+  }) async {
+    await _prefs.setDouble(_cachedLatKey, latitude);
+    await _prefs.setDouble(_cachedLngKey, longitude);
+    await _prefs.setString(_cachedLabelKey, label);
   }
 
   Future<void> setUseDeviceLocation(bool useDeviceLocation) async {
@@ -168,4 +194,16 @@ class PrayerSettingsProvider {
       Prayer.none => 'none',
     };
   }
+}
+
+class CachedLocation {
+  const CachedLocation({
+    required this.latitude,
+    required this.longitude,
+    required this.label,
+  });
+
+  final double latitude;
+  final double longitude;
+  final String label;
 }

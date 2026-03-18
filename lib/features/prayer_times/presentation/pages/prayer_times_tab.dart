@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
@@ -9,6 +10,7 @@ import 'package:flutter_qiblah/flutter_qiblah.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../data/models/city_entry.dart';
 import '../../data/services/location_service.dart';
 import '../cubit/prayer_times_cubit.dart';
 import '../cubit/prayer_times_state.dart';
@@ -35,7 +37,9 @@ class PrayerTimesTab extends StatelessWidget {
 
           if (state.status == PrayerTimesStatus.failure) {
             return Center(
-              child: Text(state.errorMessage ?? 'common.failed_load_adhkar'.tr()),
+              child: Text(
+                state.errorMessage ?? 'common.failed_load_adhkar'.tr(),
+              ),
             );
           }
 
@@ -54,8 +58,9 @@ class _PrayerTimesContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accentColor =
-        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
+    final accentColor = isDark
+        ? const Color(0xFF6EE7E8)
+        : const Color(0xFFD4A574);
     final warmGold = isDark ? const Color(0xFFF2C777) : const Color(0xFFC58B55);
 
     final times = state.prayerTimes;
@@ -73,9 +78,11 @@ class _PrayerTimesContent extends StatelessWidget {
 
     final rawLocation = state.locationLabel;
     final locationText =
-        rawLocation == null || rawLocation.trim().isEmpty || rawLocation == 'GPS'
-            ? 'prayer_times.current_location'.tr()
-            : rawLocation;
+        rawLocation == null ||
+            rawLocation.trim().isEmpty ||
+            rawLocation == 'GPS'
+        ? 'prayer_times.current_location'.tr()
+        : rawLocation;
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -187,10 +194,9 @@ class _PrayerTimesContent extends StatelessWidget {
                 children: [
                   Text(
                     'prayer_times.settings'.tr(),
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(fontWeight: FontWeight.w700),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const Spacer(),
                   IconButton(
@@ -291,10 +297,9 @@ class _PrayerTimesContent extends StatelessWidget {
                 children: [
                   Text(
                     'prayer_times.settings'.tr(),
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.w700),
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: 12),
                   _DropdownField<CalculationMethod>(
@@ -392,14 +397,14 @@ class _PrayerTimesContent extends StatelessWidget {
                     child: ElevatedButton(
                       onPressed: () async {
                         await cubit.updateSettings(
-                              method: method,
-                              madhab: madhab,
-                              offsets: offsets,
-                              customSound: soundController.text.trim().isEmpty
-                                  ? null
-                                  : soundController.text.trim(),
-                              setCustomSound: true,
-                            );
+                          method: method,
+                          madhab: madhab,
+                          offsets: offsets,
+                          customSound: soundController.text.trim().isEmpty
+                              ? null
+                              : soundController.text.trim(),
+                          setCustomSound: true,
+                        );
                         if (context.mounted) {
                           Navigator.pop(context);
                         }
@@ -422,8 +427,9 @@ class _PrayerTimesContent extends StatelessWidget {
     PrayerTimesState state,
   ) async {
     final cubit = context.read<PrayerTimesCubit>();
-    final labelController =
-        TextEditingController(text: state.locationLabel ?? '');
+    final labelController = TextEditingController(
+      text: state.locationLabel ?? '',
+    );
     final latController = TextEditingController(
       text: state.latitude?.toStringAsFixed(6) ?? '',
     );
@@ -442,10 +448,9 @@ class _PrayerTimesContent extends StatelessWidget {
             children: [
               Text(
                 'prayer_times.location'.tr(),
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 12),
               _LocationActionButton(
@@ -453,6 +458,25 @@ class _PrayerTimesContent extends StatelessWidget {
                 icon: Icons.my_location,
                 onTap: () async {
                   await cubit.useDeviceLocation();
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              _LocationActionButton(
+                label: 'prayer_times.select_city'.tr(),
+                icon: Icons.location_city,
+                onTap: () async {
+                  final selection = await _showCitySearchSheet(context, cubit);
+                  if (selection == null) {
+                    return;
+                  }
+                  await cubit.setManualLocation(
+                    latitude: selection.latitude,
+                    longitude: selection.longitude,
+                    label: selection.displayName,
+                  );
                   if (context.mounted) {
                     Navigator.pop(context);
                   }
@@ -510,10 +534,10 @@ class _PrayerTimesContent extends StatelessWidget {
                         : labelController.text.trim();
 
                     await context.read<PrayerTimesCubit>().setManualLocation(
-                          latitude: lat,
-                          longitude: lng,
-                          label: label,
-                        );
+                      latitude: lat,
+                      longitude: lng,
+                      label: label,
+                    );
                     if (context.mounted) {
                       Navigator.pop(context);
                     }
@@ -543,8 +567,9 @@ class _PrayerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accentColor =
-        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFC58B55);
+    final accentColor = isDark
+        ? const Color(0xFF6EE7E8)
+        : const Color(0xFFC58B55);
     final timeText = DateFormat.Hm().format(item.time);
 
     return _GlassCard(
@@ -560,16 +585,16 @@ class _PrayerCard extends StatelessWidget {
             child: Text(
               _label(context),
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
-                  ),
+                fontWeight: isCurrent ? FontWeight.w700 : FontWeight.w500,
+              ),
             ),
           ),
           Text(
             timeText,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: isCurrent ? accentColor : null,
-                  fontWeight: FontWeight.w700,
-                ),
+              color: isCurrent ? accentColor : null,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -647,9 +672,7 @@ class _HeroPrayerCard extends StatelessWidget {
         child: Stack(
           children: [
             Positioned.fill(
-              child: CustomPaint(
-                painter: _StarFieldPainter(isDark: isDark),
-              ),
+              child: CustomPaint(painter: _StarFieldPainter(isDark: isDark)),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -662,8 +685,9 @@ class _HeroPrayerCard extends StatelessWidget {
                       Text(
                         dateLine,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color:
-                              isDark ? Colors.white60 : const Color(0xFF6A4B2E),
+                          color: isDark
+                              ? Colors.white60
+                              : const Color(0xFF6A4B2E),
                         ),
                       ),
                       if (hijriLine != null) ...[
@@ -743,6 +767,169 @@ class _HeroPrayerCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+Future<CityEntry?> _showCitySearchSheet(
+  BuildContext context,
+  PrayerTimesCubit cubit,
+) {
+  return showModalBottomSheet<CityEntry>(
+    context: context,
+    backgroundColor: Colors.transparent,
+    isScrollControlled: true,
+    builder: (context) {
+      return _BottomSheetContainer(child: _CitySearchSheet(cubit: cubit));
+    },
+  );
+}
+
+class _CitySearchSheet extends StatefulWidget {
+  const _CitySearchSheet({required this.cubit});
+
+  final PrayerTimesCubit cubit;
+
+  @override
+  State<_CitySearchSheet> createState() => _CitySearchSheetState();
+}
+
+class _CitySearchSheetState extends State<_CitySearchSheet> {
+  final _controller = TextEditingController();
+  Timer? _debounce;
+  bool _loading = true;
+  bool _available = false;
+  bool _searching = false;
+  List<CityEntry> _results = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _prepare();
+    _controller.addListener(_onQueryChanged);
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _prepare() async {
+    setState(() => _loading = true);
+    final available = await widget.cubit.ensureCityDatabaseAvailable();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _available = available;
+      _loading = false;
+    });
+  }
+
+  void _onQueryChanged() {
+    final query = _controller.text.trim();
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () async {
+      if (!mounted) {
+        return;
+      }
+      if (query.length < 2) {
+        setState(() {
+          _results = [];
+          _searching = false;
+        });
+        return;
+      }
+
+      setState(() => _searching = true);
+      final results = await widget.cubit.searchCities(query);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _results = results;
+        _searching = false;
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_loading) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: 12),
+          const CircularProgressIndicator(),
+          const SizedBox(height: 12),
+          Text('prayer_times.downloading_cities'.tr()),
+        ],
+      );
+    }
+
+    if (!_available) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'prayer_times.city_unavailable_offline'.tr(),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          ElevatedButton(onPressed: _prepare, child: Text('common.retry'.tr())),
+        ],
+      );
+    }
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'prayer_times.select_city'.tr(),
+          style: Theme.of(
+            context,
+          ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _controller,
+          decoration: InputDecoration(
+            hintText: 'prayer_times.search_city_hint'.tr(),
+            prefixIcon: const Icon(Icons.search),
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (_searching)
+          const Padding(
+            padding: EdgeInsets.all(12),
+            child: CircularProgressIndicator(),
+          )
+        else if (_results.isEmpty && _controller.text.trim().length >= 2)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text('prayer_times.no_city_results'.tr()),
+          )
+        else if (_results.isNotEmpty)
+          SizedBox(
+            height: 320,
+            child: ListView.separated(
+              itemCount: _results.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, index) {
+                final city = _results[index];
+                return ListTile(
+                  title: Text(city.displayName),
+                  subtitle: Text(
+                    '${city.latitude.toStringAsFixed(2)}, ${city.longitude.toStringAsFixed(2)}',
+                  ),
+                  onTap: () => Navigator.pop(context, city),
+                );
+              },
+            ),
+          ),
+      ],
     );
   }
 }
@@ -828,13 +1015,13 @@ class _PrayerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final timeText = DateFormat.Hm().format(item.time);
     final titleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
-          color: isDark ? Colors.white : const Color(0xFF4B321D),
-          fontWeight: FontWeight.w700,
-        );
+      color: isDark ? Colors.white : const Color(0xFF4B321D),
+      fontWeight: FontWeight.w700,
+    );
     final timeStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
-          color: isDark ? Colors.white70 : const Color(0xFF4B321D),
-          fontWeight: FontWeight.w600,
-        );
+      color: isDark ? Colors.white70 : const Color(0xFF4B321D),
+      fontWeight: FontWeight.w600,
+    );
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -865,8 +1052,10 @@ class _PrayerTile extends StatelessWidget {
             Align(
               alignment: Alignment.topRight,
               child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: accent.withValues(alpha: 0.8),
                   borderRadius: BorderRadius.circular(12),
@@ -911,8 +1100,9 @@ class _StarFieldPainter extends CustomPainter {
       final radius = random.nextDouble() * 1.6 + 0.4;
       final opacity = (random.nextDouble() * 0.5) + 0.2;
       final paint = Paint()
-        ..color = (isDark ? Colors.white : const Color(0xFFD4A574))
-            .withValues(alpha: opacity);
+        ..color = (isDark ? Colors.white : const Color(0xFFD4A574)).withValues(
+          alpha: opacity,
+        );
       canvas.drawCircle(Offset(dx, dy), radius, paint);
     }
   }
@@ -938,10 +1128,7 @@ class _PrayerBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.w600,
-        ),
+        style: TextStyle(color: color, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -954,8 +1141,9 @@ class _QiblaCompass extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accentColor =
-        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFC58B55);
+    final accentColor = isDark
+        ? const Color(0xFF6EE7E8)
+        : const Color(0xFFC58B55);
     return SizedBox(
       height: 180,
       child: StreamBuilder<QiblahDirection>(
@@ -992,11 +1180,7 @@ class _QiblaCompass extends StatelessWidget {
                 ),
                 Transform.rotate(
                   angle: angle,
-                  child: Icon(
-                    Icons.navigation,
-                    size: 60,
-                    color: accentColor,
-                  ),
+                  child: Icon(Icons.navigation, size: 60, color: accentColor),
                 ),
                 Positioned(
                   bottom: 14,
@@ -1036,10 +1220,9 @@ class _QiblaSection extends StatelessWidget {
             children: [
               Text(
                 'prayer_times.qibla'.tr(),
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w700),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 12),
               _QiblaCompass(isDark: isDark),
@@ -1059,8 +1242,9 @@ class _PermissionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accentColor =
-        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFC58B55);
+    final accentColor = isDark
+        ? const Color(0xFF6EE7E8)
+        : const Color(0xFFC58B55);
 
     final message = switch (state.status) {
       PrayerTimesStatus.permissionDeniedForever =>
@@ -1096,8 +1280,10 @@ class _PermissionCard extends StatelessWidget {
                     child: Text('common.retry'.tr()),
                   ),
                   OutlinedButton(
-                    onPressed: () =>
-                        _showManualDialog(context, context.read<PrayerTimesCubit>()),
+                    onPressed: () => _showManualDialog(
+                      context,
+                      context.read<PrayerTimesCubit>(),
+                    ),
                     child: Text('prayer_times.manual_location'.tr()),
                   ),
                   TextButton(
@@ -1183,10 +1369,10 @@ class _PermissionCard extends StatelessWidget {
                   ? '${lat.toStringAsFixed(2)}, ${lng.toStringAsFixed(2)}'
                   : labelController.text.trim();
               await cubit.setManualLocation(
-                    latitude: lat,
-                    longitude: lng,
-                    label: label,
-                  );
+                latitude: lat,
+                longitude: lng,
+                label: label,
+              );
               if (context.mounted) {
                 Navigator.pop(context);
               }
@@ -1214,8 +1400,9 @@ class _OffsetRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accentColor =
-        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFC58B55);
+    final accentColor = isDark
+        ? const Color(0xFF6EE7E8)
+        : const Color(0xFFC58B55);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),

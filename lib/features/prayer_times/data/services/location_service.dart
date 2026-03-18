@@ -1,3 +1,4 @@
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 class LocationService {
@@ -17,7 +18,9 @@ class LocationService {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      return const LocationResult(status: LocationStatus.permissionDeniedForever);
+      return const LocationResult(
+        status: LocationStatus.permissionDeniedForever,
+      );
     }
 
     final position = await Geolocator.getCurrentPosition(
@@ -34,6 +37,47 @@ class LocationService {
   Future<void> openLocationSettings() => Geolocator.openLocationSettings();
 
   Future<void> openAppSettings() => Geolocator.openAppSettings();
+
+  Future<String?> reverseGeocode({
+    required double latitude,
+    required double longitude,
+  }) async {
+    try {
+      final placemarks = await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isEmpty) {
+        return null;
+      }
+
+      final place = placemarks.first;
+      final cityCandidates = [
+        place.locality,
+        place.subAdministrativeArea,
+        place.administrativeArea,
+      ];
+
+      String? city;
+      for (final candidate in cityCandidates) {
+        if (candidate != null && candidate.trim().isNotEmpty) {
+          city = candidate.trim();
+          break;
+        }
+      }
+
+      final country = place.country?.trim();
+      final parts = [
+        if (city != null && city.isNotEmpty) city,
+        if (country != null && country.isNotEmpty) country,
+      ];
+
+      if (parts.isEmpty) {
+        return null;
+      }
+
+      return parts.join(', ');
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 enum LocationStatus {
@@ -44,11 +88,7 @@ enum LocationStatus {
 }
 
 class LocationResult {
-  const LocationResult({
-    required this.status,
-    this.latitude,
-    this.longitude,
-  });
+  const LocationResult({required this.status, this.latitude, this.longitude});
 
   final LocationStatus status;
   final double? latitude;

@@ -17,6 +17,8 @@ import '../../features/tasbeeh/presentation/cubit/tasbeeh_cubit.dart';
 import '../../features/prayer_times/data/services/location_service.dart';
 import '../../features/prayer_times/data/services/prayer_service.dart';
 import '../../features/prayer_times/data/services/prayer_settings_provider.dart';
+import '../../features/prayer_times/data/services/network_service.dart';
+import '../../features/prayer_times/data/services/city_database_service.dart';
 import '../../features/prayer_times/presentation/cubit/prayer_times_cubit.dart';
 import '../notifications/notification_service.dart';
 import '../storage/local_storage_service.dart';
@@ -39,6 +41,10 @@ Future<void> setupLocator() async {
 
   getIt.registerLazySingleton<PrayerService>(PrayerService.new);
   getIt.registerLazySingleton<LocationService>(LocationService.new);
+  getIt.registerLazySingleton<NetworkService>(NetworkService.new);
+  getIt.registerLazySingleton<CityDatabaseService>(
+    () => CityDatabaseService(getIt<NetworkService>()),
+  );
 
   getIt.registerLazySingleton<AdhkarLocalDataSource>(AdhkarLocalDataSource.new);
 
@@ -97,6 +103,8 @@ Future<void> setupLocator() async {
       prayerService: getIt<PrayerService>(),
       locationService: getIt<LocationService>(),
       settingsProvider: getIt<PrayerSettingsProvider>(),
+      networkService: getIt<NetworkService>(),
+      cityDatabaseService: getIt<CityDatabaseService>(),
       notificationService: getIt<NotificationService>(),
     ),
   );

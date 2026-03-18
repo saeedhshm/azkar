@@ -7,7 +7,10 @@ import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/notifications/notification_service.dart';
+import '../../data/models/city_entry.dart';
+import '../../data/services/city_database_service.dart';
 import '../../data/services/location_service.dart';
+import '../../data/services/network_service.dart';
 import '../../data/services/prayer_service.dart';
 import '../../data/services/prayer_settings_provider.dart';
 import '../../domain/entities/prayer_settings.dart';
@@ -18,16 +21,22 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     required PrayerService prayerService,
     required LocationService locationService,
     required PrayerSettingsProvider settingsProvider,
+    required NetworkService networkService,
+    required CityDatabaseService cityDatabaseService,
     required NotificationService notificationService,
-  })  : _prayerService = prayerService,
-        _locationService = locationService,
-        _settingsProvider = settingsProvider,
-        _notificationService = notificationService,
-        super(PrayerTimesState(settings: PrayerSettings.defaults()));
+  }) : _prayerService = prayerService,
+       _locationService = locationService,
+       _settingsProvider = settingsProvider,
+       _networkService = networkService,
+       _cityDatabaseService = cityDatabaseService,
+       _notificationService = notificationService,
+       super(PrayerTimesState(settings: PrayerSettings.defaults()));
 
   final PrayerService _prayerService;
   final LocationService _locationService;
   final PrayerSettingsProvider _settingsProvider;
+  final NetworkService _networkService;
+  final CityDatabaseService _cityDatabaseService;
   final NotificationService _notificationService;
 
   Timer? _ticker;
@@ -36,6 +45,11 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     emit(state.copyWith(status: PrayerTimesStatus.loading));
 
     final settings = _settingsProvider.load();
+    final cachedLocation = _settingsProvider.loadCachedLocation();
+    final isOnline = await _networkService.isOnline();
+    if (isOnline) {
+      unawaited(_cityDatabaseService.ensureDownloaded());
+    }
 
     if (settings.useDeviceLocation) {
       final result = await _locationService.getCurrentLocation();
@@ -48,6 +62,15 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
             latitude: settings.manualLatitude!,
             longitude: settings.manualLongitude!,
             locationLabel: settings.manualLabel,
+          );
+          return;
+        }
+        if (cachedLocation != null) {
+          await _loadForCoordinates(
+            settings: settings,
+            latitude: cachedLocation.latitude,
+            longitude: cachedLocation.longitude,
+            locationLabel: cachedLocation.label,
           );
           return;
         }
@@ -71,6 +94,15 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
           );
           return;
         }
+        if (cachedLocation != null) {
+          await _loadForCoordinates(
+            settings: settings,
+            latitude: cachedLocation.latitude,
+            longitude: cachedLocation.longitude,
+            locationLabel: cachedLocation.label,
+          );
+          return;
+        }
         emit(
           state.copyWith(
             status: PrayerTimesStatus.permissionDeniedForever,
@@ -88,6 +120,15 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
             latitude: settings.manualLatitude!,
             longitude: settings.manualLongitude!,
             locationLabel: settings.manualLabel,
+          );
+          return;
+        }
+        if (cachedLocation != null) {
+          await _loadForCoordinates(
+            settings: settings,
+            latitude: cachedLocation.latitude,
+            longitude: cachedLocation.longitude,
+            locationLabel: cachedLocation.label,
           );
           return;
         }
@@ -114,11 +155,28 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
         return;
       }
 
+      String? label;
+      if (isOnline) {
+        label = await _locationService.reverseGeocode(
+          latitude: latitude,
+          longitude: longitude,
+        );
+        if (label != null && label.trim().isNotEmpty) {
+          await _settingsProvider.saveCachedLocation(
+            latitude: latitude,
+            longitude: longitude,
+            label: label,
+          );
+        }
+      }
+
+      label ??= cachedLocation?.label;
+
       await _loadForCoordinates(
         settings: settings,
         latitude: latitude,
         longitude: longitude,
-        locationLabel: settings.manualLabel ?? 'GPS',
+        locationLabel: label ?? settings.manualLabel ?? 'GPS',
       );
     } else if (settings.manualLatitude != null &&
         settings.manualLongitude != null) {
@@ -127,6 +185,13 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
         latitude: settings.manualLatitude!,
         longitude: settings.manualLongitude!,
         locationLabel: settings.manualLabel,
+      );
+    } else if (cachedLocation != null) {
+      await _loadForCoordinates(
+        settings: settings,
+        latitude: cachedLocation.latitude,
+        longitude: cachedLocation.longitude,
+        locationLabel: cachedLocation.label,
       );
     } else {
       emit(
@@ -150,11 +215,11 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     );
 
     final settings = _settingsProvider.load().copyWith(
-          useDeviceLocation: false,
-          manualLatitude: latitude,
-          manualLongitude: longitude,
-          manualLabel: label,
-        );
+      useDeviceLocation: false,
+      manualLatitude: latitude,
+      manualLongitude: longitude,
+      manualLabel: label,
+    );
 
     await _settingsProvider.save(settings);
 
@@ -165,6 +230,24 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
       locationLabel: label,
     );
   }
+
+  Future<bool> ensureCityDatabaseAvailable() async {
+    if (await _cityDatabaseService.isDownloaded()) {
+      return true;
+    }
+    final online = await _networkService.isOnline();
+    if (!online) {
+      return false;
+    }
+    await _cityDatabaseService.ensureDownloaded();
+    return _cityDatabaseService.isDownloaded();
+  }
+
+  Future<List<CityEntry>> searchCities(String query) {
+    return _cityDatabaseService.search(query);
+  }
+
+  Future<bool> isOnline() => _networkService.isOnline();
 
   Future<void> useDeviceLocation() async {
     await _settingsProvider.setUseDeviceLocation(true);
@@ -182,8 +265,9 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
       method: method,
       madhab: madhab,
       offsets: offsets,
-      customAdhanSound:
-          setCustomSound ? customSound : state.settings.customAdhanSound,
+      customAdhanSound: setCustomSound
+          ? customSound
+          : state.settings.customAdhanSound,
     );
     await _settingsProvider.save(updated);
     await _loadForCoordinates(
@@ -221,8 +305,7 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
       settings: settings,
     );
 
-    final gregorianDate =
-        DateFormat.yMMMMEEEEd().format(DateTime.now());
+    final gregorianDate = DateFormat.yMMMMEEEEd().format(DateTime.now());
     final hijri = HijriCalendar.fromDate(DateTime.now());
 
     emit(
