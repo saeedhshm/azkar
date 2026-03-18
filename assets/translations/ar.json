@@ -68,6 +68,7 @@
     "qibla": "اتجاه القبلة",
     "location": "الموقع",
     "change_location": "تغيير",
+    "current_location": "الموقع الحالي",
     "use_device_location": "استخدام موقع الجهاز",
     "manual_location": "إدخال يدوي للموقع",
     "city_label": "المدينة",

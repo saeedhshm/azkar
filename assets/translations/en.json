@@ -68,6 +68,7 @@
     "qibla": "Qibla direction",
     "location": "Location",
     "change_location": "Change",
+    "current_location": "Current location",
     "use_device_location": "Use device location",
     "manual_location": "Manual location",
     "city_label": "City",

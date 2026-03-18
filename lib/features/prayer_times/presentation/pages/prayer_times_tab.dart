@@ -55,7 +55,8 @@ class _PrayerTimesContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accentColor =
-        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFC58B55);
+        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
+    final warmGold = isDark ? const Color(0xFFF2C777) : const Color(0xFFC58B55);
 
     final times = state.prayerTimes;
     if (times == null) {
@@ -70,111 +71,113 @@ class _PrayerTimesContent extends StatelessWidget {
       _PrayerItem(Prayer.isha, times.isha),
     ];
 
+    final rawLocation = state.locationLabel;
+    final locationText =
+        rawLocation == null || rawLocation.trim().isEmpty || rawLocation == 'GPS'
+            ? 'prayer_times.current_location'.tr()
+            : rawLocation;
+
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
-        _GlassCard(
+        _HeroPrayerCard(
           isDark: isDark,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'prayer_times.date'.tr(),
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                state.gregorianDate ?? '',
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              if (state.hijriDate != null) ...[
-                const SizedBox(height: 2),
-                Text(
-                  state.hijriDate!,
-                  style: Theme.of(context).textTheme.bodyMedium,
+          accentColor: warmGold,
+          dateLine: state.gregorianDate ?? '',
+          hijriLine: state.hijriDate,
+          nextPrayer: _prayerLabel(state.nextPrayer),
+          countdown: _formatCountdown(state.countdown),
+          time: state.nextPrayerTime == null
+              ? null
+              : DateFormat.Hm().format(state.nextPrayerTime!),
+          locationLabel: locationText,
+          onChangeLocation: () => _showLocationSheet(context, state),
+        ),
+        const SizedBox(height: 16),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final tileWidth = (constraints.maxWidth - 12) / 2;
+            final nightCard = _prayerCardStyle(
+              isDark: isDark,
+              accent: accentColor,
+              type: _PrayerVisualType.night,
+            );
+            final sunsetCard = _prayerCardStyle(
+              isDark: isDark,
+              accent: warmGold,
+              type: _PrayerVisualType.sunset,
+            );
+            final sunCard = _prayerCardStyle(
+              isDark: isDark,
+              accent: warmGold,
+              type: _PrayerVisualType.sun,
+            );
+
+            return Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                SizedBox(
+                  width: tileWidth,
+                  child: _PrayerTile(
+                    item: items[0],
+                    isDark: isDark,
+                    isCurrent: state.currentPrayer == Prayer.fajr,
+                    style: nightCard,
+                    label: _prayerLabel(Prayer.fajr),
+                    accent: accentColor,
+                  ),
+                ),
+                SizedBox(
+                  width: tileWidth,
+                  child: _PrayerTile(
+                    item: items[1],
+                    isDark: isDark,
+                    isCurrent: state.currentPrayer == Prayer.dhuhr,
+                    style: sunCard,
+                    label: _prayerLabel(Prayer.dhuhr),
+                    accent: warmGold,
+                    isNext: state.nextPrayer == Prayer.dhuhr,
+                  ),
+                ),
+                SizedBox(
+                  width: tileWidth,
+                  child: _PrayerTile(
+                    item: items[2],
+                    isDark: isDark,
+                    isCurrent: state.currentPrayer == Prayer.asr,
+                    style: sunCard,
+                    label: _prayerLabel(Prayer.asr),
+                    accent: warmGold,
+                  ),
+                ),
+                SizedBox(
+                  width: tileWidth,
+                  child: _PrayerTile(
+                    item: items[3],
+                    isDark: isDark,
+                    isCurrent: state.currentPrayer == Prayer.maghrib,
+                    style: sunsetCard,
+                    label: _prayerLabel(Prayer.maghrib),
+                    accent: warmGold,
+                  ),
+                ),
+                SizedBox(
+                  width: constraints.maxWidth,
+                  child: _PrayerTile(
+                    item: items[4],
+                    isDark: isDark,
+                    isCurrent: state.currentPrayer == Prayer.isha,
+                    style: nightCard,
+                    label: _prayerLabel(Prayer.isha),
+                    accent: accentColor,
+                  ),
                 ),
               ],
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Icon(Icons.location_on_outlined, color: accentColor),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      state.locationLabel ??
-                          '${state.latitude?.toStringAsFixed(4)}, ${state.longitude?.toStringAsFixed(4)}',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => _showLocationSheet(context, state),
-                    child: Text('prayer_times.change_location'.tr()),
-                  ),
-                ],
-              ),
-            ],
-          ),
+            );
+          },
         ),
-        const SizedBox(height: 14),
-        _GlassCard(
-          isDark: isDark,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'prayer_times.next_prayer'.tr(),
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  _PrayerBadge(
-                    label: _prayerLabel(state.nextPrayer),
-                    color: accentColor,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 400),
-                      child: Text(
-                        _formatCountdown(state.countdown),
-                        key: ValueKey(state.countdown?.inSeconds ?? 0),
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  if (state.nextPrayerTime != null)
-                    Text(
-                      DateFormat.Hm().format(state.nextPrayerTime!),
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 14),
-        ...items.map((item) {
-          final isCurrent = state.currentPrayer == item.prayer;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: _PrayerCard(
-              item: item,
-              isCurrent: isCurrent,
-              isDark: isDark,
-            ),
-          );
-        }),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         _GlassCard(
           isDark: isDark,
           child: Column(
@@ -583,6 +586,337 @@ class _PrayerCard extends StatelessWidget {
       _ => 'prayer_times.prayers.fajr'.tr(),
     };
   }
+}
+
+class _HeroPrayerCard extends StatelessWidget {
+  const _HeroPrayerCard({
+    required this.isDark,
+    required this.accentColor,
+    required this.dateLine,
+    required this.hijriLine,
+    required this.nextPrayer,
+    required this.countdown,
+    required this.time,
+    required this.locationLabel,
+    required this.onChangeLocation,
+  });
+
+  final bool isDark;
+  final Color accentColor;
+  final String dateLine;
+  final String? hijriLine;
+  final String nextPrayer;
+  final String countdown;
+  final String? time;
+  final String locationLabel;
+  final VoidCallback onChangeLocation;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final gradient = isDark
+        ? const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF1B2A44), Color(0xFF223754), Color(0xFF0F2236)],
+          )
+        : const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFF7EBD6), Color(0xFFF1D7B0), Color(0xFFE7C38E)],
+          );
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: gradient,
+          borderRadius: BorderRadius.circular(28),
+          border: Border.all(
+            color: accentColor.withValues(alpha: isDark ? 0.35 : 0.5),
+            width: 1.4,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: accentColor.withValues(alpha: isDark ? 0.35 : 0.2),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _StarFieldPainter(isDark: isDark),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        dateLine,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color:
+                              isDark ? Colors.white60 : const Color(0xFF6A4B2E),
+                        ),
+                      ),
+                      if (hijriLine != null) ...[
+                        const SizedBox(width: 8),
+                        Text(
+                          hijriLine!,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark
+                                ? Colors.white60
+                                : const Color(0xFF6A4B2E),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'prayer_times.next_prayer'.tr(),
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: isDark ? Colors.white70 : const Color(0xFF6A4B2E),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    nextPrayer,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: accentColor,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    countdown,
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      color: isDark ? Colors.white : const Color(0xFF4B321D),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (time != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      time!,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: isDark
+                            ? Colors.white70
+                            : const Color(0xFF6A4B2E),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Icon(Icons.location_on_outlined, color: accentColor),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          locationLabel,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: isDark
+                                ? Colors.white70
+                                : const Color(0xFF6A4B2E),
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: onChangeLocation,
+                        child: Text('prayer_times.change_location'.tr()),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum _PrayerVisualType { sun, sunset, night }
+
+class _PrayerCardStyle {
+  const _PrayerCardStyle({
+    required this.gradient,
+    required this.glow,
+    required this.icon,
+    required this.iconColor,
+  });
+
+  final Gradient gradient;
+  final Color glow;
+  final IconData icon;
+  final Color iconColor;
+}
+
+_PrayerCardStyle _prayerCardStyle({
+  required bool isDark,
+  required Color accent,
+  required _PrayerVisualType type,
+}) {
+  switch (type) {
+    case _PrayerVisualType.sun:
+      return _PrayerCardStyle(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF7A4E1A), const Color(0xFFB77B2C)]
+              : [const Color(0xFFF3D6A3), const Color(0xFFD9A561)],
+        ),
+        glow: accent,
+        icon: Icons.wb_sunny_rounded,
+        iconColor: Colors.white70,
+      );
+    case _PrayerVisualType.sunset:
+      return _PrayerCardStyle(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF5B2E1A), const Color(0xFF9B5C2B)]
+              : [const Color(0xFFE5B37E), const Color(0xFFC98A4C)],
+        ),
+        glow: accent,
+        icon: Icons.wb_sunny_outlined,
+        iconColor: Colors.white70,
+      );
+    case _PrayerVisualType.night:
+      return _PrayerCardStyle(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF1A2C45), const Color(0xFF2B3E5F)]
+              : [const Color(0xFFF0E6DA), const Color(0xFFD8C9B7)],
+        ),
+        glow: accent,
+        icon: Icons.nightlight_round,
+        iconColor: Colors.white70,
+      );
+  }
+}
+
+class _PrayerTile extends StatelessWidget {
+  const _PrayerTile({
+    required this.item,
+    required this.isDark,
+    required this.isCurrent,
+    required this.style,
+    required this.label,
+    required this.accent,
+    this.isNext = false,
+  });
+
+  final _PrayerItem item;
+  final bool isDark;
+  final bool isCurrent;
+  final _PrayerCardStyle style;
+  final String label;
+  final Color accent;
+  final bool isNext;
+
+  @override
+  Widget build(BuildContext context) {
+    final timeText = DateFormat.Hm().format(item.time);
+    final titleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
+          color: isDark ? Colors.white : const Color(0xFF4B321D),
+          fontWeight: FontWeight.w700,
+        );
+    final timeStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
+          color: isDark ? Colors.white70 : const Color(0xFF4B321D),
+          fontWeight: FontWeight.w600,
+        );
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: style.gradient,
+        border: Border.all(
+          color: isCurrent
+              ? accent
+              : accent.withValues(alpha: isDark ? 0.4 : 0.35),
+          width: isCurrent ? 2 : 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: style.glow.withValues(alpha: isDark ? 0.35 : 0.25),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: Icon(style.icon, color: style.iconColor, size: 20),
+          ),
+          if (isNext)
+            Align(
+              alignment: Alignment.topRight,
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'common.next'.tr(),
+                  style: TextStyle(
+                    color: isDark ? Colors.black : Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 6),
+              Text(label, style: titleStyle, textAlign: TextAlign.center),
+              const SizedBox(height: 6),
+              Text(timeText, style: timeStyle, textAlign: TextAlign.center),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StarFieldPainter extends CustomPainter {
+  _StarFieldPainter({required this.isDark});
+
+  final bool isDark;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final random = Random(9);
+    final count = isDark ? 70 : 40;
+    for (var i = 0; i < count; i++) {
+      final dx = random.nextDouble() * size.width;
+      final dy = random.nextDouble() * size.height;
+      final radius = random.nextDouble() * 1.6 + 0.4;
+      final opacity = (random.nextDouble() * 0.5) + 0.2;
+      final paint = Paint()
+        ..color = (isDark ? Colors.white : const Color(0xFFD4A574))
+            .withValues(alpha: opacity);
+      canvas.drawCircle(Offset(dx, dy), radius, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _PrayerBadge extends StatelessWidget {

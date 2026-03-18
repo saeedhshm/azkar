@@ -68,6 +68,7 @@
     "qibla": "Kıble yönü",
     "location": "Konum",
     "change_location": "Değiştir",
+    "current_location": "Mevcut konum",
     "use_device_location": "Cihaz konumunu kullan",
     "manual_location": "Manuel konum",
     "city_label": "Şehir",

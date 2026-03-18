@@ -68,6 +68,7 @@
     "qibla": "Arah kiblat",
     "location": "Lokasi",
     "change_location": "Ubah",
+    "current_location": "Lokasi saat ini",
     "use_device_location": "Gunakan lokasi perangkat",
     "manual_location": "Lokasi manual",
     "city_label": "Kota",
