@@ -85,6 +85,7 @@
     "open_settings": "Ayarları aç",
     "prayers": {
       "fajr": "İmsak",
+      "sunrise": "Güneş",
       "dhuhr": "Öğle",
       "asr": "İkindi",
       "maghrib": "Akşam",

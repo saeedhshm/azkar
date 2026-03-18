@@ -268,6 +268,8 @@ class NotificationService {
       channelDescription: 'Prayer time notifications',
       importance: Importance.high,
       priority: Priority.high,
+      ongoing: true,
+      autoCancel: false,
       sound: soundName != null && soundName.isNotEmpty
           ? RawResourceAndroidNotificationSound(soundName)
           : null,

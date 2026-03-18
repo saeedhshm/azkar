@@ -85,6 +85,7 @@
     "open_settings": "فتح الإعدادات",
     "prayers": {
       "fajr": "الفجر",
+      "sunrise": "الشروق",
       "dhuhr": "الظهر",
       "asr": "العصر",
       "maghrib": "المغرب",

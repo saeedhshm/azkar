@@ -72,6 +72,7 @@ class _PrayerTimesContent extends StatelessWidget {
 
     final items = <_PrayerItem>[
       _PrayerItem(Prayer.fajr, times.fajr),
+      _PrayerItem(Prayer.sunrise, times.sunrise),
       _PrayerItem(Prayer.dhuhr, times.dhuhr),
       _PrayerItem(Prayer.asr, times.asr),
       _PrayerItem(Prayer.maghrib, times.maghrib),
@@ -151,6 +152,20 @@ class _PrayerTimesContent extends StatelessWidget {
                   child: _PrayerTile(
                     item: items[1],
                     isDark: isDark,
+                    isCurrent: state.currentPrayer == Prayer.sunrise,
+                    style: sunCard,
+                    label: _prayerLabel(Prayer.sunrise),
+                    accent: warmGold,
+                    isNext: state.nextPrayer == Prayer.sunrise,
+                    use24h: use24h,
+                    locale: locale,
+                  ),
+                ),
+                SizedBox(
+                  width: tileWidth,
+                  child: _PrayerTile(
+                    item: items[2],
+                    isDark: isDark,
                     isCurrent: state.currentPrayer == Prayer.dhuhr,
                     style: sunCard,
                     label: _prayerLabel(Prayer.dhuhr),
@@ -163,7 +178,7 @@ class _PrayerTimesContent extends StatelessWidget {
                 SizedBox(
                   width: tileWidth,
                   child: _PrayerTile(
-                    item: items[2],
+                    item: items[3],
                     isDark: isDark,
                     isCurrent: state.currentPrayer == Prayer.asr,
                     style: sunCard,
@@ -177,7 +192,7 @@ class _PrayerTimesContent extends StatelessWidget {
                 SizedBox(
                   width: tileWidth,
                   child: _PrayerTile(
-                    item: items[3],
+                    item: items[4],
                     isDark: isDark,
                     isCurrent: state.currentPrayer == Prayer.maghrib,
                     style: sunsetCard,
@@ -191,7 +206,7 @@ class _PrayerTimesContent extends StatelessWidget {
                 SizedBox(
                   width: constraints.maxWidth,
                   child: _PrayerTile(
-                    item: items[4],
+                    item: items[5],
                     isDark: isDark,
                     isCurrent: state.currentPrayer == Prayer.isha,
                     style: nightCard,
@@ -259,6 +274,7 @@ class _PrayerTimesContent extends StatelessWidget {
   String _prayerLabel(Prayer? prayer) {
     return switch (prayer) {
       Prayer.fajr => 'prayer_times.prayers.fajr'.tr(),
+      Prayer.sunrise => 'prayer_times.prayers.sunrise'.tr(),
       Prayer.dhuhr => 'prayer_times.prayers.dhuhr'.tr(),
       Prayer.asr => 'prayer_times.prayers.asr'.tr(),
       Prayer.maghrib => 'prayer_times.prayers.maghrib'.tr(),
@@ -631,6 +647,7 @@ class _PrayerCard extends StatelessWidget {
   String _label(BuildContext context) {
     return switch (item.prayer) {
       Prayer.fajr => 'prayer_times.prayers.fajr'.tr(),
+      Prayer.sunrise => 'prayer_times.prayers.sunrise'.tr(),
       Prayer.dhuhr => 'prayer_times.prayers.dhuhr'.tr(),
       Prayer.asr => 'prayer_times.prayers.asr'.tr(),
       Prayer.maghrib => 'prayer_times.prayers.maghrib'.tr(),
