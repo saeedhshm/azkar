@@ -4,6 +4,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:easy_localization/easy_localization.dart';
 
 import '../constants/app_constants.dart';
 
@@ -37,11 +38,13 @@ class NotificationService {
   }
 
   Future<void> _requestPermissions() async {
-    await _plugin
+    final androidImplementation = _plugin
         .resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin
-        >()
-        ?.requestNotificationsPermission();
+        >();
+
+    await androidImplementation?.requestNotificationsPermission();
+    await androidImplementation?.requestExactAlarmsPermission();
 
     await _plugin
         .resolvePlatformSpecificImplementation<
@@ -70,40 +73,40 @@ class NotificationService {
 
     await _scheduleNotification(
       id: AppConstants.morningReminderNotificationId,
-      title: 'Morning Adhkar Reminder',
-      body: 'Start your day with remembrance.',
+      title: 'notifications.adhkar.morning_title'.tr(),
+      body: 'notifications.adhkar.morning_body'.tr(),
       hour: morning.hour,
       minute: morning.minute,
     );
 
     await _scheduleNotification(
       id: AppConstants.eveningReminderNotificationId,
-      title: 'Evening Adhkar Reminder',
-      body: 'Close your day with remembrance.',
+      title: 'notifications.adhkar.evening_title'.tr(),
+      body: 'notifications.adhkar.evening_body'.tr(),
       hour: evening.hour,
       minute: evening.minute,
     );
 
     await _scheduleNotification(
       id: AppConstants.sleepReminderNotificationId,
-      title: 'Sleep Adhkar Reminder',
-      body: 'End your day with remembrance.',
+      title: 'notifications.adhkar.sleep_title'.tr(),
+      body: 'notifications.adhkar.sleep_body'.tr(),
       hour: sleep.hour,
       minute: sleep.minute,
     );
 
     await _scheduleNotification(
       id: AppConstants.wakingReminderNotificationId,
-      title: 'Waking Adhkar Reminder',
-      body: 'Start your morning with remembrance.',
+      title: 'notifications.adhkar.waking_title'.tr(),
+      body: 'notifications.adhkar.waking_body'.tr(),
       hour: waking.hour,
       minute: waking.minute,
     );
 
     await _scheduleWeeklyNotification(
       id: AppConstants.fridayReminderNotificationId,
-      title: 'Friday Adhkar Reminder',
-      body: 'Remember Allah on this blessed day.',
+      title: 'notifications.adhkar.friday_title'.tr(),
+      body: 'notifications.adhkar.friday_body'.tr(),
       hour: friday.hour,
       minute: friday.minute,
       weekday: DateTime.friday,
@@ -146,7 +149,7 @@ class NotificationService {
         ),
         iOS: DarwinNotificationDetails(),
       ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
       payload: 'adhkar_reminder',
     );
@@ -191,7 +194,7 @@ class NotificationService {
         ),
         iOS: DarwinNotificationDetails(),
       ),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
       payload: 'adhkar_reminder',
     );
@@ -280,7 +283,7 @@ class NotificationService {
       _prayerBody(prayer),
       schedule,
       NotificationDetails(android: androidDetails, iOS: iosDetails),
-      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       matchDateTimeComponents: DateTimeComponents.time,
       payload: 'prayer_time',
     );
@@ -288,23 +291,23 @@ class NotificationService {
 
   String _prayerTitle(Prayer prayer) {
     return switch (prayer) {
-      Prayer.fajr => 'Fajr Prayer',
-      Prayer.dhuhr => 'Dhuhr Prayer',
-      Prayer.asr => 'Asr Prayer',
-      Prayer.maghrib => 'Maghrib Prayer',
-      Prayer.isha => 'Isha Prayer',
-      _ => 'Prayer Time',
+      Prayer.fajr => 'notifications.prayer.fajr_title'.tr(),
+      Prayer.dhuhr => 'notifications.prayer.dhuhr_title'.tr(),
+      Prayer.asr => 'notifications.prayer.asr_title'.tr(),
+      Prayer.maghrib => 'notifications.prayer.maghrib_title'.tr(),
+      Prayer.isha => 'notifications.prayer.isha_title'.tr(),
+      _ => 'notifications.prayer.default_title'.tr(),
     };
   }
 
   String _prayerBody(Prayer prayer) {
     return switch (prayer) {
-      Prayer.fajr => 'Time for Fajr prayer.',
-      Prayer.dhuhr => 'Time for Dhuhr prayer.',
-      Prayer.asr => 'Time for Asr prayer.',
-      Prayer.maghrib => 'Time for Maghrib prayer.',
-      Prayer.isha => 'Time for Isha prayer.',
-      _ => 'It is time for prayer.',
+      Prayer.fajr => 'notifications.prayer.fajr_body'.tr(),
+      Prayer.dhuhr => 'notifications.prayer.dhuhr_body'.tr(),
+      Prayer.asr => 'notifications.prayer.asr_body'.tr(),
+      Prayer.maghrib => 'notifications.prayer.maghrib_body'.tr(),
+      Prayer.isha => 'notifications.prayer.isha_body'.tr(),
+      _ => 'notifications.prayer.default_body'.tr(),
     };
   }
 }

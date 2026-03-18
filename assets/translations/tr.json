@@ -233,5 +233,33 @@
   "tasbeeh": {
     "default_phrase": "Sübhanallah",
     "tap_to_count": "Saymak için dokun"
+  },
+  "notifications": {
+    "adhkar": {
+      "morning_title": "Sabah zikir hatırlatması",
+      "morning_body": "Güne zikirle başla.",
+      "evening_title": "Akşam zikir hatırlatması",
+      "evening_body": "Günü zikirle tamamla.",
+      "sleep_title": "Uyku zikir hatırlatması",
+      "sleep_body": "Zikirle uyu.",
+      "waking_title": "Uyanma zikir hatırlatması",
+      "waking_body": "Sabaha zikirle başla.",
+      "friday_title": "Cuma hatırlatması",
+      "friday_body": "Bu mübarek günde Allah'ı an."
+    },
+    "prayer": {
+      "fajr_title": "Sabah namazı",
+      "fajr_body": "Sabah namazı vakti.",
+      "dhuhr_title": "Öğle namazı",
+      "dhuhr_body": "Öğle namazı vakti.",
+      "asr_title": "İkindi namazı",
+      "asr_body": "İkindi namazı vakti.",
+      "maghrib_title": "Akşam namazı",
+      "maghrib_body": "Akşam namazı vakti.",
+      "isha_title": "Yatsı namazı",
+      "isha_body": "Yatsı namazı vakti.",
+      "default_title": "Namaz vakti",
+      "default_body": "Namaz vakti."
+    }
   }
 }

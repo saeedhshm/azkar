@@ -233,5 +233,33 @@
   "tasbeeh": {
     "default_phrase": "SubhanAllah",
     "tap_to_count": "Tap to Count"
+  },
+  "notifications": {
+    "adhkar": {
+      "morning_title": "Morning Adhkar Reminder",
+      "morning_body": "Start your day with remembrance.",
+      "evening_title": "Evening Adhkar Reminder",
+      "evening_body": "Close your day with remembrance.",
+      "sleep_title": "Sleep Adhkar Reminder",
+      "sleep_body": "End your day with remembrance.",
+      "waking_title": "Waking Adhkar Reminder",
+      "waking_body": "Begin your morning with remembrance.",
+      "friday_title": "Friday Reminder",
+      "friday_body": "Remember Allah on this blessed day."
+    },
+    "prayer": {
+      "fajr_title": "Fajr Prayer",
+      "fajr_body": "Time for Fajr prayer.",
+      "dhuhr_title": "Dhuhr Prayer",
+      "dhuhr_body": "Time for Dhuhr prayer.",
+      "asr_title": "Asr Prayer",
+      "asr_body": "Time for Asr prayer.",
+      "maghrib_title": "Maghrib Prayer",
+      "maghrib_body": "Time for Maghrib prayer.",
+      "isha_title": "Isha Prayer",
+      "isha_body": "Time for Isha prayer.",
+      "default_title": "Prayer Time",
+      "default_body": "It is time for prayer."
+    }
   }
 }

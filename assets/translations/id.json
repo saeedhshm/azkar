@@ -233,5 +233,33 @@
   "tasbeeh": {
     "default_phrase": "Subhanallah",
     "tap_to_count": "Ketuk untuk menghitung"
+  },
+  "notifications": {
+    "adhkar": {
+      "morning_title": "Pengingat adhkar pagi",
+      "morning_body": "Mulai harimu dengan zikir.",
+      "evening_title": "Pengingat adhkar sore",
+      "evening_body": "Akhiri harimu dengan zikir.",
+      "sleep_title": "Pengingat adhkar tidur",
+      "sleep_body": "Tidurlah dengan zikir.",
+      "waking_title": "Pengingat adhkar bangun",
+      "waking_body": "Awali pagimu dengan zikir.",
+      "friday_title": "Pengingat Jumat",
+      "friday_body": "Perbanyak zikir di hari yang diberkahi ini."
+    },
+    "prayer": {
+      "fajr_title": "Salat Subuh",
+      "fajr_body": "Waktu salat Subuh.",
+      "dhuhr_title": "Salat Zuhur",
+      "dhuhr_body": "Waktu salat Zuhur.",
+      "asr_title": "Salat Asar",
+      "asr_body": "Waktu salat Asar.",
+      "maghrib_title": "Salat Maghrib",
+      "maghrib_body": "Waktu salat Maghrib.",
+      "isha_title": "Salat Isya",
+      "isha_body": "Waktu salat Isya.",
+      "default_title": "Waktu salat",
+      "default_body": "Saatnya salat."
+    }
   }
 }

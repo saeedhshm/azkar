@@ -233,5 +233,33 @@
   "tasbeeh": {
     "default_phrase": "سبحان الله",
     "tap_to_count": "اضغط للعد"
+  },
+  "notifications": {
+    "adhkar": {
+      "morning_title": "تذكير أذكار الصباح",
+      "morning_body": "ابدأ يومك بذكر الله.",
+      "evening_title": "تذكير أذكار المساء",
+      "evening_body": "اختم يومك بذكر الله.",
+      "sleep_title": "تذكير أذكار النوم",
+      "sleep_body": "نم على ذكر الله.",
+      "waking_title": "تذكير أذكار الاستيقاظ",
+      "waking_body": "ابدأ صباحك بذكر الله.",
+      "friday_title": "تذكير يوم الجمعة",
+      "friday_body": "أكثر من ذكر الله في هذا اليوم المبارك."
+    },
+    "prayer": {
+      "fajr_title": "صلاة الفجر",
+      "fajr_body": "حان الآن وقت صلاة الفجر.",
+      "dhuhr_title": "صلاة الظهر",
+      "dhuhr_body": "حان الآن وقت صلاة الظهر.",
+      "asr_title": "صلاة العصر",
+      "asr_body": "حان الآن وقت صلاة العصر.",
+      "maghrib_title": "صلاة المغرب",
+      "maghrib_body": "حان الآن وقت صلاة المغرب.",
+      "isha_title": "صلاة العشاء",
+      "isha_body": "حان الآن وقت صلاة العشاء.",
+      "default_title": "وقت الصلاة",
+      "default_body": "حان الآن وقت الصلاة."
+    }
   }
 }
