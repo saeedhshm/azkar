@@ -43,9 +43,7 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<PrayerService>(PrayerService.new);
   getIt.registerLazySingleton<LocationService>(LocationService.new);
   getIt.registerLazySingleton<NetworkService>(NetworkService.new);
-  getIt.registerLazySingleton<CityDatabaseService>(
-    () => CityDatabaseService(getIt<NetworkService>()),
-  );
+  getIt.registerLazySingleton<CityDatabaseService>(CityDatabaseService.new);
 
   getIt.registerLazySingleton<AdhkarLocalDataSource>(AdhkarLocalDataSource.new);
 

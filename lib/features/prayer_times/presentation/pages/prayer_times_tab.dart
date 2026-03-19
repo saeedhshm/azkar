@@ -490,6 +490,12 @@ class _PrayerTimesContent extends StatelessWidget {
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
               ),
+              const SizedBox(height: 6),
+              Text(
+                'prayer_times.location_hint'.tr(),
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
               const SizedBox(height: 12),
               _LocationActionButton(
                 label: 'prayer_times.use_device_location'.tr(),
@@ -843,6 +849,8 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
   Timer? _debounce;
   bool _loading = true;
   bool _available = false;
+  bool _isOnline = false;
+  String? _error;
   bool _searching = false;
   List<CityEntry> _results = [];
 
@@ -862,12 +870,15 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
 
   Future<void> _prepare() async {
     setState(() => _loading = true);
+    final online = await widget.cubit.isOnline();
     final available = await widget.cubit.ensureCityDatabaseAvailable();
     if (!mounted) {
       return;
     }
     setState(() {
       _available = available;
+      _isOnline = online;
+      _error = widget.cubit.getCityDownloadError();
       _loading = false;
     });
   }
@@ -914,13 +925,21 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
     }
 
     if (!_available) {
+      final message = _isOnline
+          ? 'prayer_times.city_download_failed'.tr()
+          : 'prayer_times.city_unavailable_offline'.tr();
       return Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            'prayer_times.city_unavailable_offline'.tr(),
-            textAlign: TextAlign.center,
-          ),
+          Text(message, textAlign: TextAlign.center),
+          if (_error != null && _error!.trim().isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              '${'prayer_times.city_download_error_label'.tr()}: ${_error!}',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
           const SizedBox(height: 12),
           ElevatedButton(onPressed: _prepare, child: Text('common.retry'.tr())),
         ],

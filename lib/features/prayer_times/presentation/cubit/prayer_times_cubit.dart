@@ -238,6 +238,8 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     return downloaded;
   }
 
+  String? getCityDownloadError() => _cityDatabaseService.lastError;
+
   Future<List<CityEntry>> searchCities(String query) {
     return _cityDatabaseService.search(query);
   }
