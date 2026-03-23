@@ -90,7 +90,7 @@ class _PrayerTimesContent extends StatelessWidget {
     final locale = context.locale.toString();
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 140),
       children: [
         _HeroPrayerCard(
           isDark: isDark,
@@ -221,42 +221,41 @@ class _PrayerTimesContent extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 14),
+        _QiblaSection(isDark: isDark),
+        const SizedBox(height: 14),
         _GlassCard(
           isDark: isDark,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Text(
-                    'prayer_times.settings'.tr(),
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  const Spacer(),
-                  IconButton(
-                    icon: const Icon(Icons.tune),
-                    color: accentColor,
-                    onPressed: () => _openSettingsSheet(context, state),
-                  ),
-                ],
-              ),
               Text(
-                '${'prayer_times.method'.tr()}: ${_methodLabel(state.settings.method)}',
-                style: Theme.of(context).textTheme.bodyMedium,
+                'prayer_times.settings'.tr(),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                '${'prayer_times.madhab_label'.tr()}: ${_madhabLabel(state.settings.madhab)}',
-                style: Theme.of(context).textTheme.bodyMedium,
+              const SizedBox(height: 8),
+              _SettingsRow(
+                label: 'prayer_times.method'.tr(),
+                value: _methodLabel(state.settings.method),
+                onTap: () => _openSettingsSheet(context, state),
+              ),
+              const SizedBox(height: 8),
+              _SettingsRow(
+                label: 'prayer_times.madhab_label'.tr(),
+                value: _madhabLabel(state.settings.madhab),
+                onTap: () => _openSettingsSheet(context, state),
+              ),
+              const SizedBox(height: 8),
+              _SettingsRow(
+                label: 'settings.use_24h'.tr(),
+                value: use24h ? '24h' : 'AM/PM',
+                onTap: () => _openSettingsSheet(context, state),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 14),
-        _QiblaSection(isDark: isDark),
       ],
     );
   }
@@ -691,15 +690,18 @@ class _HeroPrayerCard extends StatelessWidget {
     final theme = Theme.of(context);
     final gradient = isDark
         ? const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF1B2A44), Color(0xFF223754), Color(0xFF0F2236)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFF162336), Color(0xFF1B2A3F)],
           )
         : const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFF7EBD6), Color(0xFFF1D7B0), Color(0xFFE7C38E)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color(0xFFF8EEDC), Color(0xFFF2DEBF)],
           );
+    final secondaryText =
+        isDark ? Colors.white70 : const Color(0xFF6A4B2E);
+    final primaryText = isDark ? Colors.white : const Color(0xFF4B321D);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(28),
@@ -708,7 +710,7 @@ class _HeroPrayerCard extends StatelessWidget {
           gradient: gradient,
           borderRadius: BorderRadius.circular(28),
           border: Border.all(
-            color: accentColor.withValues(alpha: isDark ? 0.35 : 0.5),
+            color: accentColor.withValues(alpha: isDark ? 0.28 : 0.35),
             width: 1.4,
           ),
           boxShadow: [
@@ -725,39 +727,53 @@ class _HeroPrayerCard extends StatelessWidget {
               child: CustomPaint(painter: _StarFieldPainter(isDark: isDark)),
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        dateLine,
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: isDark
-                              ? Colors.white60
-                              : const Color(0xFF6A4B2E),
+                      Expanded(
+                        child: Text(
+                          hijriLine ?? dateLine,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: secondaryText,
+                          ),
+                          textAlign: TextAlign.center,
                         ),
                       ),
-                      if (hijriLine != null) ...[
-                        const SizedBox(width: 8),
-                        Text(
-                          hijriLine!,
+                      const SizedBox(width: 8),
+                      Icon(Icons.location_on_outlined,
+                          color: accentColor, size: 16),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          locationLabel,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDark
-                                ? Colors.white60
-                                : const Color(0xFF6A4B2E),
+                            color: secondaryText,
                           ),
                         ),
-                      ],
+                      ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  if (hijriLine != null && dateLine.isNotEmpty) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      dateLine,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: secondaryText,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 10),
                   Text(
                     'prayer_times.next_prayer'.tr(),
                     style: theme.textTheme.titleSmall?.copyWith(
-                      color: isDark ? Colors.white70 : const Color(0xFF6A4B2E),
+                      color: secondaryText,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -773,7 +789,7 @@ class _HeroPrayerCard extends StatelessWidget {
                   Text(
                     countdown,
                     style: theme.textTheme.headlineSmall?.copyWith(
-                      color: isDark ? Colors.white : const Color(0xFF4B321D),
+                      color: primaryText,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -782,34 +798,33 @@ class _HeroPrayerCard extends StatelessWidget {
                     Text(
                       time!,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDark
-                            ? Colors.white70
-                            : const Color(0xFF6A4B2E),
+                        color: secondaryText,
                       ),
                     ),
                   ],
-                  Row(
-                    children: [
-                      Icon(Icons.location_on_outlined, color: accentColor),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          locationLabel,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: isDark
-                                ? Colors.white70
-                                : const Color(0xFF6A4B2E),
-                          ),
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: onChangeLocation,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: accentColor.withValues(alpha: isDark ? 0.2 : 0.25),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: accentColor.withValues(alpha: 0.4),
                         ),
                       ),
-                      GestureDetector(
-                        onTap: onChangeLocation,
-                        child: Padding(
-                          padding: const EdgeInsets.all(4.0),
-                          child: Text('prayer_times.change_location'.tr()),
+                      child: Text(
+                        'prayer_times.change_location'.tr(),
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: accentColor,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ],
               ),
@@ -1023,34 +1038,34 @@ _PrayerCardStyle _prayerCardStyle({
       return _PrayerCardStyle(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF7A4E1A), const Color(0xFFB77B2C)]
-              : [const Color(0xFFF3D6A3), const Color(0xFFD9A561)],
+              ? [const Color(0xFF16263A), const Color(0xFF1A2B40)]
+              : [const Color(0xFFF7EBD6), const Color(0xFFF0D9B7)],
         ),
         glow: accent,
         icon: Icons.wb_sunny_rounded,
-        iconColor: Colors.white70,
+        iconColor: accent,
       );
     case _PrayerVisualType.sunset:
       return _PrayerCardStyle(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF5B2E1A), const Color(0xFF9B5C2B)]
-              : [const Color(0xFFE5B37E), const Color(0xFFC98A4C)],
+              ? [const Color(0xFF16263A), const Color(0xFF1A2B40)]
+              : [const Color(0xFFF7EBD6), const Color(0xFFF0D9B7)],
         ),
         glow: accent,
-        icon: Icons.wb_sunny_outlined,
-        iconColor: Colors.white70,
+        icon: Icons.wb_twilight_rounded,
+        iconColor: accent,
       );
     case _PrayerVisualType.night:
       return _PrayerCardStyle(
         gradient: LinearGradient(
           colors: isDark
-              ? [const Color(0xFF1A2C45), const Color(0xFF2B3E5F)]
-              : [const Color(0xFFF0E6DA), const Color(0xFFD8C9B7)],
+              ? [const Color(0xFF16263A), const Color(0xFF1A2B40)]
+              : [const Color(0xFFF7EBD6), const Color(0xFFF0D9B7)],
         ),
         glow: accent,
         icon: Icons.nightlight_round,
-        iconColor: Colors.white70,
+        iconColor: accent,
       );
   }
 }
@@ -1085,80 +1100,67 @@ class _PrayerTile extends StatelessWidget {
       use24h: use24h,
       locale: locale,
     );
-    final titleStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
-      color: isDark ? Colors.white : const Color(0xFF4B321D),
-      fontWeight: FontWeight.w700,
-    );
-    final timeStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
-      color: isDark ? Colors.white70 : const Color(0xFF4B321D),
-      fontWeight: FontWeight.w600,
-    );
+    final titleStyle = Theme.of(context).textTheme.titleMedium?.copyWith(
+          color: isDark ? Colors.white : const Color(0xFF4B321D),
+          fontWeight: FontWeight.w700,
+        );
+    final timeStyle = Theme.of(context).textTheme.bodyLarge?.copyWith(
+          color: isDark ? Colors.white70 : const Color(0xFF4B321D),
+          fontWeight: FontWeight.w600,
+        );
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: style.gradient,
         border: Border.all(
           color: isCurrent
               ? accent
-              : accent.withValues(alpha: isDark ? 0.4 : 0.35),
+              : accent.withValues(alpha: isDark ? 0.2 : 0.25),
           width: isCurrent ? 2 : 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: style.glow.withValues(alpha: isDark ? 0.35 : 0.25),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            color: style.glow.withValues(alpha: isDark ? 0.25 : 0.18),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Stack(
         children: [
-          // Align(
-          //   alignment: Alignment.topRight,
-          //   child: Icon(style.icon, color: style.iconColor, size: 35),
-          // ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 6),
-                  Text(label, style: titleStyle, textAlign: TextAlign.center),
-                  const SizedBox(height: 6),
-                  Text(timeText, style: timeStyle, textAlign: TextAlign.center),
-                ],
+          if (isNext)
+            Positioned(
+              top: 0,
+              left: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  'common.next'.tr(),
+                  style: TextStyle(
+                    color: isDark ? Colors.black : Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 11,
+                  ),
+                ),
               ),
-              Spacer(),
-              Column(
-                children: [
-                  Icon(style.icon, color: style.iconColor, size: 35),
-                  SizedBox(height: 8),
-                  if (isNext)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: accent.withValues(alpha: 0.8),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      // child: Icon(Icons.notifications_active, color: style.iconColor, size: 15),
-                      child: Text(
-                        'common.next'.tr(),
-                        style: TextStyle(
-                          color: isDark ? Colors.black : Colors.white,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ],
+            ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(style.icon, color: style.iconColor, size: 28),
+                const SizedBox(height: 8),
+                Text(label, style: titleStyle),
+                const SizedBox(height: 6),
+                Text(timeText, style: timeStyle),
+              ],
+            ),
           ),
         ],
       ),
@@ -1223,10 +1225,10 @@ class _QiblaCompass extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accentColor = isDark
-        ? const Color(0xFF6EE7E8)
+        ? const Color(0xFFF2C777)
         : const Color(0xFFC58B55);
     return SizedBox(
-      height: 180,
+      height: 200,
       child: StreamBuilder<QiblahDirection>(
         stream: FlutterQiblah.qiblahStream,
         builder: (context, snapshot) {
@@ -1242,32 +1244,60 @@ class _QiblaCompass extends StatelessWidget {
               alignment: Alignment.center,
               children: [
                 Container(
-                  width: 160,
-                  height: 160,
+                  width: 180,
+                  height: 180,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
                     gradient: isDark
                         ? const LinearGradient(
-                            colors: [Color(0xFF1E3340), Color(0xFF0C1A28)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFF1A2A3E), Color(0xFF101B2B)],
                           )
                         : const LinearGradient(
-                            colors: [Color(0xFFF3E2C4), Color(0xFFE6C89C)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [Color(0xFFF6E5C9), Color(0xFFEBCFA4)],
                           ),
                     border: Border.all(
-                      color: accentColor.withValues(alpha: 0.6),
+                      color: accentColor.withValues(alpha: 0.5),
                       width: 2,
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 140,
+                  height: 140,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: accentColor.withValues(alpha: 0.25),
+                      width: 1,
                     ),
                   ),
                 ),
                 Transform.rotate(
                   angle: angle,
-                  child: Icon(Icons.navigation, size: 60, color: accentColor),
+                  child: Icon(Icons.navigation, size: 56, color: accentColor),
                 ),
-                Positioned(
-                  bottom: 14,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: accentColor.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: accentColor.withValues(alpha: 0.4),
+                    ),
+                  ),
                   child: Text(
                     '${direction.qiblah.toStringAsFixed(0)}°',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: accentColor,
+                        ),
                   ),
                 ),
               ],
@@ -1297,7 +1327,7 @@ class _QiblaSection extends StatelessWidget {
         return _GlassCard(
           isDark: isDark,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 'prayer_times.qibla'.tr(),
@@ -1311,6 +1341,66 @@ class _QiblaSection extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+}
+
+class _SettingsRow extends StatelessWidget {
+  const _SettingsRow({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = isDark ? const Color(0xFFF2C777) : const Color(0xFFC58B55);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.04)
+              : Colors.white.withValues(alpha: 0.55),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: accent.withValues(alpha: isDark ? 0.18 : 0.3),
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: isDark ? Colors.white70 : const Color(0xFF6A4B2E),
+                        ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: accent),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1590,11 +1680,11 @@ class _GlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderColor = isDark
-        ? Colors.white.withValues(alpha: 0.15)
-        : const Color(0xFFBFA272).withValues(alpha: 0.35);
+        ? Colors.white.withValues(alpha: 0.12)
+        : const Color(0xFFBFA272).withValues(alpha: 0.28);
     final background = isDark
-        ? Colors.white.withValues(alpha: 0.06)
-        : Colors.white.withValues(alpha: 0.55);
+        ? Colors.white.withValues(alpha: 0.08)
+        : Colors.white.withValues(alpha: 0.65);
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(26),

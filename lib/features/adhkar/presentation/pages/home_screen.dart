@@ -20,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final Future<Map<String, int>> _countsFuture;
+  int _currentIndex = 0;
 
   @override
   void initState() {
@@ -47,66 +48,212 @@ class _HomeScreenState extends State<HomeScreen> {
     final unselectedColor = isDark
         ? Colors.white.withValues(alpha: 0.7)
         : const Color(0xFF7A5A35);
+    final barColor = isDark ? const Color(0xFF0B1322) : const Color(0xFFF3E7D2);
+    final barBorder = isDark
+        ? Colors.white.withValues(alpha: 0.08)
+        : const Color(0xFFC9A77A).withValues(alpha: 0.5);
 
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: AppBar(
-          title: Text('app.name'.tr()),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          actions: [
-            IconButton(
-              tooltip: 'common.favorites'.tr(),
-              onPressed: () => context.push('/favorites'),
-              icon: const Icon(Icons.bookmark_outline),
+    return Scaffold(
+      extendBody: true,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text('app.name'.tr()),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          IconButton(
+            tooltip: 'common.favorites'.tr(),
+            onPressed: () => context.push('/favorites'),
+            icon: const Icon(Icons.bookmark_outline),
+          ),
+          IconButton(
+            tooltip: 'common.tasbeeh_counter'.tr(),
+            onPressed: () => context.push('/tasbeeh'),
+            icon: const Icon(Icons.touch_app_outlined),
+          ),
+          IconButton(
+            tooltip: 'common.settings'.tr(),
+            onPressed: () => context.push('/settings'),
+            icon: const Icon(Icons.settings_outlined),
+          ),
+        ],
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: _QuranFab(
+        isDark: isDark,
+        isSelected: _currentIndex == 1,
+        onTap: () => setState(() => _currentIndex = 1),
+      ),
+      bottomNavigationBar: ClipRRect(
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
+        child: BottomAppBar(
+          color: barColor,
+          elevation: 10,
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 8,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              border: Border(top: BorderSide(color: barBorder, width: 1)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.4 : 0.12),
+                  blurRadius: 18,
+                  offset: const Offset(0, -6),
+                ),
+              ],
             ),
-            IconButton(
-              tooltip: 'common.tasbeeh_counter'.tr(),
-              onPressed: () => context.push('/tasbeeh'),
-              icon: const Icon(Icons.touch_app_outlined),
-            ),
-            IconButton(
-              tooltip: 'common.settings'.tr(),
-              onPressed: () => context.push('/settings'),
-              icon: const Icon(Icons.settings_outlined),
-            ),
-          ],
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(48),
-            child: TabBar(
-              labelColor: accentColor,
-              unselectedLabelColor: unselectedColor,
-              indicator: UnderlineTabIndicator(
-                borderSide: BorderSide(color: accentColor, width: 3),
-                insets: const EdgeInsets.symmetric(horizontal: 24),
-              ),
-              tabs: [
-                Tab(text: 'home.tabs.prayer_times'.tr()),
-                Tab(text: 'home.tabs.adhkar'.tr()),
-                Tab(text: 'home.tabs.quran'.tr()),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _BottomNavItem(
+                  label: 'home.tabs.prayer_times'.tr(),
+                  icon: Icons.access_time_rounded,
+                  isSelected: _currentIndex == 0,
+                  selectedColor: accentColor,
+                  unselectedColor: unselectedColor,
+                  showLabel: false,
+                  onTap: () => setState(() => _currentIndex = 0),
+                ),
+                const SizedBox(width: 72),
+                _BottomNavItem(
+                  label: 'home.tabs.adhkar'.tr(),
+                  icon: Icons.auto_awesome_rounded,
+                  isSelected: _currentIndex == 2,
+                  selectedColor: accentColor,
+                  unselectedColor: unselectedColor,
+                  showLabel: false,
+                  onTap: () => setState(() => _currentIndex = 2),
+                ),
               ],
             ),
           ),
         ),
-        body: Stack(
-          children: [
-            _HomeBackground(isDark: isDark),
-            SafeArea(
-                child: TabBarView(
-                  children: [
-                    const PrayerTimesTab(),
-                    _AdhkarTab(countsFuture: _countsFuture),
-                    _PlaceholderTab(
-                      title: 'home.tabs.quran'.tr(),
-                      icon: Icons.menu_book_rounded,
-                      isDark: isDark,
-                    ),
-                  ],
+      ),
+      body: Stack(
+        children: [
+          _HomeBackground(isDark: isDark),
+          SafeArea(
+            bottom: false,
+            child: IndexedStack(
+              index: _currentIndex,
+              children: [
+                const PrayerTimesTab(),
+                _PlaceholderTab(
+                  title: 'home.tabs.quran'.tr(),
+                  icon: Icons.menu_book_rounded,
+                  isDark: isDark,
                 ),
+                _AdhkarTab(countsFuture: _countsFuture),
+              ],
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuranFab extends StatelessWidget {
+  const _QuranFab({
+    required this.isDark,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final bool isDark;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final accentColor =
+        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFC58B55);
+    final baseColor = isDark ? const Color(0xFF10243A) : const Color(0xFFF9EFE0);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FloatingActionButton(
+          onPressed: onTap,
+          elevation: 8,
+          backgroundColor: baseColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
+          child: Icon(
+            Icons.menu_book_rounded,
+            color: isSelected ? accentColor : Theme.of(context).iconTheme.color,
+            size: 28,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          'home.tabs.quran'.tr(),
+          style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: isSelected
+                    ? accentColor
+                    : Theme.of(context)
+                        .textTheme
+                        .labelMedium
+                        ?.color
+                        ?.withValues(alpha: 0.7),
+              ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BottomNavItem extends StatelessWidget {
+  const _BottomNavItem({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.selectedColor,
+    required this.unselectedColor,
+    required this.showLabel,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final Color selectedColor;
+  final Color unselectedColor;
+  final bool showLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isSelected ? selectedColor : unselectedColor;
+
+    return Tooltip(
+      message: label,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 22),
+              if (showLabel) ...[
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: color,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
+                        height: 1.0,
+                        fontSize: 10,
+                      ),
+                ),
+              ],
+            ],
+          ),
         ),
       ),
     );
