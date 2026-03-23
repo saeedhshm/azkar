@@ -6,6 +6,7 @@ import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/notifications/notification_service.dart';
+import '../../../../core/widgets/prayer_widget_service.dart';
 import '../../data/models/city_entry.dart';
 import '../../data/services/city_database_service.dart';
 import '../../data/services/location_service.dart';
@@ -23,12 +24,14 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     required NetworkService networkService,
     required CityDatabaseService cityDatabaseService,
     required NotificationService notificationService,
+    required PrayerWidgetService widgetService,
   }) : _prayerService = prayerService,
        _locationService = locationService,
        _settingsProvider = settingsProvider,
        _networkService = networkService,
        _cityDatabaseService = cityDatabaseService,
        _notificationService = notificationService,
+       _widgetService = widgetService,
        super(PrayerTimesState(settings: PrayerSettings.defaults()));
 
   final PrayerService _prayerService;
@@ -37,6 +40,7 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
   final NetworkService _networkService;
   final CityDatabaseService _cityDatabaseService;
   final NotificationService _notificationService;
+  final PrayerWidgetService _widgetService;
 
   Timer? _ticker;
 
@@ -304,6 +308,7 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
 
     final gregorianDate = DateFormat.yMMMMEEEEd().format(DateTime.now());
     final hijri = HijriCalendar.fromDate(DateTime.now());
+    final hijriLine = hijri.toFormat('dd MMMM yyyy');
 
     emit(
       state.copyWith(
@@ -318,7 +323,7 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
         nextPrayerTime: summary.nextPrayerTime,
         countdown: summary.countdown,
         gregorianDate: gregorianDate,
-        hijriDate: hijri.toFormat('dd MMMM yyyy'),
+        hijriDate: hijriLine,
       ),
     );
 
@@ -326,6 +331,19 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
       prayerTimes: summary.prayerTimes,
       soundName: settings.customAdhanSound,
     );
+
+    if (summary.nextPrayer != null &&
+        summary.nextPrayerTime != null &&
+        summary.countdown != null) {
+      await _widgetService.update(
+        nextPrayer: summary.nextPrayer!,
+        nextPrayerTime: summary.nextPrayerTime!,
+        remaining: summary.countdown!,
+        dateLine: gregorianDate,
+        hijriLine: hijriLine,
+        locationLabel: locationLabel ?? settings.manualLabel ?? 'GPS',
+      );
+    }
 
     _startTicker();
   }

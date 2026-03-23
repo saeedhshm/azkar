@@ -23,6 +23,7 @@ import '../../features/prayer_times/data/services/city_database_service.dart';
 import '../../features/prayer_times/presentation/cubit/prayer_times_cubit.dart';
 import '../notifications/notification_service.dart';
 import '../storage/local_storage_service.dart';
+import '../widgets/prayer_widget_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -44,6 +45,9 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<LocationService>(LocationService.new);
   getIt.registerLazySingleton<NetworkService>(NetworkService.new);
   getIt.registerLazySingleton<CityDatabaseService>(CityDatabaseService.new);
+  getIt.registerLazySingleton<PrayerWidgetService>(
+    () => PrayerWidgetService(getIt<LocalStorageService>()),
+  );
 
   getIt.registerLazySingleton<AdhkarLocalDataSource>(AdhkarLocalDataSource.new);
 
@@ -109,6 +113,7 @@ Future<void> setupLocator() async {
       networkService: getIt<NetworkService>(),
       cityDatabaseService: getIt<CityDatabaseService>(),
       notificationService: getIt<NotificationService>(),
+      widgetService: getIt<PrayerWidgetService>(),
     ),
   );
 }
