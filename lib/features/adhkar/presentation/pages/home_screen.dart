@@ -81,8 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: _QuranFab(
         isDark: isDark,
-        isSelected: _currentIndex == 1,
-        onTap: () => setState(() => _currentIndex = 1),
+        onTap: () => context.push('/quran'),
       ),
       bottomNavigationBar: ClipRRect(
         borderRadius: const BorderRadius.vertical(top: Radius.circular(26)),
@@ -119,11 +118,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 _BottomNavItem(
                   label: 'home.tabs.adhkar'.tr(),
                   icon: Icons.auto_awesome_rounded,
-                  isSelected: _currentIndex == 2,
+                  isSelected: _currentIndex == 1,
                   selectedColor: accentColor,
                   unselectedColor: unselectedColor,
                   showLabel: false,
-                  onTap: () => setState(() => _currentIndex = 2),
+                  onTap: () => setState(() => _currentIndex = 1),
                 ),
               ],
             ),
@@ -139,11 +138,6 @@ class _HomeScreenState extends State<HomeScreen> {
               index: _currentIndex,
               children: [
                 const PrayerTimesTab(),
-                _PlaceholderTab(
-                  title: 'home.tabs.quran'.tr(),
-                  icon: Icons.menu_book_rounded,
-                  isDark: isDark,
-                ),
                 _AdhkarTab(countsFuture: _countsFuture),
               ],
             ),
@@ -157,12 +151,10 @@ class _HomeScreenState extends State<HomeScreen> {
 class _QuranFab extends StatelessWidget {
   const _QuranFab({
     required this.isDark,
-    required this.isSelected,
     required this.onTap,
   });
 
   final bool isDark;
-  final bool isSelected;
   final VoidCallback onTap;
 
   @override
@@ -181,7 +173,7 @@ class _QuranFab extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
           child: Icon(
             Icons.menu_book_rounded,
-            color: isSelected ? accentColor : Theme.of(context).iconTheme.color,
+            color: accentColor,
             size: 28,
           ),
         ),
@@ -189,13 +181,7 @@ class _QuranFab extends StatelessWidget {
         Text(
           'home.tabs.quran'.tr(),
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: isSelected
-                    ? accentColor
-                    : Theme.of(context)
-                        .textTheme
-                        .labelMedium
-                        ?.color
-                        ?.withValues(alpha: 0.7),
+                color: accentColor,
               ),
         ),
       ],
@@ -349,77 +335,6 @@ class _AdhkarTab extends StatelessWidget {
           },
         );
       },
-    );
-  }
-}
-
-class _PlaceholderTab extends StatelessWidget {
-  const _PlaceholderTab({
-    required this.title,
-    required this.icon,
-    required this.isDark,
-  });
-
-  final String title;
-  final IconData icon;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final accentColor =
-        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFC58B55);
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(26),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.06)
-                    : Colors.white.withValues(alpha: 0.55),
-                borderRadius: BorderRadius.circular(26),
-                border: Border.all(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.15)
-                      : const Color(0xFFBFA272).withValues(alpha: 0.35),
-                  width: 1.2,
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 28,
-                  vertical: 26,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(icon, size: 42, color: accentColor),
-                    const SizedBox(height: 12),
-                    Text(
-                      title,
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleLarge
-                          ?.copyWith(fontWeight: FontWeight.w700),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'home.placeholder'.tr(),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
