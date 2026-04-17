@@ -21,6 +21,10 @@ import '../../features/prayer_times/data/services/prayer_settings_provider.dart'
 import '../../features/prayer_times/data/services/network_service.dart';
 import '../../features/prayer_times/data/services/city_database_service.dart';
 import '../../features/prayer_times/presentation/cubit/prayer_times_cubit.dart';
+import '../../features/quran/data/datasources/quran_local_data_source.dart';
+import '../../features/quran/data/repositories/quran_repository_impl.dart';
+import '../../features/quran/domain/repositories/quran_repository.dart';
+import '../../features/quran/presentation/cubit/quran_cubit.dart';
 import '../notifications/notification_service.dart';
 import '../storage/local_storage_service.dart';
 import '../widgets/prayer_widget_service.dart';
@@ -47,6 +51,10 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<CityDatabaseService>(CityDatabaseService.new);
   getIt.registerLazySingleton<PrayerWidgetService>(
     () => PrayerWidgetService(getIt<LocalStorageService>()),
+  );
+  getIt.registerLazySingleton<QuranLocalDataSource>(QuranLocalDataSource.new);
+  getIt.registerLazySingleton<QuranRepository>(
+    () => QuranRepositoryImpl(getIt<QuranLocalDataSource>()),
   );
 
   getIt.registerLazySingleton<AdhkarLocalDataSource>(AdhkarLocalDataSource.new);
@@ -116,4 +124,6 @@ Future<void> setupLocator() async {
       widgetService: getIt<PrayerWidgetService>(),
     ),
   );
+
+  getIt.registerFactory<QuranCubit>(() => QuranCubit(getIt<QuranRepository>()));
 }

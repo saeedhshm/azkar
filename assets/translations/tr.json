@@ -277,5 +277,25 @@
       "default_title": "Namaz vakti",
       "default_body": "Namaz vakti."
     }
+  },
+  "quran": {
+    "title": "Kur’an-ı Kerim",
+    "subtitle": "Sakin ve zarif metin mushaf okuyucu",
+    "search_hint": "Sure, ayet veya metin ara",
+    "select_surah": "Sure seç",
+    "surah_index": "Sure dizini",
+    "search_results": "Arama sonuçları",
+    "no_results": "Sonuç bulunamadı.",
+    "ayahs": "ayet",
+    "ayah_number": "Ayet numarası",
+    "jump": "Git",
+    "jump_to_ayah": "Ayete git",
+    "juz": "Cüz",
+    "page": "Sayfa",
+    "meccan": "Mekki",
+    "medinan": "Medeni",
+    "clear_search": "Aramayı temizle",
+    "tap_to_highlight": "Vurgulamak için herhangi bir ayete dokun",
+    "bismillah": "Rahmân ve Rahîm olan Allah’ın adıyla"
   }
 }

@@ -54,6 +54,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/data/adhkar_1500.json
+    - assets/data/quran_uthmani.json
     - assets/data/cities_min.json.gz
     - assets/translations/
   fonts:

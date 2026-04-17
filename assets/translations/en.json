@@ -277,5 +277,25 @@
       "default_title": "Prayer Time",
       "default_body": "It is time for prayer."
     }
+  },
+  "quran": {
+    "title": "Quran",
+    "subtitle": "A refined text Mushaf reader",
+    "search_hint": "Search surah, ayah, or Quran text",
+    "select_surah": "Select Surah",
+    "surah_index": "Surah index",
+    "search_results": "Search results",
+    "no_results": "No results found.",
+    "ayahs": "ayahs",
+    "ayah_number": "Ayah number",
+    "jump": "Jump",
+    "jump_to_ayah": "Jump to ayah",
+    "juz": "Juz",
+    "page": "Page",
+    "meccan": "Meccan",
+    "medinan": "Medinan",
+    "clear_search": "Clear search",
+    "tap_to_highlight": "Tap any ayah to highlight it",
+    "bismillah": "In the name of Allah, the Most Gracious, the Most Merciful"
   }
 }

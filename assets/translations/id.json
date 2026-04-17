@@ -277,5 +277,25 @@
       "default_title": "Waktu salat",
       "default_body": "Saatnya salat."
     }
+  },
+  "quran": {
+    "title": "Al-Qur’an",
+    "subtitle": "Pembaca mushaf teks yang tenang dan elegan",
+    "search_hint": "Cari surah, ayat, atau teks Quran",
+    "select_surah": "Pilih Surah",
+    "surah_index": "Indeks surah",
+    "search_results": "Hasil pencarian",
+    "no_results": "Tidak ada hasil.",
+    "ayahs": "ayat",
+    "ayah_number": "Nomor ayat",
+    "jump": "Buka",
+    "jump_to_ayah": "Buka ayat",
+    "juz": "Juz",
+    "page": "Halaman",
+    "meccan": "Makkiyah",
+    "medinan": "Madaniyah",
+    "clear_search": "Bersihkan pencarian",
+    "tap_to_highlight": "Ketuk ayat untuk menandainya",
+    "bismillah": "Dengan nama Allah Yang Maha Pengasih, Maha Penyayang"
   }
 }

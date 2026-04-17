@@ -3,6 +3,7 @@ class AppConstants {
 
   static const appName = 'Adhkar App';
   static const adhkarAssetPath = 'assets/data/adhkar_1500.json';
+  static const quranAssetPath = 'assets/data/quran_uthmani.json';
 
   static const appBox = 'adhkar_app_box';
   static const favoritesKey = 'favorites';
