@@ -32,13 +32,14 @@ class _PrayerTimeTileState extends State<PrayerTimeTile> {
     final colors = AppThemeColors.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final opacity = widget.isPast && !widget.isCurrent ? 0.72 : 1.0;
-    final currentBg = Color.alphaBlend(
-      theme.colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.12),
-      colors.cardSurface,
-    );
-    final currentFg = theme.colorScheme.onSurface;
-    final badgeBg = theme.colorScheme.primary.withValues(alpha: 0.14);
-    final badgeFg = theme.colorScheme.primary;
+    // New design: current prayer has olive green background with golden accent
+    final currentBg = colors.currentPrayerBg ??
+        Color.alphaBlend(
+          theme.colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.12),
+          colors.cardSurface,
+        );
+    final currentFg = colors.currentPrayerFg ?? theme.colorScheme.onSurface;
+    final badgeFg = isDark ? Colors.white : (colors.accentColor ?? theme.colorScheme.primary);
 
     return Semantics(
       label: '${widget.name}, ${widget.time}',
@@ -59,20 +60,22 @@ class _PrayerTimeTileState extends State<PrayerTimeTile> {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               decoration: BoxDecoration(
                 color: widget.isCurrent ? currentBg : colors.cardSurface,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: widget.isCurrent
-                      ? theme.colorScheme.primary.withValues(
-                          alpha: isDark ? 0.72 : 0.42,
+                      ? (colors.accentColor ?? theme.colorScheme.primary).withValues(
+                          alpha: isDark ? 0.5 : 0.4,
                         )
                       : colors.softBorder,
-                  width: widget.isCurrent ? 1.4 : 1,
+                  width: widget.isCurrent ? 2 : 1,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.16 : 0.06),
-                    blurRadius: widget.isCurrent ? 14 : 8,
-                    offset: const Offset(0, 5),
+                    color: widget.isCurrent
+                        ? (colors.accentColor ?? theme.colorScheme.primary).withValues(alpha: isDark ? 0.3 : 0.2)
+                        : Colors.black.withValues(alpha: isDark ? 0.16 : 0.06),
+                    blurRadius: widget.isCurrent ? 16 : 10,
+                    offset: const Offset(0, 6),
                   ),
                 ],
               ),
@@ -80,23 +83,27 @@ class _PrayerTimeTileState extends State<PrayerTimeTile> {
                 children: [
                   if (widget.isCurrent)
                     PositionedDirectional(
-                      top: 0,
-                      end: 0,
+                      top: 8,
+                      end: 8,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
+                          horizontal: 10,
+                          vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: badgeBg,
-                          borderRadius: BorderRadius.circular(999),
+                          color: isDark ? Colors.white.withValues(alpha: 0.25) : colors.accentColor?.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: isDark ? Colors.white.withValues(alpha: 0.4) : (colors.accentColor ?? badgeFg).withValues(alpha: 0.5),
+                            width: 1,
+                          ),
                         ),
                         child: Text(
                           'common.now'.tr(),
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: badgeFg,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 9,
+                            color: isDark ? Colors.white : (colors.accentColor ?? badgeFg),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 10,
                           ),
                         ),
                       ),

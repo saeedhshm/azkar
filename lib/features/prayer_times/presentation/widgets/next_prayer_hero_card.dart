@@ -54,18 +54,26 @@ class NextPrayerHeroCard extends StatelessWidget {
             colors: [
               colors.heroCardBackground,
               Color.alphaBlend(
-                colors.cardSurfaceTint.withValues(alpha: isDark ? 0.18 : 0.08),
+                (colors.accentColor ?? colors.cardSurfaceTint).withValues(alpha: isDark ? 0.15 : 0.12),
                 colors.heroCardBackground,
               ),
             ],
           ),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: colors.softBorder),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: (colors.accentColor ?? colors.softBorder).withValues(alpha: isDark ? 0.3 : 0.25),
+            width: 1.5,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
+              color: (colors.accentColor ?? Colors.black).withValues(alpha: isDark ? 0.25 : 0.12),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -73,20 +81,21 @@ class NextPrayerHeroCard extends StatelessWidget {
           alignment: Alignment.center,
           children: [
             Positioned(
-              bottom: 22,
+              bottom: 18,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      colors.countdownText.withValues(
-                        alpha: isDark ? 0.22 : 0.12,
+                      (colors.accentColor ?? colors.countdownText).withValues(
+                        alpha: isDark ? 0.35 : 0.22,
                       ),
-                      colors.countdownText.withValues(alpha: 0),
+                      (colors.accentColor ?? colors.countdownText).withValues(alpha: 0),
                     ],
+                    radius: 0.6,
                   ),
                 ),
-                child: const SizedBox(width: 230, height: 80),
+                child: const SizedBox(width: 250, height: 90),
               ),
             ),
             Column(
@@ -196,7 +205,7 @@ class _HeroMetaRow extends StatelessWidget {
                 child: Icon(
                   Icons.location_on,
                   size: 12,
-                  color: Theme.of(context).colorScheme.primary,
+                  color: colors.accentColor ?? Theme.of(context).colorScheme.primary,
                 ),
               ),
               Flexible(

@@ -3,16 +3,18 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  static const _lightBackground = Color(0xFFF8F9FA);
-  static const _lightPrimary = Color(0xFF1B5E20);
-  static const _lightPrimaryContainer = Color(0xFFE8F5E9);
-  static const _lightSecondaryText = Color(0xFF5D4037);
-  static const _lightCountdownText = Color(0xFF2E7D32);
-  static const _darkBackground = Color(0xFF121212);
-  static const _darkPrimary = Color(0xFF4CAF50);
-  static const _darkPrimaryContainer = Color(0xFF1E2A1E);
-  static const _darkSecondaryText = Color(0xFFD7CCC8);
-  static const _darkCountdownText = Color(0xFF81C784);
+  // New Olive Green / Golden Theme Colors
+  static const _lightBackground = Color(0xFFF5F0E6);
+  static const _lightPrimary = Color(0xFF4A5D23);
+  static const _lightPrimaryContainer = Color(0xFFD4DBC4);
+  static const _lightSecondaryText = Color(0xFF5D4E37);
+  static const _lightCountdownText = Color(0xFFB8860B);
+  static const _lightAccent = Color(0xFFD4AF37);
+  static const _darkBackground = Color(0xFF1A1F15);
+  static const _darkPrimary = Color(0xFF8FBC8F);
+  static const _darkPrimaryContainer = Color(0xFF2D3B1F);
+  static const _darkSecondaryText = Color(0xFFD4C4B0);
+  static const _darkCountdownText = Color(0xFFDAA520);
 
   static final ThemeData light = ThemeData(
     useMaterial3: true,
@@ -41,10 +43,13 @@ class AppTheme {
         secondaryText: _lightSecondaryText,
         countdownText: _lightCountdownText,
         prayerIcon: _lightSecondaryText,
-        cardSurface: Color(0xFFFDFCF7),
-        cardSurfaceTint: Color(0xFF496E38),
-        mutedText: Color(0xFF68736A),
-        softBorder: Color(0xFFE2DFD2),
+        cardSurface: Color(0xFFFAF8F3),
+        cardSurfaceTint: Color(0xFF6B7B4C),
+        mutedText: Color(0xFF7A6F5B),
+        softBorder: Color(0xFFD9D4C5),
+        accentColor: _lightAccent,
+        currentPrayerBg: Color(0xFF4A5D23),
+        currentPrayerFg: Colors.white,
       ),
     ],
     textTheme: ThemeData.light().textTheme.apply(
@@ -199,10 +204,13 @@ class AppTheme {
         secondaryText: _darkSecondaryText,
         countdownText: _darkCountdownText,
         prayerIcon: _darkSecondaryText,
-        cardSurface: Color(0xFF17231B),
-        cardSurfaceTint: Color(0xFF1C2F20),
-        mutedText: Color(0xFFB8C2BA),
-        softBorder: Color(0xFF334538),
+        cardSurface: Color(0xFF1E2618),
+        cardSurfaceTint: Color(0xFF2A3A1F),
+        mutedText: Color(0xFFC4B8A5),
+        softBorder: Color(0xFF3D4A35),
+        accentColor: _darkCountdownText,
+        currentPrayerBg: Color(0xFF3D4A2A),
+        currentPrayerFg: Colors.white,
       ),
     ],
     textTheme: ThemeData.dark().textTheme.apply(
@@ -346,6 +354,9 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
     required this.mutedText,
     required this.softBorder,
     this.cardRadius = 24,
+    this.accentColor,
+    this.currentPrayerBg,
+    this.currentPrayerFg,
   });
 
   final Color heroCardBackground;
@@ -357,6 +368,9 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
   final Color mutedText;
   final Color softBorder;
   final double cardRadius;
+  final Color? accentColor;
+  final Color? currentPrayerBg;
+  final Color? currentPrayerFg;
 
   static AppThemeColors of(BuildContext context) {
     return Theme.of(context).extension<AppThemeColors>()!;
@@ -373,6 +387,9 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
     Color? mutedText,
     Color? softBorder,
     double? cardRadius,
+    Color? accentColor,
+    Color? currentPrayerBg,
+    Color? currentPrayerFg,
   }) {
     return AppThemeColors(
       heroCardBackground: heroCardBackground ?? this.heroCardBackground,
@@ -384,6 +401,9 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
       mutedText: mutedText ?? this.mutedText,
       softBorder: softBorder ?? this.softBorder,
       cardRadius: cardRadius ?? this.cardRadius,
+      accentColor: accentColor ?? this.accentColor,
+      currentPrayerBg: currentPrayerBg ?? this.currentPrayerBg,
+      currentPrayerFg: currentPrayerFg ?? this.currentPrayerFg,
     );
   }
 
@@ -407,6 +427,9 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
       mutedText: Color.lerp(mutedText, other.mutedText, t)!,
       softBorder: Color.lerp(softBorder, other.softBorder, t)!,
       cardRadius: cardRadius + (other.cardRadius - cardRadius) * t,
+      accentColor: Color.lerp(accentColor, other.accentColor, t),
+      currentPrayerBg: Color.lerp(currentPrayerBg, other.currentPrayerBg, t),
+      currentPrayerFg: Color.lerp(currentPrayerFg, other.currentPrayerFg, t),
     );
   }
 }

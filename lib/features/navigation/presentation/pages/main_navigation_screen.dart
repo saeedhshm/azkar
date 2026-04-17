@@ -70,6 +70,7 @@ class _ShellNavigationBar extends StatelessWidget {
       _NavItemData(Icons.auto_stories_rounded, 'home.tabs.adhkar'.tr()),
       _NavItemData(Icons.settings_rounded, 'home.tabs.settings'.tr()),
     ];
+    final accentColor = colors.accentColor ?? theme.colorScheme.primary;
 
     return SafeArea(
       top: false,
@@ -89,9 +90,14 @@ class _ShellNavigationBar extends StatelessWidget {
                   border: Border.all(color: colors.softBorder),
                   boxShadow: [
                     BoxShadow(
-                      color: shadowColor.withValues(alpha: isDark ? 0.3 : 0.08),
+                      color: accentColor.withValues(alpha: isDark ? 0.25 : 0.12),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
+                    ),
+                    BoxShadow(
+                      color: shadowColor.withValues(alpha: isDark ? 0.2 : 0.06),
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
@@ -159,10 +165,11 @@ class _CenterNavButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
+    final accentColor = colors.accentColor ?? theme.colorScheme.primary;
     final bg = selected
-        ? theme.colorScheme.primary
-        : theme.colorScheme.primary.withValues(alpha: 0.9);
-    final fg = theme.colorScheme.onPrimary;
+        ? accentColor
+        : accentColor.withValues(alpha: 0.9);
+    final fg = Colors.white;
 
     return Semantics(
       button: true,
@@ -183,8 +190,8 @@ class _CenterNavButton extends StatelessWidget {
                 color: bg,
                 boxShadow: [
                   BoxShadow(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.35),
-                    blurRadius: 18,
+                    color: accentColor.withValues(alpha: 0.45),
+                    blurRadius: 20,
                     offset: const Offset(0, 8),
                   ),
                 ],
@@ -195,7 +202,7 @@ class _CenterNavButton extends StatelessWidget {
             Text(
               item.label,
               style: theme.textTheme.labelSmall?.copyWith(
-                color: selected ? theme.colorScheme.primary : colors.mutedText,
+                color: selected ? accentColor : colors.mutedText,
                 fontWeight: FontWeight.w800,
                 fontSize: 10,
               ),
@@ -224,6 +231,7 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
+    final accentColor = colors.accentColor ?? theme.colorScheme.primary;
     final selected = index == selectedIndex;
 
     return Expanded(
@@ -243,7 +251,7 @@ class _NavItem extends StatelessWidget {
                   item.icon,
                   size: 21,
                   color: selected
-                      ? theme.colorScheme.primary
+                      ? accentColor
                       : colors.mutedText.withValues(alpha: 0.78),
                 ),
                 const SizedBox(height: 3),
@@ -253,7 +261,7 @@ class _NavItem extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.labelSmall?.copyWith(
                     color: selected
-                        ? theme.colorScheme.primary
+                        ? accentColor
                         : colors.mutedText.withValues(alpha: 0.85),
                     fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                     fontSize: 10,
@@ -314,10 +322,11 @@ class _DustPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final random = Random(19);
     final paint = Paint();
-    final color = isDark ? Colors.white : const Color(0xFF5D4037);
+    // Use olive/golden color for dust particles
+    final color = isDark ? const Color(0xFFD4AF37) : const Color(0xFF4A5D23);
 
     for (var i = 0; i < 80; i++) {
-      paint.color = color.withValues(alpha: isDark ? 0.16 : 0.08);
+      paint.color = color.withValues(alpha: isDark ? 0.14 : 0.06);
       canvas.drawCircle(
         Offset(
           random.nextDouble() * size.width,
