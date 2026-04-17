@@ -1,17 +1,19 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'dart:ui' as ui;
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../data/datasources/quran_page_image_cache_service.dart';
 import '../../domain/entities/quran_search_result.dart';
 import '../../domain/entities/quran_surah.dart';
 import '../cubit/quran_cubit.dart';
 import '../cubit/quran_state.dart';
+import '../widgets/quran_mushaf_image_page.dart';
 import '../widgets/quran_search_bar.dart';
 import '../widgets/quran_search_results.dart';
-import '../widgets/quran_surah_page.dart';
 import '../widgets/quran_surah_sheet.dart';
 
 class QuranScreen extends StatefulWidget {
@@ -64,6 +66,7 @@ class _QuranScreenState extends State<QuranScreen> {
                 onSearchChanged: context.read<QuranCubit>().search,
                 onClearSearch: context.read<QuranCubit>().clearSearch,
                 onResultTap: (result) => _jumpToResult(context, state, result),
+                imageCacheService: getIt<QuranPageImageCacheService>(),
               ),
             ),
           );
@@ -87,9 +90,10 @@ class _QuranScreenState extends State<QuranScreen> {
     if (selection == null || !context.mounted) {
       return;
     }
+    final pageNumber = _pageForSelection(state.surahs, selection);
     _searchController.clear();
     cubit.clearSearch();
-    await _animateToSurah(state.surahs, selection.surahNumber);
+    await _animateToPageNumber(pageNumber);
     cubit.selectSurah(selection.surahNumber, ayahNumber: selection.ayahNumber);
   }
 
@@ -101,24 +105,22 @@ class _QuranScreenState extends State<QuranScreen> {
     if (selectedSurah == null) {
       return;
     }
-    final controller = TextEditingController();
+    var ayahInput = '';
     final ayahNumber = await showDialog<int>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
           title: Text('quran.jump_to_ayah'.tr()),
           content: TextField(
-            controller: controller,
             autofocus: true,
             keyboardType: TextInputType.number,
+            onChanged: (value) => ayahInput = value,
             decoration: InputDecoration(
               labelText: 'quran.ayah_number'.tr(),
               helperText: '1 - ${selectedSurah.ayahCount}',
             ),
-            onSubmitted: (_) => Navigator.pop(
-              dialogContext,
-              int.tryParse(controller.text.trim()),
-            ),
+            onSubmitted: (value) =>
+                Navigator.pop(dialogContext, int.tryParse(value.trim())),
           ),
           actions: [
             TextButton(
@@ -126,21 +128,31 @@ class _QuranScreenState extends State<QuranScreen> {
               child: Text('common.cancel'.tr()),
             ),
             FilledButton(
-              onPressed: () => Navigator.pop(
-                dialogContext,
-                int.tryParse(controller.text.trim()),
-              ),
+              onPressed: () =>
+                  Navigator.pop(dialogContext, int.tryParse(ayahInput.trim())),
               child: Text('quran.jump'.tr()),
             ),
           ],
         );
       },
     );
-    controller.dispose();
     if (ayahNumber == null || !context.mounted) {
       return;
     }
     final safeAyah = ayahNumber.clamp(1, selectedSurah.ayahCount).toInt();
+    int? pageNumber;
+    for (final ayah in selectedSurah.ayahs) {
+      if (ayah.numberInSurah == safeAyah) {
+        pageNumber = ayah.page;
+        break;
+      }
+    }
+    if (pageNumber != null) {
+      await _animateToPageNumber(pageNumber);
+    }
+    if (!context.mounted) {
+      return;
+    }
     context.read<QuranCubit>().selectAyah(safeAyah);
   }
 
@@ -152,20 +164,51 @@ class _QuranScreenState extends State<QuranScreen> {
     final cubit = context.read<QuranCubit>();
     _searchController.clear();
     cubit.clearSearch();
-    await _animateToSurah(state.surahs, result.surah.number);
+    await _animateToPageNumber(result.ayah.page);
     cubit.selectSurah(
       result.surah.number,
       ayahNumber: result.ayah.numberInSurah,
     );
   }
 
-  Future<void> _animateToSurah(List<QuranSurah> surahs, int surahNumber) async {
-    final index = surahs.indexWhere((surah) => surah.number == surahNumber);
-    if (index < 0 || !_pageController.hasClients) {
+  int _pageForSelection(
+    List<QuranSurah> surahs,
+    QuranSurahSelection selection,
+  ) {
+    QuranSurah? selectedSurah;
+    for (final surah in surahs) {
+      if (surah.number == selection.surahNumber) {
+        selectedSurah = surah;
+        break;
+      }
+    }
+    if (selectedSurah == null || selectedSurah.ayahs.isEmpty) {
+      return QuranPageImageCacheService.firstPage;
+    }
+    final ayahNumber = selection.ayahNumber;
+    if (ayahNumber == null) {
+      return selectedSurah.ayahs.first.page;
+    }
+    for (final ayah in selectedSurah.ayahs) {
+      if (ayah.numberInSurah == ayahNumber) {
+        return ayah.page;
+      }
+    }
+    return selectedSurah.ayahs.first.page;
+  }
+
+  Future<void> _animateToPageNumber(int pageNumber) async {
+    final safePage = pageNumber
+        .clamp(
+          QuranPageImageCacheService.firstPage,
+          QuranPageImageCacheService.lastPage,
+        )
+        .toInt();
+    if (!_pageController.hasClients) {
       return;
     }
     await _pageController.animateToPage(
-      index,
+      safePage - 1,
       duration: const Duration(milliseconds: 520),
       curve: Curves.easeOutCubic,
     );
@@ -248,6 +291,7 @@ class _QuranBody extends StatelessWidget {
     required this.onSearchChanged,
     required this.onClearSearch,
     required this.onResultTap,
+    required this.imageCacheService,
   });
 
   final QuranState state;
@@ -256,6 +300,7 @@ class _QuranBody extends StatelessWidget {
   final ValueChanged<String> onSearchChanged;
   final VoidCallback onClearSearch;
   final ValueChanged<QuranSearchResult> onResultTap;
+  final QuranPageImageCacheService imageCacheService;
 
   @override
   Widget build(BuildContext context) {
@@ -296,6 +341,7 @@ class _QuranBody extends StatelessWidget {
                         key: const ValueKey('quran-reader'),
                         state: state,
                         pageController: pageController,
+                        imageCacheService: imageCacheService,
                       ),
               ),
             ),
@@ -310,10 +356,12 @@ class _QuranPageView extends StatelessWidget {
     super.key,
     required this.state,
     required this.pageController,
+    required this.imageCacheService,
   });
 
   final QuranState state;
   final PageController pageController;
+  final QuranPageImageCacheService imageCacheService;
 
   @override
   Widget build(BuildContext context) {
@@ -321,23 +369,18 @@ class _QuranPageView extends StatelessWidget {
     return PageView.builder(
       controller: pageController,
       physics: const BouncingScrollPhysics(),
-      itemCount: state.surahs.length,
+      itemCount: QuranPageImageCacheService.lastPage,
+      reverse: Directionality.of(context) == ui.TextDirection.rtl,
       onPageChanged: (index) {
-        final surah = state.surahs[index];
-        if (surah.number != cubit.state.selectedSurahNumber) {
-          cubit.selectSurah(surah.number);
-        }
+        cubit.selectPage(index + 1);
       },
       itemBuilder: (context, index) {
-        final surah = state.surahs[index];
+        final pageNumber = index + 1;
         return Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 104),
-          child: QuranSurahPage(
-            surah: surah,
-            selectedAyahNumber: state.selectedSurahNumber == surah.number
-                ? state.selectedAyahNumber
-                : null,
-            onAyahTap: (ayah) => cubit.selectAyah(ayah.numberInSurah),
+          child: QuranMushafImagePage(
+            pageNumber: pageNumber,
+            imageCacheService: imageCacheService,
           ),
         );
       },
@@ -354,16 +397,13 @@ class _ReadingHint extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
-    final surah = state.selectedSurah;
     return Row(
       children: [
-        Icon(Icons.touch_app_rounded, size: 16, color: colors.mutedText),
+        Icon(Icons.zoom_out_map_rounded, size: 16, color: colors.mutedText),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
-            surah == null
-                ? 'quran.tap_to_highlight'.tr()
-                : '${'quran.tap_to_highlight'.tr()} • ${'quran.page'.tr()} ${surah.ayahs.isEmpty ? '-' : surah.ayahs.first.page}',
+            '${'quran.image_reader_hint'.tr()} • ${'quran.page'.tr()} ${state.selectedPageNumber}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: theme.textTheme.labelMedium?.copyWith(

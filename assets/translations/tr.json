@@ -296,6 +296,9 @@
     "medinan": "Medeni",
     "clear_search": "Aramayı temizle",
     "tap_to_highlight": "Vurgulamak için herhangi bir ayete dokun",
-    "bismillah": "Rahmân ve Rahîm olan Allah’ın adıyla"
+    "bismillah": "Rahmân ve Rahîm olan Allah’ın adıyla",
+    "image_reader_hint": "Sayfaları kaydır ve yakınlaştır",
+    "downloading_page": "Sayfa {page} indiriliyor...",
+    "download_page_error": "Bu mushaf sayfası indirilemedi. İnternet bağlantınızı kontrol edip tekrar deneyin."
   }
 }

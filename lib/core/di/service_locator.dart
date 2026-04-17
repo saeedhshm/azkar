@@ -22,6 +22,7 @@ import '../../features/prayer_times/data/services/network_service.dart';
 import '../../features/prayer_times/data/services/city_database_service.dart';
 import '../../features/prayer_times/presentation/cubit/prayer_times_cubit.dart';
 import '../../features/quran/data/datasources/quran_local_data_source.dart';
+import '../../features/quran/data/datasources/quran_page_image_cache_service.dart';
 import '../../features/quran/data/repositories/quran_repository_impl.dart';
 import '../../features/quran/domain/repositories/quran_repository.dart';
 import '../../features/quran/presentation/cubit/quran_cubit.dart';
@@ -53,6 +54,9 @@ Future<void> setupLocator() async {
     () => PrayerWidgetService(getIt<LocalStorageService>()),
   );
   getIt.registerLazySingleton<QuranLocalDataSource>(QuranLocalDataSource.new);
+  getIt.registerLazySingleton<QuranPageImageCacheService>(
+    QuranPageImageCacheService.new,
+  );
   getIt.registerLazySingleton<QuranRepository>(
     () => QuranRepositoryImpl(getIt<QuranLocalDataSource>()),
   );

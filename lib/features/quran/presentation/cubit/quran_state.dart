@@ -13,6 +13,7 @@ class QuranState extends Equatable {
     required this.surahs,
     required this.selectedSurahNumber,
     required this.selectedAyahNumber,
+    required this.selectedPageNumber,
     required this.query,
     required this.searchResults,
     required this.audioStatus,
@@ -24,6 +25,7 @@ class QuranState extends Equatable {
       surahs = const <QuranSurah>[],
       selectedSurahNumber = 1,
       selectedAyahNumber = null,
+      selectedPageNumber = 1,
       query = '',
       searchResults = const <QuranSearchResult>[],
       audioStatus = QuranAudioStatus.idle,
@@ -33,6 +35,7 @@ class QuranState extends Equatable {
   final List<QuranSurah> surahs;
   final int selectedSurahNumber;
   final int? selectedAyahNumber;
+  final int selectedPageNumber;
   final String query;
   final List<QuranSearchResult> searchResults;
   final QuranAudioStatus audioStatus;
@@ -54,6 +57,7 @@ class QuranState extends Equatable {
     List<QuranSurah>? surahs,
     int? selectedSurahNumber,
     Object? selectedAyahNumber = _sentinel,
+    int? selectedPageNumber,
     String? query,
     List<QuranSearchResult>? searchResults,
     QuranAudioStatus? audioStatus,
@@ -66,6 +70,7 @@ class QuranState extends Equatable {
       selectedAyahNumber: selectedAyahNumber == _sentinel
           ? this.selectedAyahNumber
           : selectedAyahNumber as int?,
+      selectedPageNumber: selectedPageNumber ?? this.selectedPageNumber,
       query: query ?? this.query,
       searchResults: searchResults ?? this.searchResults,
       audioStatus: audioStatus ?? this.audioStatus,
@@ -79,6 +84,7 @@ class QuranState extends Equatable {
     surahs,
     selectedSurahNumber,
     selectedAyahNumber,
+    selectedPageNumber,
     query,
     searchResults,
     audioStatus,
