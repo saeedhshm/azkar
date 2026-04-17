@@ -27,8 +27,8 @@ class AdhkarApp extends StatelessWidget {
           return MaterialApp.router(
             title: 'app.name'.tr(),
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.lightTheme,
-            darkTheme: AppTheme.darkTheme,
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
             themeMode: themeMode,
             routerConfig: AppRouter.router,
             localizationsDelegates: context.localizationDelegates,

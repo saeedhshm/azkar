@@ -332,13 +332,13 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
       soundName: settings.customAdhanSound,
     );
 
-    if (summary.nextPrayer != null &&
-        summary.nextPrayerTime != null &&
-        summary.countdown != null) {
+    final nextPrayerTime = summary.nextPrayerTime;
+    final countdown = summary.countdown;
+    if (nextPrayerTime != null && countdown != null) {
       await _widgetService.update(
-        nextPrayer: summary.nextPrayer!,
-        nextPrayerTime: summary.nextPrayerTime!,
-        remaining: summary.countdown!,
+        nextPrayer: summary.nextPrayer,
+        nextPrayerTime: nextPrayerTime,
+        remaining: countdown,
         dateLine: gregorianDate,
         hijriLine: hijriLine,
         locationLabel: locationLabel ?? settings.manualLabel ?? 'GPS',

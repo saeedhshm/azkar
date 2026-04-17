@@ -19,6 +19,7 @@
     "reset": "Sıfırla",
     "count": "Adet",
     "completed": "Tamamlandı",
+    "now": "ŞİMDİ",
     "save": "Kaydet",
     "cancel": "İptal",
     "retry": "Tekrar dene",
@@ -49,15 +50,21 @@
       }
     },
     "tabs": {
+      "home": "Ana Sayfa",
       "prayer_times": "Namaz Vakitleri",
       "adhkar": "Zikirler",
-      "quran": "Kur'an-ı Kerim"
+      "quran": "Kur'an-ı Kerim",
+      "qibla": "Kıble",
+      "settings": "Ayarlar",
+      "more": "Daha Fazla"
     },
     "placeholder": "Yakında"
   },
   "prayer_times": {
     "date": "Bugünün tarihi",
     "next_prayer": "Sonraki namaz",
+    "current_context": "Şu anda {prayer} vaktindesiniz",
+    "next_at": "{prayer} {time}",
     "settings": "Ayarlar",
     "method": "Hesaplama yöntemi",
     "madhab_label": "Mezhep",
@@ -223,8 +230,13 @@
     },
     "appearance": "Görünüm",
     "dark_mode": "Karanlık mod",
+    "theme_mode": "Tema modu",
+    "theme_system": "Sistem",
+    "theme_light": "Açık",
+    "theme_dark": "Koyu",
     "time_format": "Saat biçimi",
     "use_24h": "24 saat biçimi",
+    "prayer_calculation": "Namaz hesaplaması",
     "reminders": "Hatırlatmalar",
     "enable_notifications": "Bildirimleri etkinleştir",
     "morning_reminder": "Sabah hatırlatması",

@@ -19,6 +19,7 @@
     "reset": "إعادة تعيين",
     "count": "العدد",
     "completed": "تم",
+    "now": "الآن",
     "save": "حفظ",
     "cancel": "إلغاء",
     "retry": "إعادة المحاولة",
@@ -49,15 +50,21 @@
       }
     },
     "tabs": {
+      "home": "الرئيسية",
       "prayer_times": "مواقيت الصلاة",
       "adhkar": "الأذكار",
-      "quran": "القرآن الكريم"
+      "quran": "القرآن الكريم",
+      "qibla": "القبلة",
+      "settings": "الإعدادات",
+      "more": "المزيد"
     },
     "placeholder": "قريبًا"
   },
   "prayer_times": {
     "date": "تاريخ اليوم",
     "next_prayer": "الصلاة القادمة",
+    "current_context": "أنت الآن في وقت {prayer}",
+    "next_at": "{prayer} في {time}",
     "settings": "الإعدادات",
     "method": "طريقة الحساب",
     "madhab_label": "المذهب",
@@ -223,8 +230,13 @@
     },
     "appearance": "المظهر",
     "dark_mode": "الوضع الداكن",
+    "theme_mode": "وضع المظهر",
+    "theme_system": "النظام",
+    "theme_light": "فاتح",
+    "theme_dark": "داكن",
     "time_format": "تنسيق الوقت",
     "use_24h": "نظام 24 ساعة",
+    "prayer_calculation": "حساب مواقيت الصلاة",
     "reminders": "التذكيرات",
     "enable_notifications": "تفعيل الإشعارات",
     "morning_reminder": "تذكير الصباح",

@@ -18,11 +18,7 @@ class PrayerService {
     adjustments.maghrib = settings.offsets[Prayer.maghrib] ?? 0;
     adjustments.isha = settings.offsets[Prayer.isha] ?? 0;
 
-    return PrayerTimes(
-      coordinates,
-      DateComponents.from(date),
-      params,
-    );
+    return PrayerTimes(coordinates, DateComponents.from(date), params);
   }
 
   PrayerTimeSummary buildSummary({
@@ -52,7 +48,7 @@ class PrayerService {
     }
 
     final currentPrayer = times.currentPrayer();
-    final countdown = nextTime?.difference(now);
+    final countdown = nextTime.difference(now);
 
     return PrayerTimeSummary(
       prayerTimes: times,

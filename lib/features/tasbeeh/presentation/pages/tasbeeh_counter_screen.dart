@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../cubit/tasbeeh_cubit.dart';
 import '../cubit/tasbeeh_state.dart';
 
@@ -30,8 +31,7 @@ class TasbeehCounterScreen extends StatelessWidget {
             }
 
             final isDark = Theme.of(context).brightness == Brightness.dark;
-            final glowColor =
-                isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
+            final glowColor = AppThemeColors.of(context).countdownText;
 
             return Stack(
               children: [
@@ -49,7 +49,6 @@ class TasbeehCounterScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               _GlassPanel(
-                                isDark: isDark,
                                 child: Column(
                                   children: [
                                     Text(
@@ -76,10 +75,8 @@ class TasbeehCounterScreen extends StatelessWidget {
                                 width: min(maxWidth, 320),
                                 child: _GlowButton(
                                   enabled: true,
-                                  onTap:
-                                      () => context
-                                          .read<TasbeehCubit>()
-                                          .increment(),
+                                  onTap: () =>
+                                      context.read<TasbeehCubit>().increment(),
                                   label: Text('tasbeeh.tap_to_count'.tr()),
                                 ),
                               ),
@@ -89,19 +86,14 @@ class TasbeehCounterScreen extends StatelessWidget {
                                 child: _OutlineGlowButton(
                                   label: Text('common.reset'.tr()),
                                   icon: Icons.refresh,
-                                  isDark: isDark,
-                                  onTap:
-                                      () => context
-                                          .read<TasbeehCubit>()
-                                          .reset(),
+                                  onTap: () =>
+                                      context.read<TasbeehCubit>().reset(),
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 '${'reader.remaining'.tr()}: ${state.count}',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
+                                style: Theme.of(context).textTheme.bodyMedium
                                     ?.copyWith(
                                       color: glowColor.withValues(alpha: 0.7),
                                     ),
@@ -129,22 +121,27 @@ class _TasbeehBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gradient = isDark
-        ? const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF0A1220), Color(0xFF0F1C2E), Color(0xFF071A1B)],
-          )
-        : const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFF6F0E5), Color(0xFFF2E7D6), Color(0xFFEADCC4)],
-          );
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+    final gradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        theme.scaffoldBackgroundColor,
+        Color.alphaBlend(
+          colors.heroCardBackground.withValues(alpha: isDark ? 0.08 : 0.35),
+          theme.scaffoldBackgroundColor,
+        ),
+      ],
+    );
 
     return DecoratedBox(
       decoration: BoxDecoration(gradient: gradient),
       child: CustomPaint(
-        painter: _SoftDustPainter(isDark: isDark),
+        painter: _SoftDustPainter(
+          isDark: isDark,
+          glowColor: isDark ? colors.countdownText : colors.heroCardBackground,
+        ),
         child: Container(),
       ),
     );
@@ -152,9 +149,10 @@ class _TasbeehBackground extends StatelessWidget {
 }
 
 class _SoftDustPainter extends CustomPainter {
-  _SoftDustPainter({required this.isDark});
+  _SoftDustPainter({required this.isDark, required this.glowColor});
 
   final bool isDark;
+  final Color glowColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -168,8 +166,8 @@ class _SoftDustPainter extends CustomPainter {
       final radius = random.nextDouble() * 1.2 + 0.2;
       final opacity = baseOpacity + random.nextDouble() * 0.4;
       final paint = Paint()
-        ..color = (isDark ? Colors.white : const Color(0xFFB48A45)).withValues(
-          alpha: opacity,
+        ..color = (isDark ? Colors.white : const Color(0xFF5D4037)).withValues(
+          alpha: opacity * 0.45,
         );
       canvas.drawCircle(Offset(dx, dy), radius, paint);
     }
@@ -178,14 +176,8 @@ class _SoftDustPainter extends CustomPainter {
       ..shader =
           RadialGradient(
             colors: isDark
-                ? [
-                    const Color(0xFF3BE8E8).withValues(alpha: 0.18),
-                    Colors.transparent,
-                  ]
-                : [
-                    const Color(0xFFB8862B).withValues(alpha: 0.2),
-                    Colors.transparent,
-                  ],
+                ? [glowColor.withValues(alpha: 0.16), Colors.transparent]
+                : [glowColor.withValues(alpha: 0.55), Colors.transparent],
           ).createShader(
             Rect.fromCircle(
               center: Offset(size.width * 0.5, size.height * 0.7),
@@ -200,19 +192,15 @@ class _SoftDustPainter extends CustomPainter {
 }
 
 class _GlassPanel extends StatelessWidget {
-  const _GlassPanel({required this.child, required this.isDark});
+  const _GlassPanel({required this.child});
 
   final Widget child;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = isDark
-        ? Colors.white.withValues(alpha: 0.15)
-        : const Color(0xFFBFA272).withValues(alpha: 0.35);
-    final background = isDark
-        ? Colors.white.withValues(alpha: 0.06)
-        : Colors.white.withValues(alpha: 0.55);
+    final colors = AppThemeColors.of(context);
+    final borderColor = colors.softBorder;
+    final background = colors.cardSurface;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(26),
@@ -247,19 +235,20 @@ class _CountRing extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final glowColor =
-        isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
-    final gradient = isDark
-        ? const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF0F3B44), Color(0xFF0B6B7B)],
-          )
-        : const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFFF3D6A3), Color(0xFFC9904B)],
-          );
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+    final glowColor = colors.countdownText;
+    final gradient = LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        theme.colorScheme.primary,
+        Color.alphaBlend(
+          colors.countdownText.withValues(alpha: isDark ? 0.45 : 0.18),
+          theme.colorScheme.primary,
+        ),
+      ],
+    );
 
     return Container(
       width: size,
@@ -278,10 +267,7 @@ class _CountRing extends StatelessWidget {
             blurRadius: 40,
           ),
         ],
-        border: Border.all(
-          color: glowColor.withValues(alpha: 0.7),
-          width: 2.2,
-        ),
+        border: Border.all(color: glowColor.withValues(alpha: 0.7), width: 2.2),
       ),
       child: Container(
         margin: const EdgeInsets.all(10),
@@ -297,9 +283,9 @@ class _CountRing extends StatelessWidget {
           child: Text(
             '$count',
             style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                  color: isDark ? Colors.white : const Color(0xFF3E2B1B),
-                  fontWeight: FontWeight.w700,
-                ),
+              color: theme.colorScheme.onPrimary,
+              fontWeight: FontWeight.w700,
+            ),
           ),
         ),
       ),
@@ -320,17 +306,19 @@ class _GlowButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final glowColor = isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
-    final metallicStart = isDark
-        ? const Color(0xFF4A5568).withValues(alpha: 0.9)
-        : const Color(0xFFF5E6D3).withValues(alpha: 0.95);
-    final metallicMid = isDark
-        ? const Color(0xFF2D3748).withValues(alpha: 0.95)
-        : const Color(0xFFE8D4B8).withValues(alpha: 0.98);
-    final metallicEnd = isDark
-        ? const Color(0xFF1A202C).withValues(alpha: 0.9)
-        : const Color(0xFFD4B896).withValues(alpha: 0.95);
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final glowColor = theme.colorScheme.primary;
+    final metallicStart = Color.alphaBlend(
+      colors.countdownText.withValues(alpha: isDark ? 0.18 : 0.08),
+      theme.colorScheme.primary,
+    );
+    final metallicMid = theme.colorScheme.primary;
+    final metallicEnd = Color.alphaBlend(
+      Colors.black.withValues(alpha: isDark ? 0.18 : 0.08),
+      theme.colorScheme.primary,
+    );
 
     return SizedBox(
       height: 68,
@@ -427,7 +415,9 @@ class _GlowButton extends StatelessWidget {
                       child: Center(
                         child: DefaultTextStyle(
                           style: TextStyle(
-                            color: enabled ? glowColor : Colors.grey.shade400,
+                            color: enabled
+                                ? theme.colorScheme.onPrimary
+                                : colors.mutedText,
                             fontWeight: FontWeight.w600,
                             fontSize: 18,
                           ),
@@ -450,35 +440,27 @@ class _OutlineGlowButton extends StatelessWidget {
   const _OutlineGlowButton({
     required this.label,
     required this.icon,
-    required this.isDark,
     required this.onTap,
   });
 
   final Widget label;
   final IconData icon;
-  final bool isDark;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final glowColor = isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+    final glowColor = theme.colorScheme.primary;
 
     return Container(
       height: 46,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: glowColor.withValues(alpha: 0.6),
-          width: 1.4,
-        ),
-        color: isDark
-            ? Colors.white.withValues(alpha: 0.05)
-            : Colors.white.withValues(alpha: 0.45),
+        border: Border.all(color: glowColor.withValues(alpha: 0.6), width: 1.4),
+        color: colors.cardSurface,
         boxShadow: [
-          BoxShadow(
-            color: glowColor.withValues(alpha: 0.2),
-            blurRadius: 10,
-          ),
+          BoxShadow(color: glowColor.withValues(alpha: 0.2), blurRadius: 10),
         ],
       ),
       child: Material(

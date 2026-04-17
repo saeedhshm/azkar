@@ -19,6 +19,7 @@
     "reset": "Atur Ulang",
     "count": "Jumlah",
     "completed": "Selesai",
+    "now": "SEKARANG",
     "save": "Simpan",
     "cancel": "Batal",
     "retry": "Coba lagi",
@@ -49,15 +50,21 @@
       }
     },
     "tabs": {
+      "home": "Beranda",
       "prayer_times": "Waktu Salat",
       "adhkar": "Dzikir",
-      "quran": "Al-Qur'an"
+      "quran": "Al-Qur'an",
+      "qibla": "Kiblat",
+      "settings": "Pengaturan",
+      "more": "Lainnya"
     },
     "placeholder": "Segera hadir"
   },
   "prayer_times": {
     "date": "Tanggal hari ini",
     "next_prayer": "Salat berikutnya",
+    "current_context": "Sekarang Anda berada di waktu {prayer}",
+    "next_at": "{prayer} pukul {time}",
     "settings": "Pengaturan",
     "method": "Metode perhitungan",
     "madhab_label": "Mazhab",
@@ -223,8 +230,13 @@
     },
     "appearance": "Tampilan",
     "dark_mode": "Mode gelap",
+    "theme_mode": "Mode tema",
+    "theme_system": "Sistem",
+    "theme_light": "Terang",
+    "theme_dark": "Gelap",
     "time_format": "Format waktu",
     "use_24h": "Format 24 jam",
+    "prayer_calculation": "Perhitungan salat",
     "reminders": "Pengingat",
     "enable_notifications": "Aktifkan notifikasi",
     "morning_reminder": "Pengingat pagi",

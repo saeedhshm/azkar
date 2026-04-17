@@ -8,6 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../cubit/reader_cubit.dart';
 import '../cubit/reader_state.dart';
 
@@ -45,6 +46,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final appColors = AppThemeColors.of(context);
 
     return BlocProvider<ReaderCubit>(
       create: (_) => getIt<ReaderCubit>()
@@ -62,7 +64,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
         ),
         body: Stack(
           children: [
-            _ReaderBackground(isDark: isDark),
+            _ReaderBackground(isDark: isDark, colors: appColors),
             SafeArea(
               child: BlocBuilder<ReaderCubit, ReaderState>(
                 builder: (context, state) {
@@ -88,14 +90,8 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                   final done = (total - state.remainingCount).clamp(0, total);
                   final progress = total == 0 ? 0.0 : done / total;
                   final percent = (progress * 100).clamp(0, 100).round();
-                  const isCurrentAudioPlaying = false;
 
-                  final accent = isDark
-                      ? const Color(0xFF6EE7E8)
-                      : const Color(0xFFB8862B);
-                  final accentDeep = isDark
-                      ? const Color(0xFF0FB9B1)
-                      : const Color(0xFF8A6422);
+                  final accent = theme.colorScheme.primary;
 
                   return LayoutBuilder(
                     builder: (context, constraints) {
@@ -111,7 +107,6 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               _GlassCard(
-                                isDark: isDark,
                                 child: Column(
                                   children: [
                                     Text(
@@ -119,9 +114,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                       style: theme.textTheme.titleSmall
                                           ?.copyWith(
                                             letterSpacing: 1.2,
-                                            color: isDark
-                                                ? Colors.white70
-                                                : Colors.black54,
+                                            color: appColors.mutedText,
                                           ),
                                     ),
                                     const SizedBox(height: 12),
@@ -137,9 +130,8 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                         style: theme.textTheme.headlineSmall
                                             ?.copyWith(
                                               height: 1.8,
-                                              color: isDark
-                                                  ? Colors.white
-                                                  : const Color(0xFF1D2530),
+                                              color:
+                                                  theme.colorScheme.onSurface,
                                             ),
                                       ),
                                     ),
@@ -150,25 +142,20 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                       ),
                                       style: theme.textTheme.bodyMedium
                                           ?.copyWith(
-                                            color: isDark
-                                                ? Colors.white70
-                                                : Colors.black54,
+                                            color: appColors.mutedText,
                                           ),
                                     ),
                                     const SizedBox(height: 18),
                                     _ProgressBar(
                                       progress: progress,
                                       accent: accent,
-                                      isDark: isDark,
                                     ),
                                     const SizedBox(height: 10),
                                     Text(
                                       '$percent%',
                                       style: theme.textTheme.titleMedium
                                           ?.copyWith(
-                                            color: isDark
-                                                ? Colors.white70
-                                                : Colors.black54,
+                                            color: appColors.mutedText,
                                           ),
                                     ),
                                     if (current.description.isNotEmpty)
@@ -179,9 +166,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                           textAlign: TextAlign.center,
                                           style: theme.textTheme.bodySmall
                                               ?.copyWith(
-                                                color: isDark
-                                                    ? Colors.white60
-                                                    : Colors.black45,
+                                                color: appColors.mutedText,
                                               ),
                                         ),
                                       ),
@@ -192,9 +177,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                           current.reference,
                                           style: theme.textTheme.bodySmall
                                               ?.copyWith(
-                                                color: isDark
-                                                    ? Colors.white60
-                                                    : Colors.black45,
+                                                color: appColors.mutedText,
                                               ),
                                         ),
                                       ),
@@ -209,12 +192,10 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                           .read<ReaderCubit>()
                                           .decrementCounter()
                                     : null,
-                                accent: accent,
-                                accentDeep: accentDeep,
                                 label: Text(
                                   'reader.tasbeeh_button'.tr(),
                                   style: theme.textTheme.titleMedium?.copyWith(
-                                    color: isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574),
+                                    color: theme.colorScheme.onPrimary,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -226,9 +207,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                     : 'reader.completed'.tr(),
                                 textAlign: TextAlign.center,
                                 style: theme.textTheme.titleSmall?.copyWith(
-                                  color: isDark
-                                      ? Colors.white70
-                                      : Colors.black54,
+                                  color: appColors.mutedText,
                                 ),
                               ),
                               const SizedBox(height: 18),
@@ -238,10 +217,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                 children: [
                                   _ActionCircle(
                                     onTap: null,
-                                    icon: isCurrentAudioPlaying
-                                        ? Icons.stop_circle
-                                        : Icons.volume_up_rounded,
-                                    accent: accent,
+                                    icon: Icons.volume_up_rounded,
                                     isDark: isDark,
                                   ),
                                   _ActionCircle(
@@ -253,20 +229,17 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                                     icon: isFavorite
                                         ? Icons.star_rounded
                                         : Icons.star_border_rounded,
-                                    accent: accent,
                                     isDark: isDark,
                                   ),
                                   _ActionCircle(
                                     onTap: () =>
                                         _copyText(context, current.text),
                                     icon: Icons.copy_all_rounded,
-                                    accent: accent,
                                     isDark: isDark,
                                   ),
                                   _ActionCircle(
                                     onTap: () => _shareText(current.text),
                                     icon: Icons.share_rounded,
-                                    accent: accent,
                                     isDark: isDark,
                                   ),
                                 ],
@@ -302,28 +275,33 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
 }
 
 class _ReaderBackground extends StatelessWidget {
-  const _ReaderBackground({required this.isDark});
+  const _ReaderBackground({required this.isDark, required this.colors});
 
   final bool isDark;
+  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
-    final gradient = isDark
-        ? const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF0A1220), Color(0xFF0F1C2E), Color(0xFF071A1B)],
-          )
-        : const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFF6F0E5), Color(0xFFF2E7D6), Color(0xFFEADCC4)],
-          );
+    final theme = Theme.of(context);
+    final gradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        theme.scaffoldBackgroundColor,
+        Color.alphaBlend(
+          colors.heroCardBackground.withValues(alpha: isDark ? 0.08 : 0.35),
+          theme.scaffoldBackgroundColor,
+        ),
+      ],
+    );
 
     return DecoratedBox(
       decoration: BoxDecoration(gradient: gradient),
       child: CustomPaint(
-        painter: _StarFieldPainter(isDark: isDark),
+        painter: _StarFieldPainter(
+          isDark: isDark,
+          glowColor: isDark ? colors.countdownText : colors.heroCardBackground,
+        ),
         child: Container(),
       ),
     );
@@ -331,9 +309,10 @@ class _ReaderBackground extends StatelessWidget {
 }
 
 class _StarFieldPainter extends CustomPainter {
-  _StarFieldPainter({required this.isDark});
+  _StarFieldPainter({required this.isDark, required this.glowColor});
 
   final bool isDark;
+  final Color glowColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -347,8 +326,8 @@ class _StarFieldPainter extends CustomPainter {
       final radius = random.nextDouble() * 1.4 + 0.3;
       final opacity = baseOpacity + random.nextDouble() * 0.4;
       final paint = Paint()
-        ..color = (isDark ? Colors.white : const Color(0xFFB48A45)).withValues(
-          alpha: opacity,
+        ..color = (isDark ? Colors.white : const Color(0xFF5D4037)).withValues(
+          alpha: opacity * 0.45,
         );
       canvas.drawCircle(Offset(dx, dy), radius, paint);
     }
@@ -357,14 +336,8 @@ class _StarFieldPainter extends CustomPainter {
       ..shader =
           RadialGradient(
             colors: isDark
-                ? [
-                    const Color(0xFF3BE8E8).withValues(alpha: 0.18),
-                    Colors.transparent,
-                  ]
-                : [
-                    const Color(0xFFB8862B).withValues(alpha: 0.2),
-                    Colors.transparent,
-                  ],
+                ? [glowColor.withValues(alpha: 0.16), Colors.transparent]
+                : [glowColor.withValues(alpha: 0.55), Colors.transparent],
           ).createShader(
             Rect.fromCircle(
               center: Offset(size.width * 0.5, size.height * 0.7),
@@ -379,28 +352,24 @@ class _StarFieldPainter extends CustomPainter {
 }
 
 class _GlassCard extends StatelessWidget {
-  const _GlassCard({required this.child, required this.isDark});
+  const _GlassCard({required this.child});
 
   final Widget child;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final borderColor = isDark
-        ? Colors.white.withValues(alpha: 0.15)
-        : const Color(0xFFBFA272).withValues(alpha: 0.35);
-    final background = isDark
-        ? Colors.white.withValues(alpha: 0.06)
-        : Colors.white.withValues(alpha: 0.55);
+    final colors = AppThemeColors.of(context);
+    final borderColor = colors.softBorder;
+    final background = colors.cardSurface;
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(26),
+      borderRadius: BorderRadius.circular(colors.cardRadius),
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: DecoratedBox(
           decoration: BoxDecoration(
             color: background,
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(colors.cardRadius),
             border: Border.all(color: borderColor, width: 1.2),
           ),
           child: Padding(
@@ -414,21 +383,14 @@ class _GlassCard extends StatelessWidget {
 }
 
 class _ProgressBar extends StatelessWidget {
-  const _ProgressBar({
-    required this.progress,
-    required this.accent,
-    required this.isDark,
-  });
+  const _ProgressBar({required this.progress, required this.accent});
 
   final double progress;
   final Color accent;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final background = isDark
-        ? Colors.white.withValues(alpha: 0.12)
-        : Colors.black.withValues(alpha: 0.08);
+    final background = AppThemeColors.of(context).softBorder;
     final gradient = LinearGradient(
       colors: [accent.withValues(alpha: 0.9), accent.withValues(alpha: 0.6)],
     );
@@ -459,31 +421,29 @@ class _GlowButton extends StatelessWidget {
   const _GlowButton({
     required this.enabled,
     required this.onTap,
-    required this.accent,
-    required this.accentDeep,
     required this.label,
   });
 
   final bool enabled;
   final VoidCallback? onTap;
-  final Color accent;
-  final Color accentDeep;
   final Widget label;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final glowColor = isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
-    final metallicStart = isDark 
-        ? const Color(0xFF4A5568).withValues(alpha: 0.9)
-        : const Color(0xFFF5E6D3).withValues(alpha: 0.95);
-    final metallicMid = isDark
-        ? const Color(0xFF2D3748).withValues(alpha: 0.95)
-        : const Color(0xFFE8D4B8).withValues(alpha: 0.98);
-    final metallicEnd = isDark
-        ? const Color(0xFF1A202C).withValues(alpha: 0.9)
-        : const Color(0xFFD4B896).withValues(alpha: 0.95);
-    
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final glowColor = theme.colorScheme.primary;
+    final metallicStart = Color.alphaBlend(
+      colors.countdownText.withValues(alpha: isDark ? 0.18 : 0.08),
+      theme.colorScheme.primary,
+    );
+    final metallicMid = theme.colorScheme.primary;
+    final metallicEnd = Color.alphaBlend(
+      Colors.black.withValues(alpha: isDark ? 0.18 : 0.08),
+      theme.colorScheme.primary,
+    );
+
     return SizedBox(
       height: 70,
       child: Stack(
@@ -547,7 +507,9 @@ class _GlowButton extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withValues(alpha: enabled ? (isDark ? 0.3 : 0.4) : 0.15),
+                            Colors.white.withValues(
+                              alpha: enabled ? (isDark ? 0.3 : 0.4) : 0.15,
+                            ),
                             Colors.transparent,
                           ],
                           begin: Alignment.topCenter,
@@ -585,8 +547,8 @@ class _GlowButton extends StatelessWidget {
                         child: DefaultTextStyle(
                           style: TextStyle(
                             color: enabled
-                                ? glowColor
-                                : Colors.grey.shade400,
+                                ? theme.colorScheme.onPrimary
+                                : colors.mutedText,
                             fontWeight: FontWeight.w600,
                             fontSize: 18,
                           ),
@@ -609,28 +571,28 @@ class _ActionCircle extends StatelessWidget {
   const _ActionCircle({
     required this.onTap,
     required this.icon,
-    required this.accent,
     required this.isDark,
   });
 
   final VoidCallback? onTap;
   final IconData icon;
-  final Color accent;
   final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    final glowColor = isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
-    final metallicStart = isDark 
-        ? const Color(0xFF4A5568).withValues(alpha: 0.9)
-        : const Color(0xFFF5E6D3).withValues(alpha: 0.95);
-    final metallicMid = isDark
-        ? const Color(0xFF2D3748).withValues(alpha: 0.95)
-        : const Color(0xFFE8D4B8).withValues(alpha: 0.98);
-    final metallicEnd = isDark
-        ? const Color(0xFF1A202C).withValues(alpha: 0.9)
-        : const Color(0xFFD4B896).withValues(alpha: 0.95);
-    
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+    final glowColor = theme.colorScheme.primary;
+    final metallicStart = Color.alphaBlend(
+      colors.countdownText.withValues(alpha: isDark ? 0.18 : 0.08),
+      theme.colorScheme.primary,
+    );
+    final metallicMid = theme.colorScheme.primary;
+    final metallicEnd = Color.alphaBlend(
+      Colors.black.withValues(alpha: isDark ? 0.18 : 0.08),
+      theme.colorScheme.primary,
+    );
+
     return SizedBox(
       height: 56,
       width: 56,
@@ -718,7 +680,7 @@ class _ActionCircle extends StatelessWidget {
                       child: Center(
                         child: Icon(
                           icon,
-                          color: glowColor,
+                          color: theme.colorScheme.onPrimary,
                           size: 24,
                         ),
                       ),
@@ -749,17 +711,16 @@ class _NavigationPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final glowColor = isDark ? const Color(0xFF6EE7E8) : const Color(0xFFD4A574);
-    final metallicStart = isDark 
-        ? const Color(0xFF4A5568).withValues(alpha: 0.9)
-        : const Color(0xFFF5E6D3).withValues(alpha: 0.95);
-    final metallicMid = isDark
-        ? const Color(0xFF2D3748).withValues(alpha: 0.95)
-        : const Color(0xFFE8D4B8).withValues(alpha: 0.98);
-    final metallicEnd = isDark
-        ? const Color(0xFF1A202C).withValues(alpha: 0.9)
-        : const Color(0xFFD4B896).withValues(alpha: 0.95);
-    
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+    final glowColor = theme.colorScheme.primary;
+    final metallicStart = colors.cardSurface;
+    final metallicMid = Color.alphaBlend(
+      colors.cardSurfaceTint.withValues(alpha: isDark ? 0.28 : 0.1),
+      colors.cardSurface,
+    );
+    final metallicEnd = colors.cardSurface;
+
     return SizedBox(
       height: isCompact ? 54 : 58,
       child: Stack(
@@ -814,7 +775,9 @@ class _NavigationPill extends StatelessWidget {
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [
-                            Colors.white.withValues(alpha: isDark ? 0.25 : 0.35),
+                            Colors.white.withValues(
+                              alpha: isDark ? 0.25 : 0.35,
+                            ),
                             Colors.transparent,
                           ],
                           begin: Alignment.topCenter,

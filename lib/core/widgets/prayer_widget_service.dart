@@ -1,5 +1,5 @@
 import 'package:adhan/adhan.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:easy_localization/easy_localization.dart' hide DateFormat;
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
 

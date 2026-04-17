@@ -19,6 +19,7 @@
     "reset": "Reset",
     "count": "Count",
     "completed": "Completed",
+    "now": "NOW",
     "save": "Save",
     "cancel": "Cancel",
     "retry": "Retry",
@@ -49,15 +50,21 @@
       }
     },
     "tabs": {
+      "home": "Home",
       "prayer_times": "Prayer Times",
       "adhkar": "Adhkar",
-      "quran": "Quran"
+      "quran": "Quran",
+      "qibla": "Qibla",
+      "settings": "Settings",
+      "more": "More"
     },
     "placeholder": "Coming soon"
   },
   "prayer_times": {
     "date": "Today's date",
     "next_prayer": "Next prayer",
+    "current_context": "You are in {prayer} time now",
+    "next_at": "{prayer} at {time}",
     "settings": "Settings",
     "method": "Calculation method",
     "madhab_label": "Madhab",
@@ -223,8 +230,13 @@
     },
     "appearance": "Appearance",
     "dark_mode": "Dark mode",
+    "theme_mode": "Theme mode",
+    "theme_system": "System",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
     "time_format": "Time format",
     "use_24h": "24-hour format",
+    "prayer_calculation": "Prayer calculation",
     "reminders": "Reminders",
     "enable_notifications": "Enable notifications",
     "morning_reminder": "Morning reminder",

@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/app_categories.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
@@ -57,29 +58,27 @@ class FavoritesScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final item = state.items[index];
                       final category = AppCategories.byKey(item.category);
-                      final accent = category.colors.isNotEmpty
-                          ? category.colors.first
-                          : Theme.of(context).colorScheme.primary;
+                      final theme = Theme.of(context);
+                      final colors = AppThemeColors.of(context);
+                      final accent = theme.colorScheme.primary;
 
                       return ClipRRect(
-                        borderRadius: BorderRadius.circular(22),
+                        borderRadius: BorderRadius.circular(colors.cardRadius),
                         child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
                           child: Card(
-                            elevation: 0,
-                            color:
-                                Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white.withValues(alpha: 0.06)
-                                : Colors.white.withValues(alpha: 0.65),
+                            elevation: 2,
+                            shadowColor: Colors.black.withValues(
+                              alpha: theme.brightness == Brightness.dark
+                                  ? 0.2
+                                  : 0.06,
+                            ),
+                            color: colors.cardSurface,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(22),
-                              side: BorderSide(
-                                color:
-                                    Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.white.withValues(alpha: 0.16)
-                                    : Colors.black.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(
+                                colors.cardRadius,
                               ),
+                              side: BorderSide(color: colors.softBorder),
                             ),
                             child: ListTile(
                               contentPadding: const EdgeInsets.all(16),
@@ -88,15 +87,19 @@ class FavoritesScreen extends StatelessWidget {
                                 maxLines: 3,
                                 overflow: TextOverflow.ellipsis,
                                 textDirection: TextDirection.rtl,
-                                style: Theme.of(
-                                  context,
-                                ).textTheme.titleMedium?.copyWith(height: 1.5),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(
+                                      height: 1.5,
+                                      color: theme.colorScheme.onSurface,
+                                    ),
                               ),
                               subtitle: Padding(
                                 padding: const EdgeInsets.only(top: 8),
                                 child: Text(
                                   category.titleKey.tr(),
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: colors.mutedText,
+                                  ),
                                 ),
                               ),
                               onTap: () => context.push(
@@ -133,17 +136,19 @@ class _FavoritesBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gradient = isDark
-        ? const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFF0A1220), Color(0xFF0F1C2E), Color(0xFF071A1B)],
-          )
-        : const LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color(0xFFF6F0E5), Color(0xFFF2E7D6), Color(0xFFEADCC4)],
-          );
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+    final gradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        theme.scaffoldBackgroundColor,
+        Color.alphaBlend(
+          colors.heroCardBackground.withValues(alpha: isDark ? 0.08 : 0.35),
+          theme.scaffoldBackgroundColor,
+        ),
+      ],
+    );
 
     return DecoratedBox(
       decoration: BoxDecoration(gradient: gradient),
@@ -172,8 +177,8 @@ class _SoftDustPainter extends CustomPainter {
       final radius = random.nextDouble() * 1.2 + 0.2;
       final opacity = baseOpacity + random.nextDouble() * 0.4;
       final paint = Paint()
-        ..color = (isDark ? Colors.white : const Color(0xFFB48A45)).withValues(
-          alpha: opacity,
+        ..color = (isDark ? Colors.white : const Color(0xFF5D4037)).withValues(
+          alpha: opacity * 0.45,
         );
       canvas.drawCircle(Offset(dx, dy), radius, paint);
     }
