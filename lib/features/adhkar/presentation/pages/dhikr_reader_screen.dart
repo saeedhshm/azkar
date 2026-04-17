@@ -326,8 +326,8 @@ class _StarFieldPainter extends CustomPainter {
       final radius = random.nextDouble() * 1.4 + 0.3;
       final opacity = baseOpacity + random.nextDouble() * 0.4;
       final paint = Paint()
-        ..color = (isDark ? Colors.white : const Color(0xFF5D4037)).withValues(
-          alpha: opacity * 0.45,
+        ..color = (isDark ? const Color(0xFFDAA520) : const Color(0xFF4A5D23)).withValues(
+          alpha: opacity * 0.35,
         );
       canvas.drawCircle(Offset(dx, dy), radius, paint);
     }

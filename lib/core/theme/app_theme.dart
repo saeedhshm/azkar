@@ -48,8 +48,8 @@ class AppTheme {
         mutedText: Color(0xFF7A6F5B),
         softBorder: Color(0xFFD9D4C5),
         accentColor: _lightAccent,
-        currentPrayerBg: Color(0xFF4A5D23),
-        currentPrayerFg: Colors.white,
+        currentPrayerBg: Color(0xFFE7C75A),
+        currentPrayerFg: Color(0xFF3B2A12),
       ),
     ],
     textTheme: ThemeData.light().textTheme.apply(

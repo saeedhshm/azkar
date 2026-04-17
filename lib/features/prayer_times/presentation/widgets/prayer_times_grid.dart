@@ -10,8 +10,7 @@ class PrayerTimesGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 104),
       itemCount: items.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -26,6 +25,7 @@ class PrayerTimesGrid extends StatelessWidget {
           time: item.time,
           icon: item.icon,
           isCurrent: item.isCurrent,
+          isNext: item.isNext,
           isPast: item.isPast,
         );
       },
@@ -39,6 +39,7 @@ class PrayerTimeTileData {
     required this.time,
     required this.icon,
     required this.isCurrent,
+    required this.isNext,
     required this.isPast,
   });
 
@@ -46,5 +47,6 @@ class PrayerTimeTileData {
   final String time;
   final IconData icon;
   final bool isCurrent;
+  final bool isNext;
   final bool isPast;
 }

@@ -8,11 +8,15 @@ class ProgressPrayerBar extends StatelessWidget {
     required this.startLabel,
     required this.endLabel,
     required this.progress,
+    this.startTime = '',
+    this.endTime = '',
   });
 
   final String startLabel;
   final String endLabel;
   final double progress;
+  final String startTime;
+  final String endTime;
 
   @override
   Widget build(BuildContext context) {
@@ -95,31 +99,67 @@ class ProgressPrayerBar extends StatelessWidget {
           ),
           const SizedBox(height: 1),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Left: prayer name + time below
               Expanded(
-                child: Text(
-                  startLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colors.mutedText,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 10,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      startLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colors.mutedText,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 10,
+                      ),
+                    ),
+                    if (startTime.isNotEmpty)
+                      Text(
+                        startTime,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colors.mutedText.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 9,
+                        ),
+                      ),
+                  ],
                 ),
               ),
               const SizedBox(width: 12),
+              // Right: next prayer name + time below.
               Expanded(
-                child: Text(
-                  endLabel,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.end,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: colors.mutedText,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 10,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      endLabel,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colors.mutedText,
+                        fontWeight: FontWeight.w800,
+                        fontSize: 10,
+                      ),
+                    ),
+                    if (endTime.isNotEmpty)
+                      Text(
+                        endTime,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.end,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: colors.mutedText.withValues(alpha: 0.7),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 9,
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],

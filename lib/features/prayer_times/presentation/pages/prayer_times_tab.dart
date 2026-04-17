@@ -83,7 +83,12 @@ class _PrayerTimesContent extends StatelessWidget {
     final use24h = context.watch<TimeFormatCubit>().state.use24h;
     final locale = context.locale.toString();
     final now = DateTime.now();
-    final window = _buildPrayerWindow(times, state.nextPrayerTime);
+    final window = _buildPrayerWindow(
+      times,
+      state.nextPrayerTime,
+      use24h: use24h,
+      locale: locale,
+    );
     final currentLabel = _prayerLabel(
       state.currentPrayer ?? window.currentPrayer,
     );
@@ -96,48 +101,51 @@ class _PrayerTimesContent extends StatelessWidget {
             locale: locale,
           );
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 104),
-      children: [
-        NextPrayerHeroCard(
-          label: 'prayer_times.next_prayer'.tr(),
-          prayerName: nextPrayerLabel,
-          countdown: _formatCountdown(state.countdown),
-          currentContext: 'prayer_times.current_context'.tr(
-            namedArgs: {'prayer': currentLabel},
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+      child: Column(
+        children: [
+          NextPrayerHeroCard(
+            label: 'prayer_times.next_prayer'.tr(),
+            prayerName: nextPrayerLabel,
+            countdown: _formatCountdown(state.countdown),
+            currentContext: 'prayer_times.current_context'.tr(
+              namedArgs: {'prayer': currentLabel},
+            ),
+            nextPrayerTimeLine: 'prayer_times.next_at'.tr(
+              namedArgs: {'prayer': nextPrayerLabel, 'time': nextTime},
+            ),
+            progressStartLabel: window.startLabel,
+            progressEndLabel: window.endLabel,
+            progressStartTime: window.startTime,
+            progressEndTime: window.endTime,
+            progress: window.progress,
+            location: locationText,
+            hijriDate: state.hijriDate ?? '',
+            gregorianDate: state.gregorianDate ?? '',
+            onLocationTap: () => _showLocationSheet(context, state),
           ),
-          nextPrayerTimeLine: 'prayer_times.next_at'.tr(
-            namedArgs: {'prayer': nextPrayerLabel, 'time': nextTime},
+          const SizedBox(height: 14),
+          Expanded(
+            child: PrayerTimesGrid(
+              items: items.map((item) {
+                return PrayerTimeTileData(
+                  name: _prayerLabel(item.prayer),
+                  time: TimeFormatter.formatDateTime(
+                    item.time,
+                    use24h: use24h,
+                    locale: locale,
+                  ),
+                  icon: _prayerIcon(item.prayer),
+                  isCurrent: state.currentPrayer == item.prayer,
+                  isNext: state.nextPrayer == item.prayer,
+                  isPast: item.time.isBefore(now),
+                );
+              }).toList(),
+            ),
           ),
-          progressStartLabel: window.startLabel,
-          progressEndLabel: window.endLabel,
-          progress: window.progress,
-          location: locationText,
-          dateLine: [
-            if (state.hijriDate != null && state.hijriDate!.isNotEmpty)
-              state.hijriDate!,
-            if (state.gregorianDate != null && state.gregorianDate!.isNotEmpty)
-              state.gregorianDate!,
-          ].join('  •  '),
-          onLocationTap: () => _showLocationSheet(context, state),
-        ),
-        const SizedBox(height: 16),
-        PrayerTimesGrid(
-          items: items.map((item) {
-            return PrayerTimeTileData(
-              name: _prayerLabel(item.prayer),
-              time: TimeFormatter.formatDateTime(
-                item.time,
-                use24h: use24h,
-                locale: locale,
-              ),
-              icon: _prayerIcon(item.prayer),
-              isCurrent: state.currentPrayer == item.prayer,
-              isPast: item.time.isBefore(now),
-            );
-          }).toList(),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -175,7 +183,12 @@ class _PrayerTimesContent extends StatelessWidget {
     };
   }
 
-  _PrayerWindow _buildPrayerWindow(PrayerTimes times, DateTime? nextTime) {
+  _PrayerWindow _buildPrayerWindow(
+    PrayerTimes times,
+    DateTime? nextTime, {
+    required bool use24h,
+    required String locale,
+  }) {
     final now = DateTime.now();
     final ordered = <_PrayerItem>[
       _PrayerItem(Prayer.fajr, times.fajr),
@@ -194,13 +207,15 @@ class _PrayerTimesContent extends StatelessWidget {
     }
 
     final nextPrayer = state.nextPrayer ?? Prayer.fajr;
-    final startTime = current?.time;
-    final endTime = nextTime;
+    final startDateTime = current?.time;
+    final endDateTime = nextTime;
     var progress = 0.0;
-    if (startTime != null && endTime != null && endTime.isAfter(startTime)) {
+    if (startDateTime != null &&
+        endDateTime != null &&
+        endDateTime.isAfter(startDateTime)) {
       progress =
-          now.difference(startTime).inSeconds /
-          endTime.difference(startTime).inSeconds;
+          now.difference(startDateTime).inSeconds /
+          endDateTime.difference(startDateTime).inSeconds;
     }
 
     return _PrayerWindow(
@@ -209,6 +224,20 @@ class _PrayerTimesContent extends StatelessWidget {
           ? _prayerLabel(nextPrayer)
           : _prayerLabel(current.prayer),
       endLabel: _prayerLabel(nextPrayer),
+      startTime: startDateTime == null
+          ? ''
+          : TimeFormatter.formatDateTime(
+              startDateTime,
+              use24h: use24h,
+              locale: locale,
+            ),
+      endTime: endDateTime == null
+          ? ''
+          : TimeFormatter.formatDateTime(
+              endDateTime,
+              use24h: use24h,
+              locale: locale,
+            ),
       progress: progress,
     );
   }
@@ -766,11 +795,15 @@ class _PrayerWindow {
     required this.currentPrayer,
     required this.startLabel,
     required this.endLabel,
+    required this.startTime,
+    required this.endTime,
     required this.progress,
   });
 
   final Prayer? currentPrayer;
   final String startLabel;
   final String endLabel;
+  final String startTime;
+  final String endTime;
   final double progress;
 }

@@ -14,9 +14,12 @@ class NextPrayerHeroCard extends StatelessWidget {
     required this.nextPrayerTimeLine,
     required this.progressStartLabel,
     required this.progressEndLabel,
+    required this.progressStartTime,
+    required this.progressEndTime,
     required this.progress,
     required this.location,
-    required this.dateLine,
+    required this.hijriDate,
+    required this.gregorianDate,
     this.onLocationTap,
   });
 
@@ -27,9 +30,12 @@ class NextPrayerHeroCard extends StatelessWidget {
   final String nextPrayerTimeLine;
   final String progressStartLabel;
   final String progressEndLabel;
+  final String progressStartTime;
+  final String progressEndTime;
   final double progress;
   final String location;
-  final String dateLine;
+  final String hijriDate;
+  final String gregorianDate;
   final VoidCallback? onLocationTap;
 
   @override
@@ -54,19 +60,22 @@ class NextPrayerHeroCard extends StatelessWidget {
             colors: [
               colors.heroCardBackground,
               Color.alphaBlend(
-                (colors.accentColor ?? colors.cardSurfaceTint).withValues(alpha: isDark ? 0.15 : 0.12),
+                (colors.accentColor ?? colors.cardSurfaceTint)
+                    .withValues(alpha: isDark ? 0.15 : 0.12),
                 colors.heroCardBackground,
               ),
             ],
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: (colors.accentColor ?? colors.softBorder).withValues(alpha: isDark ? 0.3 : 0.25),
+            color: (colors.accentColor ?? colors.softBorder)
+                .withValues(alpha: isDark ? 0.3 : 0.25),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: (colors.accentColor ?? Colors.black).withValues(alpha: isDark ? 0.25 : 0.12),
+              color: (colors.accentColor ?? Colors.black)
+                  .withValues(alpha: isDark ? 0.25 : 0.12),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -80,6 +89,7 @@ class NextPrayerHeroCard extends StatelessWidget {
         child: Stack(
           alignment: Alignment.center,
           children: [
+            // Radial glow behind countdown
             Positioned(
               bottom: 18,
               child: DecoratedBox(
@@ -87,10 +97,10 @@ class NextPrayerHeroCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      (colors.accentColor ?? colors.countdownText).withValues(
-                        alpha: isDark ? 0.35 : 0.22,
-                      ),
-                      (colors.accentColor ?? colors.countdownText).withValues(alpha: 0),
+                      (colors.accentColor ?? colors.countdownText)
+                          .withValues(alpha: isDark ? 0.35 : 0.22),
+                      (colors.accentColor ?? colors.countdownText)
+                          .withValues(alpha: 0),
                     ],
                     radius: 0.6,
                   ),
@@ -101,12 +111,27 @@ class NextPrayerHeroCard extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // Row 1: hijri date | 📍 location
                 _HeroMetaRow(
                   location: location,
-                  dateLine: dateLine,
+                  hijriDate: hijriDate,
                   onLocationTap: onLocationTap,
                 ),
-                const SizedBox(height: 16),
+                // Row 2: gregorian date
+                if (gregorianDate.isNotEmpty) ...[
+                  const SizedBox(height: 3),
+                  Text(
+                    gregorianDate,
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colors.mutedText,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 14),
+                // "You're in Asr time"
                 Text(
                   currentContext,
                   textAlign: TextAlign.center,
@@ -119,6 +144,7 @@ class NextPrayerHeroCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
+                // Countdown timer
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 180),
                   child: FittedBox(
@@ -137,6 +163,7 @@ class NextPrayerHeroCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
+                // "Maghrib at 6:12 PM"
                 Text(
                   nextPrayerTimeLine,
                   textAlign: TextAlign.center,
@@ -148,9 +175,12 @@ class NextPrayerHeroCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 13),
+                // Progress bar with start/end labels and times
                 ProgressPrayerBar(
                   startLabel: progressStartLabel,
                   endLabel: progressEndLabel,
+                  startTime: progressStartTime,
+                  endTime: progressEndTime,
                   progress: progress,
                 ),
               ],
@@ -162,15 +192,16 @@ class NextPrayerHeroCard extends StatelessWidget {
   }
 }
 
+/// Row 1: "28 Shawwal 1447 | 📍 Cairo, Egypt"
 class _HeroMetaRow extends StatelessWidget {
   const _HeroMetaRow({
     required this.location,
-    required this.dateLine,
+    required this.hijriDate,
     required this.onLocationTap,
   });
 
   final String location;
-  final String dateLine;
+  final String hijriDate;
   final VoidCallback? onLocationTap;
 
   @override
@@ -191,23 +222,28 @@ class _HeroMetaRow extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Flexible(
-                child: Text(
-                  dateLine,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: style,
+              if (hijriDate.isNotEmpty) ...[
+                Flexible(
+                  child: Text(
+                    hijriDate,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: style,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Icon(
-                  Icons.location_on,
-                  size: 12,
-                  color: colors.accentColor ?? Theme.of(context).colorScheme.primary,
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  child: Text('|', style: style),
                 ),
+              ],
+              Icon(
+                Icons.location_on,
+                size: 11,
+                color: colors.accentColor ??
+                    Theme.of(context).colorScheme.primary,
               ),
+              const SizedBox(width: 3),
               Flexible(
                 child: Text(
                   location,

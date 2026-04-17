@@ -381,7 +381,7 @@ class _SettingsSection extends StatelessWidget {
             const SizedBox(height: 12),
             DecoratedBox(
               decoration: BoxDecoration(
-                color: colors.cardSurfaceTint.withValues(alpha: 0.45),
+                color: colors.cardSurfaceTint.withValues(alpha: 0.15),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: colors.softBorder),
               ),
