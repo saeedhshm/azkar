@@ -10,12 +10,14 @@ class QuranSearchBar extends StatelessWidget {
     required this.onChanged,
     required this.onClear,
     required this.hasQuery,
+    this.autofocus = false,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final VoidCallback onClear;
   final bool hasQuery;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +42,7 @@ class QuranSearchBar extends StatelessWidget {
       ),
       child: TextField(
         controller: controller,
+        autofocus: autofocus,
         onChanged: onChanged,
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(

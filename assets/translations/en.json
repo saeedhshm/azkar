@@ -299,6 +299,7 @@
     "bismillah": "In the name of Allah, the Most Gracious, the Most Merciful",
     "image_reader_hint": "Swipe pages and pinch to zoom",
     "downloading_page": "Downloading page {page}...",
-    "download_page_error": "Could not download this Mushaf page. Check your internet connection and try again."
+    "download_page_error": "Could not download this Mushaf page. Check your internet connection and try again.",
+    "search": "Search"
   }
 }

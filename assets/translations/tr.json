@@ -299,6 +299,7 @@
     "bismillah": "Rahmân ve Rahîm olan Allah’ın adıyla",
     "image_reader_hint": "Sayfaları kaydır ve yakınlaştır",
     "downloading_page": "Sayfa {page} indiriliyor...",
-    "download_page_error": "Bu mushaf sayfası indirilemedi. İnternet bağlantınızı kontrol edip tekrar deneyin."
+    "download_page_error": "Bu mushaf sayfası indirilemedi. İnternet bağlantınızı kontrol edip tekrar deneyin.",
+    "search": "Ara"
   }
 }

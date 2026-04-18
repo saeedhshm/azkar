@@ -68,15 +68,26 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
         if (snapshot.hasData) {
           return _MushafImageShell(
             pageNumber: widget.pageNumber,
-            child: InteractiveViewer(
-              minScale: 1,
-              maxScale: 4,
-              clipBehavior: Clip.none,
-              child: Image.file(
-                snapshot.data!,
-                fit: BoxFit.contain,
-                filterQuality: FilterQuality.high,
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return InteractiveViewer(
+                  minScale: 1,
+                  maxScale: 4,
+                  clipBehavior: Clip.none,
+                  child: SizedBox(
+                    width: constraints.maxWidth,
+                    height: constraints.maxHeight,
+                    child: Image.file(
+                      snapshot.data!,
+                      width: constraints.maxWidth,
+                      height: constraints.maxHeight,
+                      fit: BoxFit.contain,
+                      alignment: Alignment.center,
+                      filterQuality: FilterQuality.high,
+                    ),
+                  ),
+                );
+              },
             ),
           );
         }
@@ -84,30 +95,21 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
         if (snapshot.hasError) {
           return _MushafImageShell(
             pageNumber: widget.pageNumber,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.cloud_off_rounded, color: gold, size: 42),
-                    const SizedBox(height: 12),
-                    Text(
-                      'quran.download_page_error'.tr(),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colors.secondaryText,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    FilledButton.icon(
-                      onPressed: _retry,
-                      icon: const Icon(Icons.refresh_rounded),
-                      label: Text('common.retry'.tr()),
-                    ),
-                  ],
+            child: _MushafStatusContent(
+              icon: Icon(Icons.cloud_off_rounded, color: gold, size: 36),
+              message: 'quran.download_page_error'.tr(),
+              messageStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: colors.secondaryText,
+                fontWeight: FontWeight.w700,
+              ),
+              action: FilledButton.icon(
+                onPressed: _retry,
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size(96, 40),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 ),
+                icon: const Icon(Icons.refresh_rounded),
+                label: Text('common.retry'.tr()),
               ),
             ),
           );
@@ -115,22 +117,68 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
 
         return _MushafImageShell(
           pageNumber: widget.pageNumber,
-          child: Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CircularProgressIndicator(color: gold),
-                const SizedBox(height: 14),
-                Text(
-                  'quran.downloading_page'.tr(
-                    namedArgs: {'page': widget.pageNumber.toString()},
+          child: _MushafStatusContent(
+            icon: SizedBox.square(
+              dimension: 32,
+              child: CircularProgressIndicator(color: gold, strokeWidth: 3),
+            ),
+            message: 'quran.downloading_page'.tr(
+              namedArgs: {'page': widget.pageNumber.toString()},
+            ),
+            messageStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: colors.mutedText,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _MushafStatusContent extends StatelessWidget {
+  const _MushafStatusContent({
+    required this.icon,
+    required this.message,
+    required this.messageStyle,
+    this.action,
+  });
+
+  final Widget icon;
+  final String message;
+  final TextStyle? messageStyle;
+  final Widget? action;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final minHeight =
+            constraints.maxHeight.isFinite && constraints.maxHeight > 32
+            ? constraints.maxHeight - 32
+            : 0.0;
+
+        return SingleChildScrollView(
+          physics: const ClampingScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: minHeight),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  icon,
+                  const SizedBox(height: 10),
+                  Text(
+                    message,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: messageStyle,
                   ),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colors.mutedText,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
+                  if (action != null) ...[const SizedBox(height: 12), action!],
+                ],
+              ),
             ),
           ),
         );
@@ -152,49 +200,56 @@ class _MushafImageShell extends StatelessWidget {
     final gold = colors.accentColor ?? colors.countdownText;
     final isDark = theme.brightness == Brightness.dark;
 
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        color: isDark ? const Color(0xFF0D130C) : const Color(0xFFFDF9EE),
-        border: Border.all(color: gold.withValues(alpha: isDark ? 0.38 : 0.28)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.34 : 0.1),
-            blurRadius: 22,
-            offset: const Offset(0, 12),
+    return SizedBox.expand(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          color: isDark ? const Color(0xFF0D130C) : const Color(0xFFFDF9EE),
+          border: Border.all(
+            color: gold.withValues(alpha: isDark ? 0.38 : 0.28),
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(22),
-        child: Stack(
-          children: [
-            Positioned.fill(child: child),
-            PositionedDirectional(
-              top: 10,
-              end: 10,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: theme.scaffoldBackgroundColor.withValues(alpha: 0.78),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: colors.softBorder),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.34 : 0.1),
+              blurRadius: 22,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              child,
+              PositionedDirectional(
+                top: 10,
+                end: 10,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: theme.scaffoldBackgroundColor.withValues(
+                      alpha: 0.78,
+                    ),
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: colors.softBorder),
                   ),
-                  child: Text(
-                    '$pageNumber / ${QuranPageImageCacheService.lastPage}',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: colors.secondaryText,
-                      fontWeight: FontWeight.w900,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    child: Text(
+                      '$pageNumber / ${QuranPageImageCacheService.lastPage}',
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colors.secondaryText,
+                        fontWeight: FontWeight.w900,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

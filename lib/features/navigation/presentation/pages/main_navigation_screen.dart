@@ -2,12 +2,12 @@ import 'dart:math';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../../adhkar/presentation/pages/adhkar_categories_screen.dart';
 import '../../../adhkar/presentation/pages/home_screen.dart';
 import '../../../prayer_times/presentation/pages/qibla_screen.dart';
-import '../../../quran/presentation/pages/quran_screen.dart';
 import '../../../settings/presentation/pages/settings_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
@@ -32,7 +32,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             children: const [
               HomeScreen(),
               QiblaScreen(),
-              QuranScreen(),
+              SizedBox.shrink(),
               AdhkarCategoriesScreen(),
               SettingsScreen(),
             ],
@@ -90,7 +90,9 @@ class _ShellNavigationBar extends StatelessWidget {
                   border: Border.all(color: colors.softBorder),
                   boxShadow: [
                     BoxShadow(
-                      color: accentColor.withValues(alpha: isDark ? 0.25 : 0.12),
+                      color: accentColor.withValues(
+                        alpha: isDark ? 0.25 : 0.12,
+                      ),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -140,7 +142,7 @@ class _ShellNavigationBar extends StatelessWidget {
               child: _CenterNavButton(
                 item: items[2],
                 selected: selectedIndex == 2,
-                onTap: () => onSelected(2),
+                onTap: () => context.push('/quran'),
               ),
             ),
           ],
@@ -166,9 +168,7 @@ class _CenterNavButton extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
     final accentColor = colors.accentColor ?? theme.colorScheme.primary;
-    final bg = selected
-        ? accentColor
-        : accentColor.withValues(alpha: 0.9);
+    final bg = selected ? accentColor : accentColor.withValues(alpha: 0.9);
     final fg = Colors.white;
 
     return Semantics(

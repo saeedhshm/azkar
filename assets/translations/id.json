@@ -299,6 +299,7 @@
     "bismillah": "Dengan nama Allah Yang Maha Pengasih, Maha Penyayang",
     "image_reader_hint": "Geser halaman dan cubit untuk zoom",
     "downloading_page": "Mengunduh halaman {page}...",
-    "download_page_error": "Halaman mushaf ini tidak dapat diunduh. Periksa koneksi internet lalu coba lagi."
+    "download_page_error": "Halaman mushaf ini tidak dapat diunduh. Periksa koneksi internet lalu coba lagi.",
+    "search": "Cari"
   }
 }
