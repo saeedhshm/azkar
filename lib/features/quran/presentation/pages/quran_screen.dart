@@ -131,7 +131,8 @@ class _QuranScreenState extends State<QuranScreen> {
                     state: state,
                     searchController: _searchController,
                     onBack: () => context.pop(),
-                    onTapChrome: () => _showChrome(scheduleHide: !_searchVisible),
+                    onTapChrome: () =>
+                        _showChrome(scheduleHide: !_searchVisible),
                     onToggleSearch: () => _toggleSearch(context),
                     onSearchChanged: (query) {
                       _showChrome(scheduleHide: false);
@@ -542,18 +543,10 @@ class _QuranPageView extends StatelessWidget {
       },
       itemBuilder: (context, index) {
         final pageNumber = index + 1;
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            8,
-            MediaQuery.paddingOf(context).top + 8,
-            8,
-            MediaQuery.paddingOf(context).bottom + 8,
-          ),
-          child: SizedBox.expand(
-            child: QuranMushafImagePage(
-              pageNumber: pageNumber,
-              imageCacheService: imageCacheService,
-            ),
+        return SizedBox.expand(
+          child: QuranMushafImagePage(
+            pageNumber: pageNumber,
+            imageCacheService: imageCacheService,
           ),
         );
       },

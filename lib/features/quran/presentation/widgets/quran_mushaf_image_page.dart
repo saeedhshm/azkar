@@ -60,33 +60,37 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           return _MushafImageShell(
-            pageNumber: widget.pageNumber,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                return InteractiveViewer(
-                  minScale: 1,
-                  maxScale: 4,
-                  clipBehavior: Clip.none,
-                  child: SizedBox(
-                    width: constraints.maxWidth,
-                    height: constraints.maxHeight,
-                    child: SvgPicture.file(
-                      snapshot.data!,
-                      width: constraints.maxWidth,
-                      height: constraints.maxHeight,
-                      fit: BoxFit.contain,
-                      alignment: Alignment.center,
+            child: SafeArea(
+              top: true,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return InteractiveViewer(
+                    minScale: 1,
+                    maxScale: 4,
+                    clipBehavior: Clip.none,
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: SizedBox(
+                        width: constraints.maxWidth,
+                        height: constraints.maxHeight,
+                        child: SvgPicture.file(
+                          snapshot.data!,
+                          width: constraints.maxWidth,
+                          height: constraints.maxHeight,
+                          fit: BoxFit.fitWidth,
+                          alignment: Alignment.center,
+                        ),
+                      ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           );
         }
 
         if (snapshot.hasError) {
           return _MushafImageShell(
-            pageNumber: widget.pageNumber,
             child: _MushafStatusContent(
               icon: Icon(Icons.cloud_off_rounded, color: gold, size: 36),
               message: 'quran.download_page_error'.tr(),
@@ -108,7 +112,6 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
         }
 
         return _MushafImageShell(
-          pageNumber: widget.pageNumber,
           child: _MushafStatusContent(
             icon: SizedBox.square(
               dimension: 32,
@@ -178,70 +181,12 @@ class _MushafStatusContent extends StatelessWidget {
 }
 
 class _MushafImageShell extends StatelessWidget {
-  const _MushafImageShell({required this.pageNumber, required this.child});
+  const _MushafImageShell({required this.child});
 
-  final int pageNumber;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final gold = colors.accentColor ?? colors.countdownText;
-    final isDark = theme.brightness == Brightness.dark;
-
-    return SizedBox.expand(
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(24),
-          color: isDark ? const Color(0xFF0D130C) : const Color(0xFFFDF9EE),
-          border: Border.all(
-            color: gold.withValues(alpha: isDark ? 0.38 : 0.28),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.34 : 0.1),
-              blurRadius: 22,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(22),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              child,
-              PositionedDirectional(
-                top: 10,
-                end: 10,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: theme.scaffoldBackgroundColor.withValues(
-                      alpha: 0.78,
-                    ),
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: colors.softBorder),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    child: Text(
-                      '$pageNumber / ${QuranPageImageCacheService.lastPage}',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.secondaryText,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    return SizedBox.expand(child: child);
   }
 }

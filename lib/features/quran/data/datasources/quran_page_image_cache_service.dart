@@ -11,9 +11,9 @@ class QuranPageImageCacheService {
 
   static const int firstPage = 1;
   static const int lastPage = 604;
-  static const int cacheVersion = 2;
+  static const int cacheVersion = 3;
   static const String _baseUrl =
-      'https://raw.githubusercontent.com/batoulapps/quran-svg/main/svg';
+      'https://raw.githubusercontent.com/quranpedia/quran-svg/main/mushafs/hafs/svg';
 
   final LocalStorageService _localStorage;
   final http.Client _client;
