@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../data/datasources/quran_page_image_cache_service.dart';
@@ -31,27 +31,20 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
   @override
   void initState() {
     super.initState();
-    _future = widget.imageCacheService.getPageImage(widget.pageNumber);
-    _precacheAdjacent();
+    _future = widget.imageCacheService.getPageFile(widget.pageNumber);
   }
 
   @override
   void didUpdateWidget(covariant QuranMushafImagePage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.pageNumber != widget.pageNumber) {
-      _future = widget.imageCacheService.getPageImage(widget.pageNumber);
-      _precacheAdjacent();
+      _future = widget.imageCacheService.getPageFile(widget.pageNumber);
     }
-  }
-
-  void _precacheAdjacent() {
-    unawaited(widget.imageCacheService.precachePage(widget.pageNumber + 1));
-    unawaited(widget.imageCacheService.precachePage(widget.pageNumber - 1));
   }
 
   void _retry() {
     setState(() {
-      _future = widget.imageCacheService.getPageImage(widget.pageNumber);
+      _future = widget.imageCacheService.getPageFile(widget.pageNumber);
     });
   }
 
@@ -77,13 +70,12 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
                   child: SizedBox(
                     width: constraints.maxWidth,
                     height: constraints.maxHeight,
-                    child: Image.file(
+                    child: SvgPicture.file(
                       snapshot.data!,
                       width: constraints.maxWidth,
                       height: constraints.maxHeight,
                       fit: BoxFit.contain,
                       alignment: Alignment.center,
-                      filterQuality: FilterQuality.high,
                     ),
                   ),
                 );
@@ -122,9 +114,7 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
               dimension: 32,
               child: CircularProgressIndicator(color: gold, strokeWidth: 3),
             ),
-            message: 'quran.downloading_page'.tr(
-              namedArgs: {'page': widget.pageNumber.toString()},
-            ),
+            message: 'quran.preparing_pages_title'.tr(),
             messageStyle: theme.textTheme.bodyMedium?.copyWith(
               color: colors.mutedText,
               fontWeight: FontWeight.w700,

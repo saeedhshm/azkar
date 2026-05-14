@@ -298,6 +298,11 @@
     "tap_to_highlight": "Tap any ayah to highlight it",
     "bismillah": "In the name of Allah, the Most Gracious, the Most Merciful",
     "image_reader_hint": "Swipe pages and pinch to zoom",
+    "preparing_pages_title": "Preparing Mushaf pages",
+    "preparing_pages_once": "Mushaf pages are downloaded only once on the first launch.",
+    "preparing_pages_progress": "Downloading Mushaf pages {current}/{total}",
+    "preparing_pages_percent": "{percent}%",
+    "download_pages_error": "Could not download Mushaf pages. Check your internet connection and try again.",
     "downloading_page": "Downloading page {page}...",
     "download_page_error": "Could not download this Mushaf page. Check your internet connection and try again.",
     "search": "Search"

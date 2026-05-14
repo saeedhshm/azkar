@@ -298,6 +298,11 @@
     "tap_to_highlight": "Ketuk ayat untuk menandainya",
     "bismillah": "Dengan nama Allah Yang Maha Pengasih, Maha Penyayang",
     "image_reader_hint": "Geser halaman dan cubit untuk zoom",
+    "preparing_pages_title": "Menyiapkan halaman Mushaf",
+    "preparing_pages_once": "Halaman Mushaf hanya diunduh sekali saat pertama kali aplikasi dibuka.",
+    "preparing_pages_progress": "Mengunduh halaman Mushaf {current}/{total}",
+    "preparing_pages_percent": "{percent}%",
+    "download_pages_error": "Halaman Mushaf tidak dapat diunduh. Periksa koneksi internet lalu coba lagi.",
     "downloading_page": "Mengunduh halaman {page}...",
     "download_page_error": "Halaman mushaf ini tidak dapat diunduh. Periksa koneksi internet lalu coba lagi.",
     "search": "Cari"

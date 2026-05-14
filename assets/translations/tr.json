@@ -298,6 +298,11 @@
     "tap_to_highlight": "Vurgulamak için herhangi bir ayete dokun",
     "bismillah": "Rahmân ve Rahîm olan Allah’ın adıyla",
     "image_reader_hint": "Sayfaları kaydır ve yakınlaştır",
+    "preparing_pages_title": "Mushaf sayfalari hazirlaniyor",
+    "preparing_pages_once": "Mushaf sayfalari ilk acilista yalnizca bir kez indirilir.",
+    "preparing_pages_progress": "Mushaf sayfalari indiriliyor {current}/{total}",
+    "preparing_pages_percent": "%{percent}",
+    "download_pages_error": "Mushaf sayfalari indirilemedi. Internet baglantinizi kontrol edip tekrar deneyin.",
     "downloading_page": "Sayfa {page} indiriliyor...",
     "download_page_error": "Bu mushaf sayfası indirilemedi. İnternet bağlantınızı kontrol edip tekrar deneyin.",
     "search": "Ara"

@@ -298,6 +298,11 @@
     "tap_to_highlight": "اضغط على أي آية لتحديدها",
     "bismillah": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
     "image_reader_hint": "اسحب بين الصفحات وكبّر للتدقيق",
+    "preparing_pages_title": "تجهيز صفحات المصحف",
+    "preparing_pages_once": "سيتم تنزيل صفحات المصحف مرة واحدة فقط عند أول تشغيل.",
+    "preparing_pages_progress": "تنزيل صفحات المصحف {current}/{total}",
+    "preparing_pages_percent": "{percent}%",
+    "download_pages_error": "تعذر تنزيل صفحات المصحف. تأكد من الاتصال بالإنترنت ثم حاول مرة أخرى.",
     "downloading_page": "جاري تنزيل صفحة {page}...",
     "download_page_error": "تعذر تنزيل صفحة المصحف. تأكد من الاتصال بالإنترنت ثم حاول مرة أخرى.",
     "search": "بحث"

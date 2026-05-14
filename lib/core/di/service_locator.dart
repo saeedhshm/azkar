@@ -55,7 +55,7 @@ Future<void> setupLocator() async {
   );
   getIt.registerLazySingleton<QuranLocalDataSource>(QuranLocalDataSource.new);
   getIt.registerLazySingleton<QuranPageImageCacheService>(
-    QuranPageImageCacheService.new,
+    () => QuranPageImageCacheService(getIt<LocalStorageService>()),
   );
   getIt.registerLazySingleton<QuranRepository>(
     () => QuranRepositoryImpl(getIt<QuranLocalDataSource>()),

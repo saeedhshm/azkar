@@ -179,6 +179,19 @@ class LocalStorageService {
     await _box.put(AppConstants.timeFormatKey, value);
   }
 
+  int? getQuranPagesCacheVersion() {
+    final value = _box.get(AppConstants.quranPagesCacheVersionKey);
+    return value is int ? value : null;
+  }
+
+  Future<void> saveQuranPagesCacheVersion(int value) async {
+    await _box.put(AppConstants.quranPagesCacheVersionKey, value);
+  }
+
+  Future<void> clearQuranPagesCacheVersion() async {
+    await _box.delete(AppConstants.quranPagesCacheVersionKey);
+  }
+
   Map<String, dynamic>? getReaderProgress(String categoryKey) {
     final raw = _box.get('reader_progress_$categoryKey');
     if (raw is Map) {
