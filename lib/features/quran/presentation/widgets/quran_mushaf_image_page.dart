@@ -6,6 +6,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../../../core/theme/app_theme.dart';
 import '../../data/datasources/quran_page_image_cache_service.dart';
+import 'quran_mushaf_frame.dart';
 
 class QuranMushafImagePage extends StatefulWidget {
   const QuranMushafImagePage({
@@ -59,7 +60,7 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
       future: _future,
       builder: (context, snapshot) {
         if (snapshot.hasData) {
-          return _MushafImageShell(
+          return QuranMushafFrame(
             child: SafeArea(
               top: true,
               child: LayoutBuilder(

@@ -129,5 +129,7 @@ Future<void> setupLocator() async {
     ),
   );
 
-  getIt.registerFactory<QuranCubit>(() => QuranCubit(getIt<QuranRepository>()));
+  getIt.registerFactory<QuranCubit>(
+    () => QuranCubit(getIt<QuranRepository>(), getIt<LocalStorageService>()),
+  );
 }

@@ -19,6 +19,7 @@ class AppConstants {
   static const fridayReminderKey = 'friday_reminder';
   static const timeFormatKey = 'time_format_24h';
   static const quranPagesCacheVersionKey = 'quran_pages_cache_version';
+  static const quranLastPageKey = 'quran_last_page';
 
   static const defaultMorningReminder = '06:00';
   static const defaultEveningReminder = '18:00';

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/storage/local_storage_service.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../data/datasources/quran_page_image_cache_service.dart';
 import '../../domain/entities/quran_search_result.dart';
@@ -26,7 +27,9 @@ class QuranScreen extends StatefulWidget {
 }
 
 class _QuranScreenState extends State<QuranScreen> {
-  final _pageController = PageController();
+  final _pageController = PageController(
+    initialPage: (getIt<LocalStorageService>().getQuranLastPage() ?? 1) - 1,
+  );
   final _searchController = TextEditingController();
   Timer? _chromeTimer;
   bool _chromeVisible = true;

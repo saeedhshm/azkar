@@ -214,4 +214,13 @@ class LocalStorageService {
   Future<void> clearReaderProgress(String categoryKey) async {
     await _box.delete('reader_progress_$categoryKey');
   }
+
+  int? getQuranLastPage() {
+    final value = _box.get(AppConstants.quranLastPageKey);
+    return value is int ? value : null;
+  }
+
+  Future<void> saveQuranLastPage(int pageNumber) async {
+    await _box.put(AppConstants.quranLastPageKey, pageNumber);
+  }
 }

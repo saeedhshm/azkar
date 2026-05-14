@@ -1,27 +1,33 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/storage/local_storage_service.dart';
 import '../../domain/entities/quran_surah.dart';
 import '../../domain/repositories/quran_repository.dart';
 import 'quran_state.dart';
 
 class QuranCubit extends Cubit<QuranState> {
-  QuranCubit(this._repository) : super(const QuranState.initial());
+  QuranCubit(this._repository, this._localStorage)
+    : super(const QuranState.initial());
 
   final QuranRepository _repository;
+  final LocalStorageService _localStorage;
 
   Future<void> load() async {
     emit(state.copyWith(status: QuranStatus.loading));
     try {
       final surahs = await _repository.getSurahs();
+      final lastPage = _localStorage.getQuranLastPage();
+      final defaultPage = surahs.isEmpty || surahs.first.ayahs.isEmpty
+          ? 1
+          : surahs.first.ayahs.first.page;
+      final startPage = lastPage ?? defaultPage;
       emit(
         state.copyWith(
           status: QuranStatus.loaded,
           surahs: surahs,
           selectedSurahNumber: surahs.isEmpty ? 1 : surahs.first.number,
           selectedAyahNumber: null,
-          selectedPageNumber: surahs.isEmpty || surahs.first.ayahs.isEmpty
-              ? 1
-              : surahs.first.ayahs.first.page,
+          selectedPageNumber: startPage,
           query: '',
           searchResults: const [],
         ),
@@ -69,6 +75,7 @@ class QuranCubit extends Cubit<QuranState> {
         selectedAyahNumber: null,
       ),
     );
+    _localStorage.saveQuranLastPage(pageNumber);
   }
 
   Future<void> search(String query) async {
