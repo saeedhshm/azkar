@@ -192,6 +192,19 @@ class LocalStorageService {
     await _box.delete(AppConstants.quranPagesCacheVersionKey);
   }
 
+  int? getQuranPolygonCacheVersion() {
+    final value = _box.get(AppConstants.quranPolygonCacheVersionKey);
+    return value is int ? value : null;
+  }
+
+  Future<void> saveQuranPolygonCacheVersion(int value) async {
+    await _box.put(AppConstants.quranPolygonCacheVersionKey, value);
+  }
+
+  Future<void> clearQuranPolygonCacheVersion() async {
+    await _box.delete(AppConstants.quranPolygonCacheVersionKey);
+  }
+
   Map<String, dynamic>? getReaderProgress(String categoryKey) {
     final raw = _box.get('reader_progress_$categoryKey');
     if (raw is Map) {
@@ -222,5 +235,43 @@ class LocalStorageService {
 
   Future<void> saveQuranLastPage(int pageNumber) async {
     await _box.put(AppConstants.quranLastPageKey, pageNumber);
+  }
+
+  ({int surah, int ayah})? getQuranLastReadAyah() {
+    final surah = _box.get(AppConstants.quranLastAyahSurahKey);
+    final ayah = _box.get(AppConstants.quranLastAyahNumberKey);
+    if (surah is int && ayah is int) {
+      return (surah: surah, ayah: ayah);
+    }
+    return null;
+  }
+
+  Future<void> saveQuranLastReadAyah({required int surah, required int ayah}) async {
+    await _box.put(AppConstants.quranLastAyahSurahKey, surah);
+    await _box.put(AppConstants.quranLastAyahNumberKey, ayah);
+  }
+
+  List<Map<String, dynamic>> getQuranBookmarks() {
+    final raw = _box.get(
+      AppConstants.quranBookmarksKey,
+      defaultValue: <dynamic>[],
+    );
+    if (raw is! List) return [];
+    return raw
+        .whereType<Map>()
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+  }
+
+  Future<void> saveQuranBookmarks(List<Map<String, dynamic>> bookmarks) async {
+    await _box.put(AppConstants.quranBookmarksKey, bookmarks);
+  }
+
+  dynamic getRaw(String key) {
+    return _box.get(key);
+  }
+
+  Future<void> putRaw(String key, dynamic value) async {
+    await _box.put(key, value);
   }
 }

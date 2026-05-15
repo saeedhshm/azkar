@@ -4,7 +4,7 @@ import '../../features/adhkar/presentation/pages/adhkar_list_screen.dart';
 import '../../features/adhkar/presentation/pages/dhikr_reader_screen.dart';
 import '../../features/adhkar/presentation/pages/favorites_screen.dart';
 import '../../features/navigation/presentation/pages/main_navigation_screen.dart';
-import '../../features/quran/presentation/pages/quran_screen.dart';
+import '../../features/quran/presentation/pages/quran_reader_screen.dart';
 import '../../features/settings/presentation/pages/settings_screen.dart';
 import '../../features/tasbeeh/presentation/pages/tasbeeh_counter_screen.dart';
 
@@ -17,7 +17,13 @@ class AppRouter {
         path: '/',
         builder: (context, state) => const MainNavigationScreen(),
       ),
-      GoRoute(path: '/quran', builder: (context, state) => const QuranScreen()),
+      GoRoute(
+        path: '/quran',
+        builder: (context, state) {
+          final page = int.tryParse(state.uri.queryParameters['page'] ?? '');
+          return QuranReaderScreen(initialPageNumber: page);
+        },
+      ),
       GoRoute(
         path: '/adhkar/:category',
         builder: (context, state) {

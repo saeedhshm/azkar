@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -23,9 +25,39 @@ import '../../features/prayer_times/data/services/city_database_service.dart';
 import '../../features/prayer_times/presentation/cubit/prayer_times_cubit.dart';
 import '../../features/quran/data/datasources/quran_local_data_source.dart';
 import '../../features/quran/data/datasources/quran_page_image_cache_service.dart';
+import '../../features/quran/data/datasources/quran_polygon_local_data_source.dart';
+import '../../features/quran/data/datasources/quran_search_index.dart';
+import '../../features/quran/data/repositories/quran_bookmark_repository_impl.dart';
+import '../../features/quran/data/repositories/quran_last_read_repository_impl.dart';
+import '../../features/quran/data/repositories/quran_polygon_repository_impl.dart';
 import '../../features/quran/data/repositories/quran_repository_impl.dart';
+import '../../features/quran/domain/repositories/quran_bookmark_repository.dart';
+import '../../features/quran/domain/repositories/quran_last_read_repository.dart';
+import '../../features/quran/domain/repositories/quran_polygon_repository.dart';
+import '../../features/quran/domain/usecases/get_quran_page_polygons_use_case.dart';
 import '../../features/quran/domain/repositories/quran_repository.dart';
+import '../../features/quran/domain/usecases/get_quran_surahs_use_case.dart';
+import '../../features/quran/domain/usecases/search_quran_use_case.dart';
+import '../../features/quran/presentation/cubit/quran_ayah_selection_cubit.dart';
+import '../../features/quran/presentation/cubit/quran_highlight_cubit.dart';
+import '../../features/quran/presentation/cubit/quran_polygon_cubit.dart';
 import '../../features/quran/presentation/cubit/quran_cubit.dart';
+import '../../features/quran/actions/presentation/cubit/ayah_actions_cubit.dart';
+import '../../features/quran/audio/data/datasources/quran_audio_player_service.dart';
+import '../../features/quran/audio/data/datasources/recitation_timing_data_source.dart';
+import '../../features/quran/audio/data/repositories/recitation_repository_impl.dart';
+import '../../features/quran/audio/domain/repositories/recitation_repository.dart';
+import '../../features/quran/audio/presentation/cubit/quran_audio_cubit.dart';
+import '../../features/quran/data/datasources/quran_recently_read_service.dart';
+import '../../features/quran/services/quran_polygon_file_cache_service.dart';
+import '../../features/quran/services/quran_polygon_hit_test_engine.dart';
+import '../../features/quran/services/quran_svg_memory_cache.dart';
+import '../../features/quran/services/quran_svg_page_service.dart';
+import '../../features/quran/tafsir/data/datasources/tafsir_local_data_source.dart';
+import '../../features/quran/tafsir/data/datasources/tafsir_remote_data_source.dart';
+import '../../features/quran/tafsir/data/repositories/tafsir_repository_impl.dart';
+import '../../features/quran/tafsir/domain/repositories/tafsir_repository.dart';
+import '../../features/quran/tafsir/domain/usecases/get_tafsir_use_case.dart';
 import '../notifications/notification_service.dart';
 import '../storage/local_storage_service.dart';
 import '../widgets/prayer_widget_service.dart';
@@ -41,6 +73,10 @@ Future<void> setupLocator() async {
   await notifications.init();
   getIt.registerSingleton<NotificationService>(notifications);
 
+  getIt.registerLazySingleton<QuranRecentlyReadService>(
+    () => QuranRecentlyReadService(getIt<LocalStorageService>()),
+  );
+
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<PrayerSettingsProvider>(
     PrayerSettingsProvider(prefs),
@@ -53,12 +89,56 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<PrayerWidgetService>(
     () => PrayerWidgetService(getIt<LocalStorageService>()),
   );
-  getIt.registerLazySingleton<QuranLocalDataSource>(QuranLocalDataSource.new);
+  final quranLocalDataSource = QuranLocalDataSource();
+  getIt.registerSingleton<QuranLocalDataSource>(quranLocalDataSource);
+  unawaited(quranLocalDataSource.loadSurahs());
   getIt.registerLazySingleton<QuranPageImageCacheService>(
     () => QuranPageImageCacheService(getIt<LocalStorageService>()),
   );
+  getIt.registerLazySingleton<QuranPolygonFileCacheService>(
+    () => QuranPolygonFileCacheService(getIt<LocalStorageService>()),
+  );
+  getIt.registerLazySingleton<QuranPolygonLocalDataSource>(
+    () => QuranPolygonLocalDataSource(getIt<QuranPolygonFileCacheService>()),
+  );
+  getIt.registerLazySingleton<QuranSvgMemoryCache>(QuranSvgMemoryCache.new);
+  getIt.registerLazySingleton<QuranSvgPageService>(
+    () => QuranSvgPageService(
+      getIt<QuranPageImageCacheService>(),
+      getIt<QuranSvgMemoryCache>(),
+    ),
+  );
+  getIt.registerLazySingleton<QuranPolygonHitTestEngine>(
+    QuranPolygonHitTestEngine.new,
+  );
+  getIt.registerLazySingleton<QuranSearchIndex>(QuranSearchIndex.new);
   getIt.registerLazySingleton<QuranRepository>(
-    () => QuranRepositoryImpl(getIt<QuranLocalDataSource>()),
+    () => QuranRepositoryImpl(
+      getIt<QuranLocalDataSource>(),
+      getIt<QuranSearchIndex>(),
+    ),
+  );
+  getIt.registerLazySingleton<QuranPolygonRepository>(
+    () => QuranPolygonRepositoryImpl(getIt<QuranPolygonLocalDataSource>()),
+  );
+  getIt.registerLazySingleton<GetQuranSurahsUseCase>(
+    () => GetQuranSurahsUseCase(getIt<QuranRepository>()),
+  );
+  getIt.registerLazySingleton<GetQuranPagePolygonsUseCase>(
+    () => GetQuranPagePolygonsUseCase(getIt<QuranPolygonRepository>()),
+  );
+  getIt.registerLazySingleton<SearchQuranUseCase>(
+    () => SearchQuranUseCase(getIt<QuranRepository>()),
+  );
+
+  getIt.registerLazySingleton<RecitationTimingDataSource>(
+    RecitationTimingDataSource.new,
+  );
+  getIt.registerLazySingleton<QuranAudioPlayerService>(
+    QuranAudioPlayerService.new,
+  );
+  getIt.registerLazySingleton<RecitationRepository>(
+    () => RecitationRepositoryImpl(getIt<RecitationTimingDataSource>()),
   );
 
   getIt.registerLazySingleton<AdhkarLocalDataSource>(AdhkarLocalDataSource.new);
@@ -129,7 +209,49 @@ Future<void> setupLocator() async {
     ),
   );
 
+  getIt.registerLazySingleton<QuranBookmarkRepository>(
+    () => QuranBookmarkRepositoryImpl(getIt<LocalStorageService>()),
+  );
+  getIt.registerLazySingleton<QuranLastReadRepository>(
+    () => QuranLastReadRepositoryImpl(getIt<LocalStorageService>()),
+  );
+
   getIt.registerFactory<QuranCubit>(
-    () => QuranCubit(getIt<QuranRepository>(), getIt<LocalStorageService>()),
+    () => QuranCubit(
+      getIt<GetQuranSurahsUseCase>(),
+      getIt<SearchQuranUseCase>(),
+      getIt<QuranLastReadRepository>(),
+    ),
+  );
+  getIt.registerFactory<QuranPolygonCubit>(
+    () => QuranPolygonCubit(
+      getIt<GetQuranPagePolygonsUseCase>(),
+      getIt<QuranPolygonRepository>(),
+    ),
+  );
+  getIt.registerFactory<QuranAyahSelectionCubit>(QuranAyahSelectionCubit.new);
+  getIt.registerFactory<QuranHighlightCubit>(
+    () => QuranHighlightCubit(getIt<QuranBookmarkRepository>()),
+  );
+  getIt.registerFactory<QuranAudioCubit>(
+    () => QuranAudioCubit(
+      getIt<QuranAudioPlayerService>(),
+      getIt<RecitationRepository>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<TafsirRemoteDataSource>(TafsirRemoteDataSource.new);
+  getIt.registerLazySingleton<TafsirLocalDataSource>(TafsirLocalDataSource.new);
+  getIt.registerLazySingleton<TafsirRepository>(
+    () => TafsirRepositoryImpl(
+      getIt<TafsirRemoteDataSource>(),
+      getIt<TafsirLocalDataSource>(),
+    ),
+  );
+  getIt.registerLazySingleton<GetTafsirUseCase>(
+    () => GetTafsirUseCase(getIt<TafsirRepository>()),
+  );
+  getIt.registerFactory<AyahActionsCubit>(
+    () => AyahActionsCubit(getIt<GetTafsirUseCase>()),
   );
 }

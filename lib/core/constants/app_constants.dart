@@ -19,7 +19,16 @@ class AppConstants {
   static const fridayReminderKey = 'friday_reminder';
   static const timeFormatKey = 'time_format_24h';
   static const quranPagesCacheVersionKey = 'quran_pages_cache_version';
+  static const quranPolygonCacheVersionKey = 'quran_polygon_cache_version';
   static const quranLastPageKey = 'quran_last_page';
+  static const quranLastAyahSurahKey = 'quran_last_ayah_surah';
+  static const quranLastAyahNumberKey = 'quran_last_ayah_number';
+  static const quranBookmarksKey = 'quran_bookmarks';
+  static const quranFavoriteReciterKey = 'quran_favorite_reciter';
+  static const quranReadingModeKey = 'quran_reading_mode';
+  static const quranDimModeKey = 'quran_dim_mode';
+  static const quranDimIntensityKey = 'quran_dim_intensity';
+  static const quranContinuousScrollKey = 'quran_continuous_scroll';
 
   static const defaultMorningReminder = '06:00';
   static const defaultEveningReminder = '18:00';

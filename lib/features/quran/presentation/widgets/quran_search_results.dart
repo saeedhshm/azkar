@@ -1,9 +1,11 @@
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
 
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/quran_search_result.dart';
+import '../../services/quran_search_text_utils.dart';
 
 class QuranSearchResults extends StatelessWidget {
   const QuranSearchResults({
@@ -39,8 +41,8 @@ class QuranSearchResults extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 104),
       itemCount: results.length + 1,
-      separatorBuilder: (_, index) =>
-          index == 0 ? const SizedBox(height: 10) : const SizedBox(height: 8),
+      separatorBuilder: (c, i) =>
+          i == 0 ? const SizedBox(height: 10) : const SizedBox(height: 8),
       itemBuilder: (context, index) {
         if (index == 0) {
           return Text(
@@ -110,17 +112,43 @@ class QuranSearchResults extends StatelessWidget {
                 const SizedBox(height: 10),
                 Directionality(
                   textDirection: ui.TextDirection.rtl,
-                  child: Text(
-                    result.ayah.text,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.right,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontFamily: 'Cairo',
-                      height: 1.9,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+                  child: result.matchedWord != null
+                      ? RichText(
+                          text: TextSpan(
+                            children: _highlightMatches(
+                              original: result.ayah.text,
+                              normalizedQuery: result.matchedWord!,
+                              baseStyle: theme.textTheme.titleMedium!.copyWith(
+                                fontFamily: 'Cairo',
+                                height: 1.9,
+                                fontWeight: FontWeight.w700,
+                                color: theme.colorScheme.onSurface,
+                              ),
+                              highlightStyle: theme.textTheme.titleMedium!
+                                  .copyWith(
+                                fontFamily: 'Cairo',
+                                height: 1.9,
+                                fontWeight: FontWeight.w900,
+                                color: gold,
+                                backgroundColor: gold.withValues(alpha: 0.15),
+                              ),
+                            ),
+                          ),
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                        )
+                      : Text(
+                          result.ayah.text,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontFamily: 'Cairo',
+                            height: 1.9,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -128,5 +156,29 @@ class QuranSearchResults extends StatelessWidget {
         );
       },
     );
+  }
+
+  List<TextSpan> _highlightMatches({
+    required String original,
+    required String normalizedQuery,
+    required TextStyle baseStyle,
+    required TextStyle highlightStyle,
+  }) {
+    final words = original.split(' ');
+    final spans = <TextSpan>[];
+    for (var i = 0; i < words.length; i++) {
+      final word = words[i];
+      final normalized = QuranSearchTextUtils.normalize(word);
+      final isMatch = normalized.contains(normalizedQuery) ||
+          normalizedQuery.contains(normalized);
+      if (spans.isNotEmpty) {
+        spans.add(TextSpan(text: ' ', style: baseStyle));
+      }
+      spans.add(TextSpan(
+        text: word,
+        style: isMatch ? highlightStyle : baseStyle,
+      ));
+    }
+    return spans;
   }
 }

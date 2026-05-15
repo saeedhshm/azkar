@@ -17,6 +17,8 @@ class QuranAyah extends Equatable {
   final int page;
   final String text;
 
+  String get ayahKey => '$surahNumber:$numberInSurah';
+
   @override
   List<Object?> get props => [
     globalNumber,

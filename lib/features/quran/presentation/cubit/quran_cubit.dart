@@ -1,32 +1,63 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/storage/local_storage_service.dart';
 import '../../domain/entities/quran_surah.dart';
-import '../../domain/repositories/quran_repository.dart';
+import '../../domain/repositories/quran_last_read_repository.dart';
+import '../../domain/usecases/get_quran_surahs_use_case.dart';
+import '../../domain/usecases/search_quran_use_case.dart';
+import '../../services/quran_svg_page_service.dart';
 import 'quran_state.dart';
 
 class QuranCubit extends Cubit<QuranState> {
-  QuranCubit(this._repository, this._localStorage)
-    : super(const QuranState.initial());
+  QuranCubit(
+    this._getQuranSurahs,
+    this._searchQuran,
+    this._lastReadRepository,
+  ) : super(const QuranState.initial());
 
-  final QuranRepository _repository;
-  final LocalStorageService _localStorage;
+  final GetQuranSurahsUseCase _getQuranSurahs;
+  final SearchQuranUseCase _searchQuran;
+  final QuranLastReadRepository _lastReadRepository;
 
-  Future<void> load() async {
+  Future<void> load({int? initialPageNumber}) async {
     emit(state.copyWith(status: QuranStatus.loading));
     try {
-      final surahs = await _repository.getSurahs();
-      final lastPage = _localStorage.getQuranLastPage();
+      final surahsFuture = _getQuranSurahs();
+      final lastPageFuture = Future.value(
+        initialPageNumber ?? _lastReadRepository.getLastPage(),
+      );
+      final lastAyahFuture = Future.value(_lastReadRepository.getLastAyah());
+
+      final results = await Future.wait([
+        surahsFuture,
+        lastPageFuture,
+        lastAyahFuture,
+      ]);
+
+      final surahs = results[0] as List<QuranSurah>;
+      final lastPage = results[1] as int?;
+      final lastAyah = results[2] as ({int surah, int ayah})?;
+
       final defaultPage = surahs.isEmpty || surahs.first.ayahs.isEmpty
           ? 1
           : surahs.first.ayahs.first.page;
-      final startPage = lastPage ?? defaultPage;
+      final startPage = (lastPage ?? defaultPage)
+          .clamp(QuranSvgPageService.firstPage, QuranSvgPageService.lastPage)
+          .toInt();
+      final initialSurah = _surahForPage(startPage, surahs: surahs);
+      final restoredAyah = lastAyah != null &&
+              lastAyah.surah == initialSurah?.number &&
+              initialSurah != null
+          ? lastAyah.ayah
+          : null;
+
       emit(
         state.copyWith(
           status: QuranStatus.loaded,
           surahs: surahs,
-          selectedSurahNumber: surahs.isEmpty ? 1 : surahs.first.number,
-          selectedAyahNumber: null,
+          selectedSurahNumber:
+              initialSurah?.number ??
+              (surahs.isEmpty ? 1 : surahs.first.number),
+          selectedAyahNumber: restoredAyah,
           selectedPageNumber: startPage,
           query: '',
           searchResults: const [],
@@ -54,6 +85,9 @@ class QuranCubit extends Cubit<QuranState> {
         selectedPageNumber: pageNumber,
       ),
     );
+    if (ayahNumber != null && pageNumber != null) {
+      _lastReadRepository.saveLastAyah(surah: surahNumber, ayah: ayahNumber);
+    }
   }
 
   void selectAyah(int ayahNumber) {
@@ -64,10 +98,16 @@ class QuranCubit extends Cubit<QuranState> {
         selectedPageNumber: pageNumber,
       ),
     );
+    if (pageNumber != null) {
+      _lastReadRepository.saveLastAyah(
+        surah: state.selectedSurahNumber,
+        ayah: ayahNumber,
+      );
+    }
   }
 
   void selectPage(int pageNumber) {
-    final surah = _surahForPage(pageNumber);
+    final surah = _surahForCurrentPage(pageNumber);
     emit(
       state.copyWith(
         selectedPageNumber: pageNumber,
@@ -75,7 +115,7 @@ class QuranCubit extends Cubit<QuranState> {
         selectedAyahNumber: null,
       ),
     );
-    _localStorage.saveQuranLastPage(pageNumber);
+    _lastReadRepository.saveLastPage(pageNumber);
   }
 
   Future<void> search(String query) async {
@@ -85,7 +125,7 @@ class QuranCubit extends Cubit<QuranState> {
       return;
     }
 
-    final results = await _repository.search(trimmed);
+    final results = await _searchQuran(trimmed);
     emit(state.copyWith(query: trimmed, searchResults: results));
   }
 
@@ -118,9 +158,16 @@ class QuranCubit extends Cubit<QuranState> {
     return null;
   }
 
-  QuranSurah? _surahForPage(int pageNumber) {
+  QuranSurah? _surahForCurrentPage(int pageNumber) {
+    return _surahForPage(pageNumber, surahs: state.surahs);
+  }
+
+  QuranSurah? _surahForPage(
+    int pageNumber, {
+    required List<QuranSurah> surahs,
+  }) {
     QuranSurah? candidate;
-    for (final surah in state.surahs) {
+    for (final surah in surahs) {
       if (surah.ayahs.any((ayah) => ayah.page == pageNumber)) {
         return surah;
       }

@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/quran_surah.dart';
+import '../../services/quran_juz_data.dart';
 
 class QuranSurahSelection {
   const QuranSurahSelection({required this.surahNumber, this.ayahNumber});
@@ -29,8 +30,10 @@ class QuranSurahSheet extends StatefulWidget {
 class _QuranSurahSheetState extends State<QuranSurahSheet> {
   final _queryController = TextEditingController();
   final _ayahController = TextEditingController();
+  final _scrollController = ScrollController();
   String _query = '';
   int? _selectedSurah;
+  bool _showGrouped = true;
 
   @override
   void initState() {
@@ -42,24 +45,32 @@ class _QuranSurahSheetState extends State<QuranSurahSheet> {
   void dispose() {
     _queryController.dispose();
     _ayahController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
+
+  List<QuranSurah> get _filtered {
+    return widget.surahs.where((surah) {
+      final q = _query.trim().toLowerCase();
+      if (q.isEmpty) return true;
+      return surah.name.contains(q) ||
+          surah.englishName.toLowerCase().contains(q) ||
+          surah.englishNameTranslation.toLowerCase().contains(q) ||
+          surah.number.toString() == q;
+    }).toList(growable: false);
+  }
+
+  List<QuranSurah> get _makki =>
+      _filtered.where((s) => s.revelationType == 'Meccan').toList();
+  List<QuranSurah> get _madani =>
+      _filtered.where((s) => s.revelationType == 'Medinan').toList();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
-    final filtered = widget.surahs
-        .where((surah) {
-          final q = _query.trim().toLowerCase();
-          if (q.isEmpty) {
-            return true;
-          }
-          return surah.name.contains(q) ||
-              surah.englishName.toLowerCase().contains(q) ||
-              surah.number.toString() == q;
-        })
-        .toList(growable: false);
+    final filtered = _filtered;
+    final showGrouped = _showGrouped && _query.isEmpty;
 
     return DraggableScrollableSheet(
       expand: false,
@@ -70,7 +81,9 @@ class _QuranSurahSheetState extends State<QuranSurahSheet> {
         return Container(
           decoration: BoxDecoration(
             color: colors.cardSurface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(30),
+            ),
             border: Border(top: BorderSide(color: colors.softBorder)),
           ),
           child: Column(
@@ -89,12 +102,37 @@ class _QuranSurahSheetState extends State<QuranSurahSheet> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'quran.select_surah'.tr(),
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w900,
-                      ),
-                      textAlign: TextAlign.center,
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.format_list_bulleted_rounded,
+                          color: colors.accentColor ?? colors.countdownText,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'quran.select_surah'.tr(),
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const Spacer(),
+                        if (_query.isEmpty)
+                          IconButton(
+                            icon: Icon(
+                              showGrouped
+                                  ? Icons.list_rounded
+                                  : Icons.grid_view_rounded,
+                              size: 20,
+                            ),
+                            onPressed: () =>
+                                setState(() => _showGrouped = !_showGrouped),
+                            tooltip: showGrouped
+                                ? 'quran.list_view'.tr()
+                                : 'quran.grid_view'.tr(),
+                            splashRadius: 20,
+                          ),
+                      ],
                     ),
                     const SizedBox(height: 14),
                     TextField(
@@ -141,33 +179,226 @@ class _QuranSurahSheetState extends State<QuranSurahSheet> {
                 ),
               ),
               Expanded(
-                child: ListView.separated(
-                  controller: scrollController,
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 22),
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    final surah = filtered[index];
-                    final selected = surah.number == widget.currentSurahNumber;
-                    return _SurahRow(
-                      surah: surah,
-                      selected: selected,
-                      onTap: () {
-                        Navigator.pop(
-                          context,
-                          QuranSurahSelection(surahNumber: surah.number),
-                        );
-                      },
-                      onSelected: () =>
-                          setState(() => _selectedSurah = surah.number),
-                    );
-                  },
-                ),
+                child: showGrouped
+                    ? _GroupedSurahList(
+                        makki: _makki,
+                        madani: _madani,
+                        currentSurahNumber: widget.currentSurahNumber,
+                        scrollController: scrollController,
+                        onTap: (surah) {
+                          Navigator.pop(
+                            context,
+                            QuranSurahSelection(surahNumber: surah.number),
+                          );
+                        },
+                        onSelected: (surah) =>
+                            setState(() => _selectedSurah = surah.number),
+                      )
+                    : Stack(
+                        children: [
+                          ListView.separated(
+                            controller: scrollController,
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 22),
+                            itemCount: filtered.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (context, index) {
+                              final surah = filtered[index];
+                              final selected =
+                                  surah.number == widget.currentSurahNumber;
+                              return _SurahRow(
+                                surah: surah,
+                                selected: selected,
+                                onTap: () {
+                                  Navigator.pop(
+                                    context,
+                                    QuranSurahSelection(
+                                      surahNumber: surah.number,
+                                    ),
+                                  );
+                                },
+                                onSelected: () => setState(
+                                    () => _selectedSurah = surah.number),
+                              );
+                            },
+                          ),
+                          if (_query.isEmpty &&
+                              widget.surahs == filtered &&
+                              !showGrouped)
+                            Positioned(
+                              right: 4,
+                              top: 0,
+                              bottom: 0,
+                              child: _SurahIndexBar(
+                                surahs: widget.surahs,
+                                scrollController: scrollController,
+                              ),
+                            ),
+                        ],
+                      ),
               ),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class _GroupedSurahList extends StatelessWidget {
+  const _GroupedSurahList({
+    required this.makki,
+    required this.madani,
+    required this.currentSurahNumber,
+    required this.scrollController,
+    required this.onTap,
+    required this.onSelected,
+  });
+
+  final List<QuranSurah> makki;
+  final List<QuranSurah> madani;
+  final int currentSurahNumber;
+  final ScrollController scrollController;
+  final void Function(QuranSurah surah) onTap;
+  final void Function(QuranSurah surah) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+
+    return ListView(
+      controller: scrollController,
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 22),
+      children: [
+        if (makki.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            child: Row(
+              children: [
+                Icon(Icons.location_city_rounded,
+                    size: 16, color: colors.accentColor),
+                const SizedBox(width: 6),
+                Text(
+                  'quran.makki'.tr(),
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: colors.accentColor,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '(${makki.length})',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colors.mutedText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ...makki.map(
+            (surah) => _SurahRow(
+              surah: surah,
+              selected: surah.number == currentSurahNumber,
+              onTap: () => onTap(surah),
+              onSelected: () => onSelected(surah),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        if (madani.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+            child: Row(
+              children: [
+                Icon(Icons.mosque_rounded,
+                    size: 16, color: const Color(0xFF6C63FF)),
+                const SizedBox(width: 6),
+                Text(
+                  'quran.madani'.tr(),
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: const Color(0xFF6C63FF),
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  '(${madani.length})',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colors.mutedText,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          ...madani.map(
+            (surah) => _SurahRow(
+              surah: surah,
+              selected: surah.number == currentSurahNumber,
+              onTap: () => onTap(surah),
+              onSelected: () => onSelected(surah),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _SurahIndexBar extends StatelessWidget {
+  const _SurahIndexBar({
+    required this.surahs,
+    required this.scrollController,
+  });
+
+  final List<QuranSurah> surahs;
+  final ScrollController scrollController;
+
+  @override
+  Widget build(BuildContext context) {
+    final uniqueLetters = <String>{};
+    final labels = <String>[];
+    for (final surah in surahs) {
+      final letter = surah.englishName.isNotEmpty
+          ? surah.englishName[0].toUpperCase()
+          : '';
+      if (letter.isNotEmpty && uniqueLetters.add(letter)) {
+        labels.add(letter);
+      }
+    }
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (final letter in labels)
+          GestureDetector(
+            onTap: () {
+              final index = surahs.indexWhere(
+                (s) =>
+                    s.englishName.isNotEmpty &&
+                    s.englishName[0].toUpperCase() == letter,
+              );
+              if (index >= 0 && scrollController.hasClients) {
+                scrollController.animateTo(
+                  index * 72.0,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeOut,
+                );
+              }
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 1),
+              child: Text(
+                letter,
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -190,6 +421,7 @@ class _SurahRow extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
     final gold = colors.accentColor ?? colors.countdownText;
+    final juz = QuranJuzData.juzForSurah(surah.number);
 
     return InkWell(
       onTap: onTap,
@@ -204,7 +436,9 @@ class _SurahRow extends StatelessWidget {
               : colors.cardSurfaceTint.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: selected ? gold.withValues(alpha: 0.5) : colors.softBorder,
+            color: selected
+                ? gold.withValues(alpha: 0.5)
+                : colors.softBorder,
           ),
         ),
         child: Row(
@@ -238,25 +472,72 @@ class _SurahRow extends StatelessWidget {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  Text(
-                    '${surah.englishNameTranslation} • ${surah.ayahCount} ${'quran.ayahs'.tr()}',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.mutedText,
-                    ),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Text(
+                        '${surah.englishNameTranslation} • ${surah.ayahCount} ${'quran.ayahs'.tr()}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colors.mutedText,
+                        ),
+                      ),
+                      if (juz != null) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 4, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: colors.accentColor
+                                    ?.withValues(alpha: 0.1) ??
+                                colors.countdownText.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'Juz ${juz.number}',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              fontSize: 9,
+                              color: colors.accentColor ?? colors.countdownText,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
             ),
             const SizedBox(width: 12),
-            Text(
-              surah.name,
-              textDirection: ui.TextDirection.rtl,
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w900,
-                color: colors.secondaryText,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  surah.name,
+                  textDirection: ui.TextDirection.rtl,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: colors.secondaryText,
+                  ),
+                ),
+                if (surah.revelationType == 'Meccan')
+                  Text(
+                    'quran.makki'.tr(),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontSize: 9,
+                      color: colors.accentColor,
+                    ),
+                  )
+                else
+                  Text(
+                    'quran.madani'.tr(),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      fontSize: 9,
+                      color: const Color(0xFF6C63FF),
+                    ),
+                  ),
+              ],
             ),
           ],
         ),

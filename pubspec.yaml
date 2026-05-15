@@ -36,6 +36,8 @@ dependencies:
   path_provider: ^2.1.4
   home_widget: ^0.6.0
   flutter_svg: ^2.2.0
+  photo_view: ^0.15.0
+  just_audio: ^0.9.42
 
 dev_dependencies:
   flutter_test:
@@ -57,6 +59,7 @@ flutter:
     - assets/data/adhkar_1500.json
     - assets/data/quran_uthmani.json
     - assets/data/cities_min.json.gz
+    - assets/data/timings/
     - assets/translations/
   fonts:
     - family: Cairo
