@@ -69,6 +69,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   bool _showZoomHint = false;
   Timer? _zoomHintTimer;
   bool _continuousScroll = false;
+  QuranCubit? _quranCubit;
 
   @override
   void initState() {
@@ -154,14 +155,14 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     });
     if (!_searchVisible) {
       _searchController.clear();
-      context.read<QuranCubit>().clearSearch();
+      _quranCubit?.clearSearch();
       _scheduleChromeHide();
     }
   }
 
   void _clearSearch(BuildContext context) {
     _searchController.clear();
-    context.read<QuranCubit>().clearSearch();
+    _quranCubit?.clearSearch();
     setState(() => _searchVisible = false);
     _scheduleChromeHide();
   }
@@ -250,7 +251,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
 
   void _onPageChanged(int pageNumber) {
     setState(() => _currentPage = pageNumber);
-    context.read<QuranCubit>().selectPage(pageNumber);
+    _quranCubit?.selectPage(pageNumber);
   }
 
   Future<void> _showBookmarksSheet(BuildContext context) async {
@@ -313,11 +314,13 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     );
   }
 
-  void _handleAyahLongPress(QuranSelectedAyah selectedAyah) {
+  void _handleAyahLongPress(
+    QuranSelectedAyah selectedAyah,
+    QuranCubit quranCubit,
+    QuranAudioCubit audioCubit,
+    QuranHighlightCubit highlightCubit,
+  ) {
     HapticFeedback.heavyImpact();
-    final quranCubit = context.read<QuranCubit>();
-    final audioCubit = context.read<QuranAudioCubit>();
-    final highlightCubit = context.read<QuranHighlightCubit>();
     _selectedAyahForText = selectedAyah;
     final quranState = quranCubit.state;
     final surahName = _surahNameForSelection(
@@ -432,9 +435,11 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                 previous.status != current.status,
             listener: (context, state) {
               if (state.status == QuranStatus.loaded) {
-                context.read<QuranAudioCubit>().onPageNeeded = _animateToPageNumber;
-                context.read<QuranAudioCubit>().setSurahs(state.surahs);
-                _restoreFavoriteReciter();
+                _quranCubit = context.read<QuranCubit>();
+                final audioCubit = context.read<QuranAudioCubit>();
+                audioCubit.onPageNeeded = _animateToPageNumber;
+                audioCubit.setSurahs(state.surahs);
+                _restoreFavoriteReciter(audioCubit);
               }
             },
           ),
@@ -536,12 +541,25 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                               message: state.errorMessage,
                             );
                           case QuranStatus.loaded:
+                            final audioCubit =
+                                context.read<QuranAudioCubit>();
+                            final highlightCubit =
+                                context.read<QuranHighlightCubit>();
+                            final quranCubit =
+                                context.read<QuranCubit>();
                             return QuranReaderPageView(
                               pageController: _pageController,
                               pageService: _pageService,
                               onPageChanged: _onPageChanged,
-                              onAyahLongPress: _handleAyahLongPress,
-                              readingMode: _readingMode && _continuousScroll,
+                              onAyahLongPress: (ayah) =>
+                                  _handleAyahLongPress(
+                                ayah,
+                                quranCubit,
+                                audioCubit,
+                                highlightCubit,
+                              ),
+                              readingMode:
+                                  _readingMode && _continuousScroll,
                             );
                         }
                       },
@@ -737,7 +755,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     );
   }
 
-  void _restoreFavoriteReciter() {
+  void _restoreFavoriteReciter(QuranAudioCubit audioCubit) {
     final storage = getIt<LocalStorageService>();
     final faveReciterId =
         storage.getRaw(AppConstants.quranFavoriteReciterKey) as String?;
@@ -747,7 +765,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
         orElse: () => null,
       );
       if (reciter != null && mounted) {
-        context.read<QuranAudioCubit>().setReciter(reciter);
+        audioCubit.setReciter(reciter);
       }
     }
   }
