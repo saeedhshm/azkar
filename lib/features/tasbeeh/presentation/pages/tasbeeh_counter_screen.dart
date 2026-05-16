@@ -1,494 +1,545 @@
-import 'dart:math';
-import 'dart:ui';
-
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/widgets/app_background.dart';
+import '../../../../core/widgets/glass_card.dart';
+import '../../../../core/widgets/glow_button.dart';
 import '../cubit/tasbeeh_cubit.dart';
 import '../cubit/tasbeeh_state.dart';
 
-class TasbeehCounterScreen extends StatelessWidget {
+class TasbeehCounterScreen extends StatefulWidget {
   const TasbeehCounterScreen({super.key});
 
   @override
+  State<TasbeehCounterScreen> createState() => _TasbeehCounterScreenState();
+}
+
+class _TasbeehCounterScreenState extends State<TasbeehCounterScreen>
+    with TickerProviderStateMixin {
+  late final AnimationController _bounceController;
+  late final Animation<double> _bounceAnimation;
+  late final AnimationController _glowController;
+  late final Animation<double> _glowAnimation;
+
+  int _selectedPresetIndex = 0;
+
+  static const List<_TasbeehPreset> _presets = [
+    _TasbeehPreset('سُبحانَ الله', 33),
+    _TasbeehPreset('الحَمدُ لله', 33),
+    _TasbeehPreset('اللهُ أَكبَر', 33),
+    _TasbeehPreset('لا إلهَ إلا الله', 100),
+    _TasbeehPreset('اللَّهُمَّ صَلِّ عَلَى مُحَمَّد', 10),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _bounceController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 140),
+      lowerBound: 0.85,
+      upperBound: 1.0,
+    )..value = 1.0;
+    _bounceAnimation = CurvedAnimation(
+      parent: _bounceController,
+      curve: Curves.easeOut,
+    );
+
+    _glowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat(reverse: true);
+    _glowAnimation = CurvedAnimation(
+      parent: _glowController,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _bounceController.dispose();
+    _glowController.dispose();
+    super.dispose();
+  }
+
+  void _onTap(TasbeehCubit cubit, TasbeehState state) {
+    if (state.count >= _presets[_selectedPresetIndex].target) return;
+    HapticFeedback.lightImpact();
+    _bounceController.reverse().then((_) => _bounceController.forward());
+    cubit.increment();
+  }
+
+  void _selectPreset(BuildContext context, int index) {
+    setState(() => _selectedPresetIndex = index);
+    context.read<TasbeehCubit>().reset();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final colors = AppThemeColors.of(context);
+
     return BlocProvider<TasbeehCubit>(
       create: (_) => getIt<TasbeehCubit>()..load(),
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: Text('common.tasbeeh_counter'.tr()),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        ),
-        body: BlocBuilder<TasbeehCubit, TasbeehState>(
-          builder: (context, state) {
-            if (state.status == TasbeehStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final isDark = Theme.of(context).brightness == Brightness.dark;
-            final glowColor = AppThemeColors.of(context).countdownText;
-
-            return Stack(
-              children: [
-                _TasbeehBackground(isDark: isDark),
-                SafeArea(
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      final maxWidth = constraints.maxWidth;
-                      final circleSize = maxWidth < 360 ? 200.0 : 240.0;
-
-                      return Center(
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _GlassPanel(
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'tasbeeh.default_phrase'.tr(),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .headlineSmall
-                                          ?.copyWith(
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 20),
-                                    _CountRing(
-                                      size: circleSize,
-                                      count: state.count,
-                                      isDark: isDark,
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 22),
-                              SizedBox(
-                                width: min(maxWidth, 320),
-                                child: _GlowButton(
-                                  enabled: true,
-                                  onTap: () =>
-                                      context.read<TasbeehCubit>().increment(),
-                                  label: Text('tasbeeh.tap_to_count'.tr()),
-                                ),
-                              ),
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                width: min(maxWidth, 260),
-                                child: _OutlineGlowButton(
-                                  label: Text('common.reset'.tr()),
-                                  icon: Icons.refresh,
-                                  onTap: () =>
-                                      context.read<TasbeehCubit>().reset(),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                '${'reader.remaining'.tr()}: ${state.count}',
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: glowColor.withValues(alpha: 0.7),
-                                    ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class _TasbeehBackground extends StatelessWidget {
-  const _TasbeehBackground({required this.isDark});
-
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final gradient = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        theme.scaffoldBackgroundColor,
-        Color.alphaBlend(
-          colors.heroCardBackground.withValues(alpha: isDark ? 0.08 : 0.35),
-          theme.scaffoldBackgroundColor,
-        ),
-      ],
-    );
-
-    return DecoratedBox(
-      decoration: BoxDecoration(gradient: gradient),
-      child: CustomPaint(
-        painter: _SoftDustPainter(
-          isDark: isDark,
-          glowColor: isDark ? colors.countdownText : colors.heroCardBackground,
-        ),
-        child: Container(),
-      ),
-    );
-  }
-}
-
-class _SoftDustPainter extends CustomPainter {
-  _SoftDustPainter({required this.isDark, required this.glowColor});
-
-  final bool isDark;
-  final Color glowColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final random = Random(7);
-    final count = isDark ? 80 : 50;
-    final baseOpacity = isDark ? 0.4 : 0.2;
-
-    for (var i = 0; i < count; i++) {
-      final dx = random.nextDouble() * size.width;
-      final dy = random.nextDouble() * size.height;
-      final radius = random.nextDouble() * 1.2 + 0.2;
-      final opacity = baseOpacity + random.nextDouble() * 0.4;
-      final paint = Paint()
-        ..color = (isDark ? const Color(0xFFDAA520) : const Color(0xFF4A5D23)).withValues(
-          alpha: opacity * 0.35,
-        );
-      canvas.drawCircle(Offset(dx, dy), radius, paint);
-    }
-
-    final glowPaint = Paint()
-      ..shader =
-          RadialGradient(
-            colors: isDark
-                ? [glowColor.withValues(alpha: 0.16), Colors.transparent]
-                : [glowColor.withValues(alpha: 0.55), Colors.transparent],
-          ).createShader(
-            Rect.fromCircle(
-              center: Offset(size.width * 0.5, size.height * 0.7),
-              radius: size.width * 0.8,
-            ),
-          );
-    canvas.drawRect(Offset.zero & size, glowPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _GlassPanel extends StatelessWidget {
-  const _GlassPanel({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
-    final borderColor = colors.softBorder;
-    final background = colors.cardSurface;
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(26),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.circular(26),
-            border: Border.all(color: borderColor, width: 1.2),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _CountRing extends StatelessWidget {
-  const _CountRing({
-    required this.size,
-    required this.count,
-    required this.isDark,
-  });
-
-  final double size;
-  final int count;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final glowColor = colors.countdownText;
-    final gradient = LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        theme.colorScheme.primary,
-        Color.alphaBlend(
-          colors.countdownText.withValues(alpha: isDark ? 0.45 : 0.18),
-          theme.colorScheme.primary,
-        ),
-      ],
-    );
-
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: gradient,
-        boxShadow: [
-          BoxShadow(
-            color: glowColor.withValues(alpha: isDark ? 0.4 : 0.25),
-            blurRadius: 24,
-            offset: const Offset(0, 8),
-          ),
-          BoxShadow(
-            color: glowColor.withValues(alpha: isDark ? 0.2 : 0.12),
-            blurRadius: 40,
-          ),
-        ],
-        border: Border.all(color: glowColor.withValues(alpha: 0.7), width: 2.2),
-      ),
-      child: Container(
-        margin: const EdgeInsets.all(10),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: isDark ? 0.08 : 0.25),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: isDark ? 0.2 : 0.5),
-            width: 1.2,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            '$count',
-            style: Theme.of(context).textTheme.displayLarge?.copyWith(
-              color: theme.colorScheme.onPrimary,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _GlowButton extends StatelessWidget {
-  const _GlowButton({
-    required this.enabled,
-    required this.onTap,
-    required this.label,
-  });
-
-  final bool enabled;
-  final VoidCallback? onTap;
-  final Widget label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final glowColor = theme.colorScheme.primary;
-    final metallicStart = Color.alphaBlend(
-      colors.countdownText.withValues(alpha: isDark ? 0.18 : 0.08),
-      theme.colorScheme.primary,
-    );
-    final metallicMid = theme.colorScheme.primary;
-    final metallicEnd = Color.alphaBlend(
-      Colors.black.withValues(alpha: isDark ? 0.18 : 0.08),
-      theme.colorScheme.primary,
-    );
-
-    return SizedBox(
-      height: 68,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          if (enabled)
-            Container(
+          leading: IconButton(
+            icon: Container(
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(44),
-                boxShadow: [
-                  BoxShadow(
-                    color: glowColor.withValues(alpha: 0.25),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                  BoxShadow(
-                    color: glowColor.withValues(alpha: 0.1),
-                    blurRadius: 20,
-                  ),
-                ],
+                color: colors.pillBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.softBorder),
               ),
+              child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
             ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(44),
-              border: Border.all(
-                color: enabled
-                    ? glowColor.withValues(alpha: 0.8)
-                    : Colors.grey.withValues(alpha: 0.6),
-                width: 2,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(42),
-              child: Stack(
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: enabled
-                            ? [metallicStart, metallicMid, metallicEnd]
-                            : [
-                                Colors.grey.shade400.withValues(alpha: 0.8),
-                                Colors.grey.shade500.withValues(alpha: 0.85),
-                                Colors.grey.shade600.withValues(alpha: 0.8),
-                              ],
-                      ),
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Container(
-                      width: double.infinity,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.white.withValues(
-                              alpha: enabled ? (isDark ? 0.3 : 0.4) : 0.15,
-                            ),
-                            Colors.transparent,
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                    ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(36),
-                      border: Border.all(
-                        color: enabled
-                            ? glowColor.withValues(alpha: 0.3)
-                            : Colors.grey.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(42),
-                      onTap: enabled ? onTap : null,
-                      child: Center(
-                        child: DefaultTextStyle(
-                          style: TextStyle(
-                            color: enabled
-                                ? theme.colorScheme.onPrimary
-                                : colors.mutedText,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                          ),
-                          child: label,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            onPressed: () => Navigator.of(context).pop(),
           ),
-        ],
+          title: Text(
+            'common.tasbeeh_counter'.tr(),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
+        ),
+        body: Stack(
+          children: [
+            AppScaffoldBackground(
+              particleCount: 100,
+              particleSeed: 42,
+              showRadialGlow: true,
+              glowCenter: const Alignment(0, 0.2),
+            ),
+            SafeArea(
+              child: BlocBuilder<TasbeehCubit, TasbeehState>(
+                builder: (context, state) {
+                  final cubit = context.read<TasbeehCubit>();
+                  final target = _presets[_selectedPresetIndex].target;
+                  final isCompleted = state.count >= target;
+                  final progress = (state.count / target).clamp(0.0, 1.0);
+
+                  return Column(
+                    children: [
+                      const SizedBox(height: 12),
+
+                      // ── Preset chips ──────────────────
+                      SizedBox(
+                        height: 44,
+                        child: ListView.separated(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          scrollDirection: Axis.horizontal,
+                          itemCount: _presets.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 8),
+                          itemBuilder: (context, i) => _PresetChip(
+                            preset: _presets[i],
+                            selected: _selectedPresetIndex == i,
+                            onTap: () => _selectPreset(context, i),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // ── Current phrase ────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: AppGlassCard(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 14),
+                          child: Center(
+                            child: Text(
+                              _presets[_selectedPresetIndex].phrase,
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    height: 1.4,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 28),
+
+                      // ── Circular ring counter ─────────
+                      Expanded(
+                        child: Center(
+                          child: _CounterRing(
+                            progress: progress,
+                            count: state.count,
+                            target: target,
+                            isCompleted: isCompleted,
+                            bounceAnimation: _bounceAnimation,
+                            glowAnimation: _glowAnimation,
+                            onTap: () => _onTap(cubit, state),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // ── Stats row ─────────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Row(
+                          children: [
+                            _StatCard(
+                              label: 'tasbeeh.total'.tr(),
+                              value: state.count.toString(),
+                            ),
+                            const SizedBox(width: 10),
+                            _StatCard(
+                              label: 'tasbeeh.sessions'.tr(),
+                              value: target > 0
+                                  ? (state.count ~/ target).toString()
+                                  : '0',
+                            ),
+                            const SizedBox(width: 10),
+                            _StatCard(
+                              label: 'tasbeeh.remaining'.tr(),
+                              value: isCompleted
+                                  ? '✓'
+                                  : (target - (state.count % target == 0 && state.count > 0 ? target : state.count % target)).toString(),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+
+                      // ── Reset button ──────────────────
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: AppOutlineGlowButton(
+                          label: Text('tasbeeh.reset'.tr()),
+                          icon: Icons.restart_alt_rounded,
+                          onTap: cubit.reset,
+                          height: 46,
+                          radius: AppRadius.xl,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _OutlineGlowButton extends StatelessWidget {
-  const _OutlineGlowButton({
-    required this.label,
-    required this.icon,
+// ─── Counter Ring ─────────────────────────────────────────────────────────────
+
+class _CounterRing extends StatelessWidget {
+  const _CounterRing({
+    required this.progress,
+    required this.count,
+    required this.target,
+    required this.isCompleted,
+    required this.bounceAnimation,
+    required this.glowAnimation,
     required this.onTap,
   });
 
-  final Widget label;
-  final IconData icon;
+  final double progress;
+  final int count;
+  final int target;
+  final bool isCompleted;
+  final Animation<double> bounceAnimation;
+  final Animation<double> glowAnimation;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
-    final glowColor = theme.colorScheme.primary;
+    final accent = isCompleted
+        ? colors.successColor
+        : (colors.accentColor ?? theme.colorScheme.primary);
 
-    return Container(
-      height: 46,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: glowColor.withValues(alpha: 0.6), width: 1.4),
-        color: colors.cardSurface,
-        boxShadow: [
-          BoxShadow(color: glowColor.withValues(alpha: 0.2), blurRadius: 10),
-        ],
-      ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(24),
-          onTap: onTap,
-          child: Center(
-            child: IconTheme(
-              data: IconThemeData(color: glowColor, size: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+    return AnimatedBuilder(
+      animation: Listenable.merge([bounceAnimation, glowAnimation]),
+      builder: (context, _) {
+        final glow = glowAnimation.value;
+        return GestureDetector(
+          onTap: isCompleted ? null : onTap,
+          child: Transform.scale(
+            scale: bounceAnimation.value,
+            child: SizedBox(
+              width: 240,
+              height: 240,
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  Icon(icon),
-                  const SizedBox(width: 8),
-                  DefaultTextStyle(
-                    style: TextStyle(
-                      color: glowColor,
-                      fontWeight: FontWeight.w600,
+                  // Animated glow ring
+                  Container(
+                    width: 240,
+                    height: 240,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: accent.withValues(
+                              alpha: (0.18 + glow * 0.12)
+                                  .clamp(0.0, 1.0)),
+                          blurRadius: 40 + glow * 20,
+                          spreadRadius: glow * 8,
+                        ),
+                      ],
                     ),
-                    child: label,
+                  ),
+                  // Progress arc
+                  CustomPaint(
+                    size: const Size(240, 240),
+                    painter: _RingPainter(
+                      progress: progress,
+                      color: accent,
+                      trackColor: colors.softBorder,
+                      strokeWidth: 8,
+                    ),
+                  ),
+                  // Inner button
+                  Container(
+                    width: 196,
+                    height: 196,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color.alphaBlend(
+                            accent.withValues(alpha: 0.18),
+                            theme.colorScheme.primary,
+                          ),
+                          theme.colorScheme.primary,
+                          Color.alphaBlend(
+                            Colors.black.withValues(alpha: 0.14),
+                            theme.colorScheme.primary,
+                          ),
+                        ],
+                      ),
+                      border: Border.all(
+                        color: accent.withValues(alpha: 0.7),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: theme.colorScheme.primary
+                              .withValues(alpha: 0.35),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        AnimatedSwitcher(
+                          duration: const Duration(milliseconds: 200),
+                          transitionBuilder: (child, anim) =>
+                              ScaleTransition(scale: anim, child: child),
+                          child: Text(
+                            count.toString(),
+                            key: ValueKey<int>(count),
+                            style: theme.textTheme.displayMedium?.copyWith(
+                              color: theme.colorScheme.onPrimary,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 62,
+                              fontFeatures: const [
+                                FontFeature.tabularFigures()
+                              ],
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '/ $target',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: theme.colorScheme.onPrimary
+                                .withValues(alpha: 0.65),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
+        );
+      },
+    );
+  }
+}
+
+// ─── Ring Painter ─────────────────────────────────────────────────────────────
+
+class _RingPainter extends CustomPainter {
+  const _RingPainter({
+    required this.progress,
+    required this.color,
+    required this.trackColor,
+    required this.strokeWidth,
+  });
+
+  final double progress;
+  final Color color;
+  final Color trackColor;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width - strokeWidth) / 2;
+
+    // Track
+    final trackPaint = Paint()
+      ..color = trackColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round;
+
+    canvas.drawCircle(center, radius, trackPaint);
+
+    // Progress arc
+    if (progress > 0) {
+      final progressPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, strokeWidth * 0.4);
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        -3.14159 / 2,
+        2 * 3.14159 * progress,
+        false,
+        progressPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _RingPainter old) =>
+      old.progress != progress || old.color != color;
+}
+
+// ─── Preset Chip ─────────────────────────────────────────────────────────────
+
+class _PresetChip extends StatelessWidget {
+  const _PresetChip({
+    required this.preset,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _TasbeehPreset preset;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+    final accent = colors.accentColor ?? theme.colorScheme.primary;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: selected
+              ? accent.withValues(alpha: 0.15)
+              : colors.pillBg,
+          borderRadius: BorderRadius.circular(AppRadius.pill),
+          border: Border.all(
+            color: selected
+                ? accent.withValues(alpha: 0.5)
+                : colors.softBorder,
+            width: selected ? 1.5 : 1,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              preset.phrase,
+              style: theme.textTheme.bodySmall?.copyWith(
+                fontWeight:
+                    selected ? FontWeight.w800 : FontWeight.w600,
+                color: selected ? accent : colors.mutedText,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+}
+
+// ─── Stat Card ────────────────────────────────────────────────────────────────
+
+class _StatCard extends StatelessWidget {
+  const _StatCard({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: colors.cardSurface,
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          border: Border.all(color: colors.softBorder),
+        ),
+        child: Column(
+          children: [
+            Text(
+              value,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+                color: colors.accentColor ?? theme.colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colors.mutedText,
+                fontSize: 10,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Data ─────────────────────────────────────────────────────────────────────
+
+class _TasbeehPreset {
+  const _TasbeehPreset(this.phrase, this.target);
+  final String phrase;
+  final int target;
 }

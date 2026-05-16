@@ -25,7 +25,8 @@
     "retry": "Retry",
     "reset_progress": "Reset progress",
     "progress_reset": "Progress reset.",
-    "copied": "Copied"
+    "copied": "Copied",
+    "audio": "Audio"
   },
   "home": {
     "sections": {
@@ -59,7 +60,14 @@
       "settings": "Settings",
       "more": "More"
     },
-    "placeholder": "Coming soon"
+    "placeholder": "Coming soon",
+    "greetings": {
+      "night": "🌙 Welcome",
+      "morning": "🌤️ Good morning",
+      "afternoon": "☀️ Good afternoon",
+      "evening": "🌅 Good evening",
+      "late_night": "🌙 Good night"
+    }
   },
   "prayer_times": {
     "date": "Today's date",
@@ -245,7 +253,11 @@
     "sleep_reminder": "Sleep reminder",
     "waking_reminder": "Waking reminder",
     "friday_reminder": "Friday reminder",
-    "save_notifications": "Save notification settings"
+    "save_notifications": "Save notification settings",
+    "footer": {
+      "app_name": "Azkari — Daily Adhkar App",
+      "version": "Version {version}"
+    }
   },
   "tasbeeh": {
     "default_phrase": "SubhanAllah",
@@ -349,5 +361,8 @@
     "madani": "Madani",
     "grid_view": "Grid View",
     "list_view": "List View"
+  },
+  "favorites": {
+    "empty_subtitle": "Add your favorite adhkar from the adhkar list by tapping the bookmark icon."
   }
 }

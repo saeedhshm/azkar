@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/storage/local_storage_service.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/utils/time_formatter.dart';
 import '../../../prayer_times/data/services/prayer_settings_provider.dart';
 import '../../../prayer_times/domain/entities/prayer_settings.dart';
@@ -25,18 +26,12 @@ class SettingsScreen extends StatelessWidget {
     required ValueChanged<TimeOfDay> onSelected,
   }) async {
     final result = await showTimePicker(context: context, initialTime: initial);
-
-    if (result != null) {
-      onSelected(result);
-    }
+    if (result != null) onSelected(result);
   }
 
-  Future<void> _changeLanguage(
-    BuildContext context,
-    String languageCode,
-  ) async {
-    await context.setLocale(Locale(languageCode));
-    await getIt<LocalStorageService>().saveLocaleCode(languageCode);
+  Future<void> _changeLanguage(BuildContext context, String code) async {
+    await context.setLocale(Locale(code));
+    await getIt<LocalStorageService>().saveLocaleCode(code);
   }
 
   @override
@@ -44,190 +39,182 @@ class SettingsScreen extends StatelessWidget {
     return BlocProvider<NotificationSettingsCubit>(
       create: (_) => getIt<NotificationSettingsCubit>()..load(),
       child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          toolbarHeight: 68,
+          toolbarHeight: 64,
           title: Text(
             'common.settings'.tr(),
-            style: Theme.of(
-              context,
-            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
           ),
         ),
         body: SafeArea(
           top: false,
-          child:
-              BlocConsumer<
-                NotificationSettingsCubit,
-                NotificationSettingsState
-              >(
-                listener: (context, state) {
-                  if (state.saveStatus == NotificationSaveStatus.saved) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('settings.saved'.tr())),
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  final themeMode = context.watch<ThemeCubit>().state;
-                  final use24h = context.watch<TimeFormatCubit>().state.use24h;
-                  final currentLanguage = context.locale.languageCode;
+          child: BlocConsumer<NotificationSettingsCubit,
+              NotificationSettingsState>(
+            listener: (context, state) {
+              if (state.saveStatus == NotificationSaveStatus.saved) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('settings.saved'.tr())),
+                );
+              }
+            },
+            builder: (context, state) {
+              final themeMode = context.watch<ThemeCubit>().state;
+              final use24h = context.watch<TimeFormatCubit>().state.use24h;
+              final currentLanguage = context.locale.languageCode;
 
-                  return ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              return ListView(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
+                children: [
+                  // ── Prayer Calculation ──────────────────
+                  const _PrayerCalculationSection(),
+                  const SizedBox(height: 16),
+
+                  // ── Appearance ──────────────────────────
+                  _SettingsSection(
+                    icon: Icons.palette_outlined,
+                    title: 'settings.appearance'.tr(),
                     children: [
-                      const _PrayerCalculationSection(),
-                      const SizedBox(height: 14),
-                      _SettingsSection(
-                        title: 'settings.appearance'.tr(),
-                        children: [
-                          _ThemeModeTile(
-                            value: themeMode,
-                            onChanged: context.read<ThemeCubit>().setMode,
-                          ),
-                          _SettingsSwitchTile(
-                            icon: Icons.schedule_rounded,
-                            title: 'settings.use_24h'.tr(),
-                            subtitle: use24h ? '24h' : 'AM/PM',
-                            value: use24h,
-                            onChanged: context
-                                .read<TimeFormatCubit>()
-                                .setUse24h,
-                          ),
-                        ],
+                      // Theme mode segmented control
+                      _ThemeModeSelector(
+                        value: themeMode,
+                        onChanged: context.read<ThemeCubit>().setMode,
                       ),
-                      const SizedBox(height: 14),
-                      _SettingsSection(
-                        title: 'settings.language.title'.tr(),
-                        children: [
-                          _SettingsDropdownTile<String>(
-                            icon: Icons.language_rounded,
-                            title: 'settings.language.label'.tr(),
-                            value: _languageCodes.contains(currentLanguage)
-                                ? currentLanguage
-                                : 'en',
-                            items: _languageCodes
-                                .map(
-                                  (code) => DropdownMenuItem<String>(
-                                    value: code,
-                                    child: Text('settings.language.$code'.tr()),
-                                  ),
-                                )
-                                .toList(growable: false),
-                            onChanged: (value) {
-                              if (value != null) {
-                                _changeLanguage(context, value);
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 14),
-                      _SettingsSection(
-                        title: 'settings.reminders'.tr(),
-                        children: [
-                          _SettingsSwitchTile(
-                            icon: Icons.notifications_active_outlined,
-                            title: 'settings.enable_notifications'.tr(),
-                            subtitle: 'settings.reminders'.tr(),
-                            value: state.enabled,
-                            onChanged: context
-                                .read<NotificationSettingsCubit>()
-                                .setEnabled,
-                          ),
-                          _TimeTile(
-                            title: 'settings.morning_reminder'.tr(),
-                            time: state.morning,
-                            use24h: use24h,
-                            onTap: () => _pickTime(
-                              context,
-                              initial: state.morning,
-                              onSelected: context
-                                  .read<NotificationSettingsCubit>()
-                                  .setMorning,
-                            ),
-                          ),
-                          _TimeTile(
-                            title: 'settings.evening_reminder'.tr(),
-                            time: state.evening,
-                            use24h: use24h,
-                            onTap: () => _pickTime(
-                              context,
-                              initial: state.evening,
-                              onSelected: context
-                                  .read<NotificationSettingsCubit>()
-                                  .setEvening,
-                            ),
-                          ),
-                          _TimeTile(
-                            title: 'settings.sleep_reminder'.tr(),
-                            time: state.sleep,
-                            use24h: use24h,
-                            onTap: () => _pickTime(
-                              context,
-                              initial: state.sleep,
-                              onSelected: context
-                                  .read<NotificationSettingsCubit>()
-                                  .setSleep,
-                            ),
-                          ),
-                          _TimeTile(
-                            title: 'settings.waking_reminder'.tr(),
-                            time: state.waking,
-                            use24h: use24h,
-                            onTap: () => _pickTime(
-                              context,
-                              initial: state.waking,
-                              onSelected: context
-                                  .read<NotificationSettingsCubit>()
-                                  .setWaking,
-                            ),
-                          ),
-                          _TimeTile(
-                            title: 'settings.friday_reminder'.tr(),
-                            time: state.friday,
-                            use24h: use24h,
-                            onTap: () => _pickTime(
-                              context,
-                              initial: state.friday,
-                              onSelected: context
-                                  .read<NotificationSettingsCubit>()
-                                  .setFriday,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            child: FilledButton(
-                              onPressed:
-                                  state.saveStatus ==
-                                      NotificationSaveStatus.saving
-                                  ? null
-                                  : context
-                                        .read<NotificationSettingsCubit>()
-                                        .save,
-                              child:
-                                  state.saveStatus ==
-                                      NotificationSaveStatus.saving
-                                  ? const SizedBox.square(
-                                      dimension: 18,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                      ),
-                                    )
-                                  : Text('settings.save_notifications'.tr()),
-                            ),
-                          ),
-                        ],
+                      const SizedBox(height: 12),
+                      _SettingsSwitchTile(
+                        icon: Icons.schedule_rounded,
+                        title: 'settings.use_24h'.tr(),
+                        subtitle: use24h ? '24:00' : '12:00 AM/PM',
+                        value: use24h,
+                        onChanged: context.read<TimeFormatCubit>().setUse24h,
                       ),
                     ],
-                  );
-                },
-              ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // ── Language ────────────────────────────
+                  _SettingsSection(
+                    icon: Icons.language_rounded,
+                    title: 'settings.language.title'.tr(),
+                    children: [
+                      _SettingsDropdownTile<String>(
+                        icon: Icons.translate_rounded,
+                        title: 'settings.language.label'.tr(),
+                        value: _languageCodes.contains(currentLanguage)
+                            ? currentLanguage
+                            : 'en',
+                        items: _languageCodes
+                            .map(
+                              (c) => DropdownMenuItem<String>(
+                                value: c,
+                                child: Text('settings.language.$c'.tr()),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) {
+                          if (v != null) _changeLanguage(context, v);
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // ── Reminders ───────────────────────────
+                  _SettingsSection(
+                    icon: Icons.notifications_outlined,
+                    title: 'settings.reminders'.tr(),
+                    children: [
+                      _SettingsSwitchTile(
+                        icon: Icons.notifications_active_outlined,
+                        title: 'settings.enable_notifications'.tr(),
+                        subtitle: 'settings.reminders'.tr(),
+                        value: state.enabled,
+                        onChanged: context
+                            .read<NotificationSettingsCubit>()
+                            .setEnabled,
+                      ),
+                      ...[
+                        (
+                          'settings.morning_reminder'.tr(),
+                          state.morning,
+                          context
+                              .read<NotificationSettingsCubit>()
+                              .setMorning,
+                        ),
+                        (
+                          'settings.evening_reminder'.tr(),
+                          state.evening,
+                          context
+                              .read<NotificationSettingsCubit>()
+                              .setEvening,
+                        ),
+                        (
+                          'settings.sleep_reminder'.tr(),
+                          state.sleep,
+                          context.read<NotificationSettingsCubit>().setSleep,
+                        ),
+                        (
+                          'settings.waking_reminder'.tr(),
+                          state.waking,
+                          context.read<NotificationSettingsCubit>().setWaking,
+                        ),
+                        (
+                          'settings.friday_reminder'.tr(),
+                          state.friday,
+                          context.read<NotificationSettingsCubit>().setFriday,
+                        ),
+                      ].map(
+                        (t) => _TimeTile(
+                          title: t.$1,
+                          time: t.$2,
+                          use24h: use24h,
+                          onTap: () => _pickTime(
+                            context,
+                            initial: t.$2,
+                            onSelected: t.$3,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton.icon(
+                          onPressed:
+                              state.saveStatus == NotificationSaveStatus.saving
+                                  ? null
+                                  : context
+                                      .read<NotificationSettingsCubit>()
+                                      .save,
+                          icon: state.saveStatus ==
+                                  NotificationSaveStatus.saving
+                              ? const SizedBox.square(
+                                  dimension: 16,
+                                  child: CircularProgressIndicator(
+                                      strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Icon(Icons.save_rounded, size: 18),
+                          label: Text('settings.save_notifications'.tr()),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // ── Footer ──────────────────────────────
+                  const SizedBox(height: 24),
+                  _SettingsFooter(),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
   }
 }
+
+// ─── Prayer Calculation Section ───────────────────────────────────────────────
 
 class _PrayerCalculationSection extends StatefulWidget {
   const _PrayerCalculationSection();
@@ -237,7 +224,8 @@ class _PrayerCalculationSection extends StatefulWidget {
       _PrayerCalculationSectionState();
 }
 
-class _PrayerCalculationSectionState extends State<_PrayerCalculationSection> {
+class _PrayerCalculationSectionState
+    extends State<_PrayerCalculationSection> {
   late final PrayerSettingsProvider _provider;
   late PrayerSettings _settings;
 
@@ -256,6 +244,7 @@ class _PrayerCalculationSectionState extends State<_PrayerCalculationSection> {
   @override
   Widget build(BuildContext context) {
     return _SettingsSection(
+      icon: Icons.mosque_outlined,
       title: 'settings.prayer_calculation'.tr(),
       children: [
         _SettingsDropdownTile<CalculationMethod>(
@@ -264,20 +253,18 @@ class _PrayerCalculationSectionState extends State<_PrayerCalculationSection> {
           value: _settings.method,
           items: _methodOptions
               .map(
-                (method) => DropdownMenuItem<CalculationMethod>(
-                  value: method,
-                  child: Text(_methodLabel(method)),
+                (m) => DropdownMenuItem<CalculationMethod>(
+                  value: m,
+                  child: Text(_methodLabel(m)),
                 ),
               )
-              .toList(growable: false),
-          onChanged: (value) {
-            if (value != null) {
-              _save(_settings.copyWith(method: value));
-            }
+              .toList(),
+          onChanged: (v) {
+            if (v != null) _save(_settings.copyWith(method: v));
           },
         ),
         _SettingsDropdownTile<Madhab>(
-          icon: Icons.mosque_outlined,
+          icon: Icons.account_balance_outlined,
           title: 'prayer_times.madhab_label'.tr(),
           value: _settings.madhab,
           items: [
@@ -290,10 +277,8 @@ class _PrayerCalculationSectionState extends State<_PrayerCalculationSection> {
               child: Text('prayer_times.madhab.hanafi'.tr()),
             ),
           ],
-          onChanged: (value) {
-            if (value != null) {
-              _save(_settings.copyWith(madhab: value));
-            }
+          onChanged: (v) {
+            if (v != null) _save(_settings.copyWith(madhab: v));
           },
         ),
       ],
@@ -302,10 +287,12 @@ class _PrayerCalculationSectionState extends State<_PrayerCalculationSection> {
 
   String _methodLabel(CalculationMethod method) {
     return switch (method) {
-      CalculationMethod.muslim_world_league => 'prayer_times.methods.mwl'.tr(),
+      CalculationMethod.muslim_world_league =>
+        'prayer_times.methods.mwl'.tr(),
       CalculationMethod.egyptian => 'prayer_times.methods.egyptian'.tr(),
       CalculationMethod.karachi => 'prayer_times.methods.karachi'.tr(),
-      CalculationMethod.umm_al_qura => 'prayer_times.methods.umm_al_qura'.tr(),
+      CalculationMethod.umm_al_qura =>
+        'prayer_times.methods.umm_al_qura'.tr(),
       CalculationMethod.dubai => 'prayer_times.methods.dubai'.tr(),
       CalculationMethod.qatar => 'prayer_times.methods.qatar'.tr(),
       CalculationMethod.kuwait => 'prayer_times.methods.kuwait'.tr(),
@@ -321,78 +308,174 @@ class _PrayerCalculationSectionState extends State<_PrayerCalculationSection> {
   }
 }
 
-class _ThemeModeTile extends StatelessWidget {
-  const _ThemeModeTile({required this.value, required this.onChanged});
+// ─── Theme Mode Selector ──────────────────────────────────────────────────────
+
+class _ThemeModeSelector extends StatelessWidget {
+  const _ThemeModeSelector(
+      {required this.value, required this.onChanged});
 
   final ThemeMode value;
   final ValueChanged<ThemeMode> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return _SettingsDropdownTile<ThemeMode>(
-      icon: Icons.contrast_rounded,
-      title: 'settings.theme_mode'.tr(),
-      value: value,
-      items: [
-        DropdownMenuItem(
-          value: ThemeMode.system,
-          child: Text('settings.theme_system'.tr()),
-        ),
-        DropdownMenuItem(
-          value: ThemeMode.light,
-          child: Text('settings.theme_light'.tr()),
-        ),
-        DropdownMenuItem(
-          value: ThemeMode.dark,
-          child: Text('settings.theme_dark'.tr()),
-        ),
-      ],
-      onChanged: (value) {
-        if (value != null) {
-          onChanged(value);
-        }
-      },
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+    final accent = colors.accentColor ?? theme.colorScheme.primary;
+
+    final options = [
+      (ThemeMode.system, Icons.contrast_rounded, 'settings.theme_system'.tr()),
+      (ThemeMode.light, Icons.light_mode_rounded, 'settings.theme_light'.tr()),
+      (ThemeMode.dark, Icons.dark_mode_rounded, 'settings.theme_dark'.tr()),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.contrast_rounded, size: 18, color: colors.prayerIcon),
+              const SizedBox(width: 10),
+              Text(
+                'settings.theme_mode'.tr(),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: options.map((opt) {
+              final (mode, icon, label) = opt;
+              final selected = value == mode;
+              return Expanded(
+                child: GestureDetector(
+                  onTap: () => onChanged(mode),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 220),
+                    margin: const EdgeInsets.only(right: 6),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10, horizontal: 8),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? accent.withValues(alpha: 0.14)
+                          : colors.pillBg,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      border: Border.all(
+                        color: selected
+                            ? accent.withValues(alpha: 0.5)
+                            : colors.softBorder,
+                        width: selected ? 1.5 : 1,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Icon(icon,
+                            size: 18,
+                            color: selected ? accent : colors.mutedText),
+                        const SizedBox(height: 4),
+                        Text(
+                          label,
+                          textAlign: TextAlign.center,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: selected ? accent : colors.mutedText,
+                            fontWeight: selected
+                                ? FontWeight.w800
+                                : FontWeight.w500,
+                            fontSize: 10,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _SettingsSection extends StatelessWidget {
-  const _SettingsSection({required this.title, required this.children});
+// ─── Settings Section ─────────────────────────────────────────────────────────
 
+class _SettingsSection extends StatelessWidget {
+  const _SettingsSection({
+    required this.icon,
+    required this.title,
+    required this.children,
+  });
+
+  final IconData icon;
   final String title;
   final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: Theme.of(
-                context,
-              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+    return Container(
+      decoration: BoxDecoration(
+        color: colors.cardSurface,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: colors.softBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(
+                alpha: theme.brightness == Brightness.dark ? 0.12 : 0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Section header
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+            child: Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    color: (colors.accentColor ?? theme.colorScheme.primary)
+                        .withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon,
+                      size: 16,
+                      color:
+                          colors.accentColor ?? theme.colorScheme.primary),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  title,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.cardSurfaceTint.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(color: colors.softBorder),
-              ),
-              child: Column(children: children),
-            ),
-          ],
-        ),
+          ),
+          // Divider
+          Divider(height: 1, color: colors.softBorder),
+          // Content
+          ...children,
+          const SizedBox(height: 4),
+        ],
       ),
     );
   }
 }
+
+// ─── Settings Row Types ───────────────────────────────────────────────────────
 
 class _SettingsDropdownTile<T> extends StatelessWidget {
   const _SettingsDropdownTile({
@@ -414,15 +497,16 @@ class _SettingsDropdownTile<T> extends StatelessWidget {
     final colors = AppThemeColors.of(context);
 
     return ListTile(
-      minVerticalPadding: 10,
-      leading: Icon(icon, color: colors.prayerIcon),
+      minVerticalPadding: 12,
+      leading: Icon(icon, color: colors.prayerIcon, size: 20),
       title: Text(title),
       trailing: DropdownButtonHideUnderline(
         child: DropdownButton<T>(
           value: value,
           items: items,
           onChanged: onChanged,
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          isDense: true,
         ),
       ),
     );
@@ -449,7 +533,7 @@ class _SettingsSwitchTile extends StatelessWidget {
     final colors = AppThemeColors.of(context);
 
     return SwitchListTile.adaptive(
-      secondary: Icon(icon, color: colors.prayerIcon),
+      secondary: Icon(icon, color: colors.prayerIcon, size: 20),
       title: Text(title),
       subtitle: Text(subtitle),
       value: value,
@@ -474,10 +558,20 @@ class _TimeTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppThemeColors.of(context);
+    final theme = Theme.of(context);
+    final accent = colors.accentColor ?? theme.colorScheme.primary;
 
     return ListTile(
-      minVerticalPadding: 10,
-      leading: Icon(Icons.alarm_rounded, color: colors.prayerIcon),
+      minVerticalPadding: 12,
+      leading: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: accent.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(Icons.alarm_rounded, color: accent, size: 18),
+      ),
       title: Text(title),
       subtitle: Text(
         TimeFormatter.formatTimeOfDay(
@@ -485,12 +579,61 @@ class _TimeTile extends StatelessWidget {
           use24h: use24h,
           locale: context.locale.toString(),
         ),
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: accent,
+          fontWeight: FontWeight.w700,
+        ),
       ),
-      trailing: const Icon(Icons.chevron_right_rounded),
+      trailing: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          color: colors.pillBg,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: colors.softBorder),
+        ),
+        child: Icon(Icons.chevron_right_rounded, size: 16,
+            color: colors.mutedText),
+      ),
       onTap: onTap,
     );
   }
 }
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+
+class _SettingsFooter extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppThemeColors.of(context);
+
+    return Column(
+      children: [
+        Divider(color: colors.softBorder),
+        const SizedBox(height: 12),
+        Text(
+          'settings.footer.app_name'.tr(),
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colors.mutedText,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'settings.footer.version'.tr(namedArgs: {'version': '1.0.0'}),
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: colors.mutedText.withValues(alpha: 0.6),
+              ),
+        ),
+        const SizedBox(height: 20),
+      ],
+    );
+  }
+}
+
+// ─── Calculation Methods ──────────────────────────────────────────────────────
 
 const _methodOptions = [
   CalculationMethod.egyptian,

@@ -25,7 +25,8 @@
     "retry": "Ulangi",
     "reset_progress": "Reset progres",
     "progress_reset": "Progres direset.",
-    "copied": "Disalin"
+    "copied": "Disalin",
+    "audio": "Audio"
   },
   "home": {
     "sections": {
@@ -59,7 +60,14 @@
       "settings": "Pengaturan",
       "more": "Lainnya"
     },
-    "placeholder": "Segera hadir"
+    "placeholder": "Segera hadir",
+    "greetings": {
+      "night": "🌙 Selamat datang",
+      "morning": "🌤️ Selamat pagi",
+      "afternoon": "☀️ Selamat siang",
+      "evening": "🌅 Selamat sore",
+      "late_night": "🌙 Selamat malam"
+    }
   },
   "prayer_times": {
     "date": "Tanggal hari ini",
@@ -245,7 +253,11 @@
     "sleep_reminder": "Pengingat tidur",
     "waking_reminder": "Pengingat bangun",
     "friday_reminder": "Pengingat Jumat",
-    "save_notifications": "Simpan pengaturan notifikasi"
+    "save_notifications": "Simpan pengaturan notifikasi",
+    "footer": {
+      "app_name": "Azkari — Aplikasi Zikir Harian",
+      "version": "Versi {version}"
+    }
   },
   "tasbeeh": {
     "default_phrase": "Subhanallah",
@@ -349,5 +361,8 @@
     "madani": "Madaniyah",
     "grid_view": "Tampilan Grid",
     "list_view": "Tampilan Daftar"
+  },
+  "favorites": {
+    "empty_subtitle": "Tambahkan zikir favorit Anda dari daftar zikir dengan mengetuk ikon simpan."
   }
 }

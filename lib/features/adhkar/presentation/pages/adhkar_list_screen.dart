@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -8,7 +7,12 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/utils/app_categories.dart';
+import '../../../../core/widgets/app_background.dart';
+import '../../../../core/widgets/app_empty_state.dart';
+import '../../../../core/widgets/app_loading.dart';
+import '../../../../core/widgets/app_badge.dart';
 import '../../domain/entities/adhkar.dart';
 import '../cubit/adhkar_cubit.dart';
 import '../cubit/adhkar_state.dart';
@@ -35,6 +39,8 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
   @override
   Widget build(BuildContext context) {
     final category = AppCategories.byKey(widget.categoryKey);
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
 
     return BlocProvider<AdhkarCubit>(
       create: (_) => getIt<AdhkarCubit>()..loadCategory(widget.categoryKey),
@@ -42,101 +48,118 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
         builder: (context) => Scaffold(
           extendBodyBehindAppBar: true,
           appBar: AppBar(
+            leading: IconButton(
+              icon: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: colors.pillBg,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: colors.softBorder),
+                ),
+                child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+              ),
+              onPressed: () => Navigator.of(context).pop(),
+            ),
             title: _isSearching
                 ? _SearchField(
                     controller: _searchController,
-                    onChanged: (value) =>
-                        context.read<AdhkarCubit>().search(value),
+                    onChanged: (v) => context.read<AdhkarCubit>().search(v),
                   )
-                : Text(category.titleKey.tr()),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
+                : Text(
+                    category.titleKey.tr(),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
             actions: [
-              IconButton(
-                icon: Icon(_isSearching ? Icons.close : Icons.search),
-                onPressed: () {
+              _AppBarIconBtn(
+                icon: _isSearching ? Icons.close_rounded : Icons.search_rounded,
+                colors: colors,
+                onTap: () {
                   setState(() => _isSearching = !_isSearching);
-
                   if (!_isSearching) {
                     _searchController.clear();
                     context.read<AdhkarCubit>().search('');
                   }
                 },
               ),
-              IconButton(
+              const SizedBox(width: 4),
+              _AppBarIconBtn(
+                icon: Icons.restart_alt_rounded,
                 tooltip: 'common.reset_progress'.tr(),
-                icon: const Icon(Icons.restart_alt),
-                onPressed: () async {
+                colors: colors,
+                onTap: () async {
                   await context.read<AdhkarCubit>().resetProgress();
-                  if (!context.mounted) {
-                    return;
-                  }
+                  if (!context.mounted) return;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('common.progress_reset'.tr())),
                   );
                 },
               ),
+              const SizedBox(width: 8),
             ],
           ),
           body: Stack(
             children: [
-              _ListBackground(
-                isDark: Theme.of(context).brightness == Brightness.dark,
-              ),
+              const AppScaffoldBackground(particleCount: 60, particleSeed: 9),
               SafeArea(
                 child: BlocBuilder<AdhkarCubit, AdhkarState>(
                   builder: (context, state) {
                     if (state.status == AdhkarStatus.loading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const AppListShimmer();
                     }
 
                     if (state.status == AdhkarStatus.failure) {
-                      return Center(
-                        child: Text(
-                          state.errorMessage ??
-                              'common.failed_load_adhkar'.tr(),
-                        ),
+                      return AppErrorState(
+                        message: state.errorMessage ??
+                            'common.failed_load_adhkar'.tr(),
+                        onRetry: () => context
+                            .read<AdhkarCubit>()
+                            .loadCategory(widget.categoryKey),
+                        retryLabel: 'common.retry'.tr(),
                       );
                     }
 
                     if (state.items.isEmpty) {
-                      return Center(
-                        child: Text('common.no_adhkar_in_category'.tr()),
+                      return AppEmptyState(
+                        icon: Icons.auto_stories_outlined,
+                        title: 'common.no_adhkar_in_category'.tr(),
                       );
                     }
 
-                    final accent = Theme.of(context).colorScheme.primary;
-
+                    final accent = theme.colorScheme.primary;
                     return ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
+                      padding: const EdgeInsets.fromLTRB(16, 6, 16, 100),
                       itemCount: state.items.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 12),
+                      separatorBuilder: (_, __) =>
+                          const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final item = state.items[index];
-                        final isFavorite = state.favoriteIds.contains(item.id);
-                        final remainingCount =
-                            state.remainingByAdhkarId[item.id] ?? item.count;
+                        final isFav =
+                            state.favoriteIds.contains(item.id);
+                        final remaining =
+                            state.remainingByAdhkarId[item.id] ??
+                                item.count;
 
-                        return _AdhkarGlassTile(
+                        return _AdhkarTile(
                           adhkar: item,
                           accent: accent,
-                          isFavorite: isFavorite,
-                          remainingCount: remainingCount,
+                          isFavorite: isFav,
+                          remainingCount: remaining,
+                          animationIndex: index,
                           onTap: () async {
                             final cubit = context.read<AdhkarCubit>();
                             await context.push(
-                              '/reader/${widget.categoryKey}?id=${item.id}&index=$index',
+                              '/reader/${widget.categoryKey}'
+                              '?id=${item.id}&index=$index',
                             );
-
-                            if (!mounted) {
-                              return;
-                            }
-
+                            if (!mounted) return;
                             await cubit.loadCategory(widget.categoryKey);
                           },
-                          onFavoriteTap: () {
-                            context.read<AdhkarCubit>().toggleFavorite(item.id);
-                          },
+                          onFavoriteTap: () => context
+                              .read<AdhkarCubit>()
+                              .toggleFavorite(item.id),
                         );
                       },
                     );
@@ -151,96 +174,80 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
   }
 }
 
+// ─── Search Field ─────────────────────────────────────────────────────────────
+
 class _SearchField extends StatelessWidget {
-  const _SearchField({required this.controller, required this.onChanged});
+  const _SearchField(
+      {required this.controller, required this.onChanged});
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
 
     return TextField(
       controller: controller,
       autofocus: true,
-      style: TextStyle(color: theme.colorScheme.onSurface),
+      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
       decoration: InputDecoration(
         hintText: 'common.search_adhkar'.tr(),
         hintStyle: TextStyle(color: colors.mutedText),
         border: InputBorder.none,
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(vertical: 8),
       ),
       onChanged: onChanged,
     );
   }
 }
 
-class _ListBackground extends StatelessWidget {
-  const _ListBackground({required this.isDark});
+// ─── AppBar Icon Button ───────────────────────────────────────────────────────
 
-  final bool isDark;
+class _AppBarIconBtn extends StatelessWidget {
+  const _AppBarIconBtn({
+    required this.icon,
+    required this.colors,
+    required this.onTap,
+    this.tooltip,
+  });
+
+  final IconData icon;
+  final AppThemeColors colors;
+  final VoidCallback onTap;
+  final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final gradient = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        theme.scaffoldBackgroundColor,
-        Color.alphaBlend(
-          colors.heroCardBackground.withValues(alpha: isDark ? 0.08 : 0.35),
-          theme.scaffoldBackgroundColor,
+    Widget btn = InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: colors.pillBg,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colors.softBorder),
         ),
-      ],
-    );
-
-    return DecoratedBox(
-      decoration: BoxDecoration(gradient: gradient),
-      child: CustomPaint(
-        painter: _SoftDustPainter(isDark: isDark),
-        child: Container(),
+        child: Icon(icon, size: 18, color: colors.accentColor),
       ),
     );
+    if (tooltip != null) btn = Tooltip(message: tooltip!, child: btn);
+    return btn;
   }
 }
 
-class _SoftDustPainter extends CustomPainter {
-  _SoftDustPainter({required this.isDark});
+// ─── Adhkar Tile ──────────────────────────────────────────────────────────────
 
-  final bool isDark;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final random = Random(9);
-    final count = isDark ? 80 : 50;
-    final baseOpacity = isDark ? 0.4 : 0.2;
-
-    for (var i = 0; i < count; i++) {
-      final dx = random.nextDouble() * size.width;
-      final dy = random.nextDouble() * size.height;
-      final radius = random.nextDouble() * 1.2 + 0.2;
-      final opacity = baseOpacity + random.nextDouble() * 0.4;
-      final paint = Paint()
-        ..color = (isDark ? const Color(0xFFDAA520) : const Color(0xFF4A5D23)).withValues(
-          alpha: opacity * 0.35,
-        );
-      canvas.drawCircle(Offset(dx, dy), radius, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _AdhkarGlassTile extends StatelessWidget {
-  const _AdhkarGlassTile({
+class _AdhkarTile extends StatelessWidget {
+  const _AdhkarTile({
     required this.adhkar,
     required this.accent,
     required this.isFavorite,
     required this.remainingCount,
+    required this.animationIndex,
     required this.onTap,
     required this.onFavoriteTap,
   });
@@ -249,6 +256,7 @@ class _AdhkarGlassTile extends StatelessWidget {
   final Color accent;
   final bool isFavorite;
   final int remainingCount;
+  final int animationIndex;
   final VoidCallback onTap;
   final VoidCallback onFavoriteTap;
 
@@ -258,95 +266,129 @@ class _AdhkarGlassTile extends StatelessWidget {
     final colors = AppThemeColors.of(context);
     final normalizedRemaining = remainingCount.clamp(0, adhkar.count);
     final isCompleted = normalizedRemaining == 0;
-    final progressValue = adhkar.count == 0
+    final progress = adhkar.count == 0
         ? 0.0
         : (adhkar.count - normalizedRemaining) / adhkar.count;
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(colors.cardRadius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
-            borderRadius: BorderRadius.circular(colors.cardRadius),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: colors.cardSurface,
-                borderRadius: BorderRadius.circular(colors.cardRadius),
-                border: Border.all(color: colors.softBorder, width: 1),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(
-                      alpha: theme.brightness == Brightness.dark ? 0.18 : 0.05,
-                    ),
-                    blurRadius: 16,
-                    offset: const Offset(0, 8),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: Duration(milliseconds: 200 + (animationIndex * 30).clamp(0, 300)),
+      curve: Curves.easeOut,
+      builder: (_, v, child) => Opacity(opacity: v, child: child),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onTap,
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: isCompleted
+                      ? colors.successColor.withValues(alpha: 0.06)
+                      : colors.cardSurface,
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                  border: Border.all(
+                    color: isCompleted
+                        ? colors.successColor.withValues(alpha: 0.3)
+                        : colors.softBorder,
+                    width: isCompleted ? 1.5 : 1,
                   ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          adhkar.text,
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
-                          textDirection: TextDirection.rtl,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            height: 1.5,
-                            color: theme.colorScheme.onSurface,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(
+                          alpha:
+                              theme.brightness == Brightness.dark
+                                  ? 0.14
+                                  : 0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            adhkar.text,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
+                            textDirection: TextDirection.rtl,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              height: 1.6,
+                            ),
                           ),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      IconButton(
-                        onPressed: onFavoriteTap,
-                        icon: Icon(
-                          isFavorite
-                              ? Icons.bookmark
-                              : Icons.bookmark_border_outlined,
+                        const SizedBox(width: 10),
+                        // Favorite button
+                        GestureDetector(
+                          onTap: onFavoriteTap,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            width: 34,
+                            height: 34,
+                            decoration: BoxDecoration(
+                              color: isFavorite
+                                  ? accent.withValues(alpha: 0.15)
+                                  : colors.pillBg,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isFavorite
+                                    ? accent.withValues(alpha: 0.4)
+                                    : colors.softBorder,
+                              ),
+                            ),
+                            child: Icon(
+                              isFavorite
+                                  ? Icons.bookmark_rounded
+                                  : Icons.bookmark_border_rounded,
+                              size: 17,
+                              color: accent,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: [
+                        AppBadge(
+                          label: '${'common.count'.tr()}: ${adhkar.count}',
                           color: accent,
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _Badge(
-                        text: '${'common.count'.tr()}: ${adhkar.count}',
-                        color: accent,
-                      ),
-                      const SizedBox(width: 8),
-                      _Badge(
-                        text: isCompleted
-                            ? 'common.completed'.tr()
-                            : '${'reader.remaining'.tr()}: $normalizedRemaining',
-                        color: isCompleted ? colors.countdownText : accent,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: LinearProgressIndicator(
-                      value: progressValue,
-                      minHeight: 6,
-                      backgroundColor: colors.softBorder,
-                      valueColor: AlwaysStoppedAnimation<Color>(accent),
+                        AppBadge(
+                          label: isCompleted
+                              ? '✓ ${'common.completed'.tr()}'
+                              : '${'reader.remaining'.tr()}: $normalizedRemaining',
+                          color: isCompleted ? colors.successColor : accent,
+                        ),
+                      ],
                     ),
-                  ),
-                  if (adhkar.description.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8),
-                      child: Text(
+                    const SizedBox(height: 10),
+                    // Progress bar
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(AppRadius.pill),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 5,
+                        backgroundColor: colors.softBorder,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          isCompleted ? colors.successColor : accent,
+                        ),
+                      ),
+                    ),
+                    if (adhkar.description.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Text(
                         adhkar.description,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -354,37 +396,12 @@ class _AdhkarGlassTile extends StatelessWidget {
                           color: colors.mutedText,
                         ),
                       ),
-                    ),
-                ],
+                    ],
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _Badge extends StatelessWidget {
-  const _Badge({required this.text, required this.color});
-
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.35)),
-      ),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
         ),
       ),
     );

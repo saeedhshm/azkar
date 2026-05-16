@@ -1,6 +1,3 @@
-import 'dart:math';
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +5,11 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/utils/app_categories.dart';
+import '../../../../core/widgets/app_background.dart';
+import '../../../../core/widgets/app_empty_state.dart';
+import '../../../../core/widgets/glass_card.dart';
 import '../cubit/favorites_cubit.dart';
 import '../cubit/favorites_state.dart';
 
@@ -17,20 +18,36 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppThemeColors.of(context);
+
     return BlocProvider<FavoritesCubit>(
       create: (_) => getIt<FavoritesCubit>()..loadFavorites(),
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: Text('common.favorites'.tr()),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
+          leading: IconButton(
+            icon: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: colors.pillBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.softBorder),
+              ),
+              child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: Text(
+            'common.favorites'.tr(),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                ),
+          ),
         ),
         body: Stack(
           children: [
-            _FavoritesBackground(
-              isDark: Theme.of(context).brightness == Brightness.dark,
-            ),
+            const AppScaffoldBackground(particleCount: 55, particleSeed: 8),
             SafeArea(
               child: BlocBuilder<FavoritesCubit, FavoritesState>(
                 builder: (context, state) {
@@ -39,83 +56,40 @@ class FavoritesScreen extends StatelessWidget {
                   }
 
                   if (state.status == FavoritesStatus.failure) {
-                    return Center(
-                      child: Text(
-                        state.errorMessage ??
-                            'common.failed_load_favorites'.tr(),
-                      ),
+                    return AppErrorState(
+                      message: state.errorMessage ??
+                          'common.failed_load_favorites'.tr(),
+                      onRetry: () =>
+                          context.read<FavoritesCubit>().loadFavorites(),
+                      retryLabel: 'common.retry'.tr(),
                     );
                   }
 
                   if (state.items.isEmpty) {
-                    return Center(child: Text('common.no_favorites'.tr()));
+                    return AppEmptyState(
+                      icon: Icons.bookmark_border_rounded,
+                      title: 'common.no_favorites'.tr(),
+                      subtitle: 'favorites.empty_subtitle'.tr(),
+                    );
                   }
 
                   return ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
+                    padding: const EdgeInsets.fromLTRB(16, 10, 16, 100),
                     itemCount: state.items.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 12),
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final item = state.items[index];
                       final category = AppCategories.byKey(item.category);
-                      final theme = Theme.of(context);
-                      final colors = AppThemeColors.of(context);
-                      final accent = theme.colorScheme.primary;
 
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(colors.cardRadius),
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-                          child: Card(
-                            elevation: 2,
-                            shadowColor: Colors.black.withValues(
-                              alpha: theme.brightness == Brightness.dark
-                                  ? 0.2
-                                  : 0.06,
-                            ),
-                            color: colors.cardSurface,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                colors.cardRadius,
-                              ),
-                              side: BorderSide(color: colors.softBorder),
-                            ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.all(16),
-                              title: Text(
-                                item.text,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                textDirection: TextDirection.rtl,
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(
-                                      height: 1.5,
-                                      color: theme.colorScheme.onSurface,
-                                    ),
-                              ),
-                              subtitle: Padding(
-                                padding: const EdgeInsets.only(top: 8),
-                                child: Text(
-                                  category.titleKey.tr(),
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: colors.mutedText,
-                                  ),
-                                ),
-                              ),
-                              onTap: () => context.push(
-                                '/reader/${item.category}?id=${item.id}',
-                              ),
-                              trailing: IconButton(
-                                icon: Icon(Icons.delete_outline, color: accent),
-                                onPressed: () {
-                                  context.read<FavoritesCubit>().toggleFavorite(
-                                    item.id,
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ),
+                      return _FavoriteTile(
+                        item: item,
+                        categoryTitle: category.titleKey.tr(),
+                        animationIndex: index,
+                        onTap: () => context
+                            .push('/reader/${item.category}?id=${item.id}'),
+                        onDelete: () => context
+                            .read<FavoritesCubit>()
+                            .toggleFavorite(item.id),
                       );
                     },
                   );
@@ -129,61 +103,125 @@ class FavoritesScreen extends StatelessWidget {
   }
 }
 
-class _FavoritesBackground extends StatelessWidget {
-  const _FavoritesBackground({required this.isDark});
+// ─── Favorite Tile ────────────────────────────────────────────────────────────
 
-  final bool isDark;
+class _FavoriteTile extends StatelessWidget {
+  const _FavoriteTile({
+    required this.item,
+    required this.categoryTitle,
+    required this.animationIndex,
+    required this.onTap,
+    required this.onDelete,
+  });
+
+  final dynamic item;
+  final String categoryTitle;
+  final int animationIndex;
+  final VoidCallback onTap;
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
-    final gradient = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        theme.scaffoldBackgroundColor,
-        Color.alphaBlend(
-          colors.heroCardBackground.withValues(alpha: isDark ? 0.08 : 0.35),
-          theme.scaffoldBackgroundColor,
-        ),
-      ],
-    );
+    final accent = colors.accentColor ?? theme.colorScheme.primary;
 
-    return DecoratedBox(
-      decoration: BoxDecoration(gradient: gradient),
-      child: CustomPaint(
-        painter: _SoftDustPainter(isDark: isDark),
-        child: Container(),
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration:
+          Duration(milliseconds: 200 + (animationIndex * 35).clamp(0, 280)),
+      curve: Curves.easeOut,
+      builder: (_, v, child) => Opacity(opacity: v, child: child),
+      child: Dismissible(
+        key: ValueKey(item.id),
+        direction: DismissDirection.endToStart,
+        background: Container(
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 20),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.error.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            border: Border.all(
+                color: theme.colorScheme.error.withValues(alpha: 0.3)),
+          ),
+          child: Icon(Icons.delete_outline_rounded,
+              color: theme.colorScheme.error, size: 22),
+        ),
+        onDismissed: (_) => onDelete(),
+        child: AppGlassCard(
+          onTap: onTap,
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      item.text,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      textDirection: TextDirection.rtl,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        height: 1.6,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: accent.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(AppRadius.pill),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.category_outlined,
+                                  size: 11, color: colors.mutedText),
+                              const SizedBox(width: 4),
+                              Text(
+                                categoryTitle,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: colors.mutedText,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Delete button
+              GestureDetector(
+                onTap: onDelete,
+                child: Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.error.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                        color:
+                            theme.colorScheme.error.withValues(alpha: 0.2)),
+                  ),
+                  child: Icon(Icons.delete_outline_rounded,
+                      size: 17, color: theme.colorScheme.error),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
-}
-
-class _SoftDustPainter extends CustomPainter {
-  _SoftDustPainter({required this.isDark});
-
-  final bool isDark;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final random = Random(8);
-    final count = isDark ? 70 : 50;
-    final baseOpacity = isDark ? 0.4 : 0.2;
-
-    for (var i = 0; i < count; i++) {
-      final dx = random.nextDouble() * size.width;
-      final dy = random.nextDouble() * size.height;
-      final radius = random.nextDouble() * 1.2 + 0.2;
-      final opacity = baseOpacity + random.nextDouble() * 0.4;
-      final paint = Paint()
-        ..color = (isDark ? const Color(0xFFDAA520) : const Color(0xFF4A5D23)).withValues(
-          alpha: opacity * 0.35,
-        );
-      canvas.drawCircle(Offset(dx, dy), radius, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

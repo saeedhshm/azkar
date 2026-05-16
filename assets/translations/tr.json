@@ -25,7 +25,8 @@
     "retry": "Tekrar",
     "reset_progress": "İlerlemeyi sıfırla",
     "progress_reset": "İlerleme sıfırlandı.",
-    "copied": "Kopyalandı"
+    "copied": "Kopyalandı",
+    "audio": "Ses"
   },
   "home": {
     "sections": {
@@ -59,7 +60,14 @@
       "settings": "Ayarlar",
       "more": "Daha Fazla"
     },
-    "placeholder": "Yakında"
+    "placeholder": "Yakında",
+    "greetings": {
+      "night": "🌙 Hoşgeldiniz",
+      "morning": "🌤️ Günaydın",
+      "afternoon": "☀️ İyi öğleden sonralar",
+      "evening": "🌅 İyi akşamlar",
+      "late_night": "🌙 İyi geceler"
+    }
   },
   "prayer_times": {
     "date": "Bugünün tarihi",
@@ -245,7 +253,11 @@
     "sleep_reminder": "Uyku hatırlatması",
     "waking_reminder": "Uyanma hatırlatması",
     "friday_reminder": "Cuma hatırlatması",
-    "save_notifications": "Bildirim ayarlarını kaydet"
+    "save_notifications": "Bildirim ayarlarını kaydet",
+    "footer": {
+      "app_name": "Azkari — Günlük Zikir Uygulaması",
+      "version": "Sürüm {version}"
+    }
   },
   "tasbeeh": {
     "default_phrase": "Sübhanallah",
@@ -349,5 +361,8 @@
     "madani": "Medeni",
     "grid_view": "Izgara Görünümü",
     "list_view": "Liste Görünümü"
+  },
+  "favorites": {
+    "empty_subtitle": "Yer imi simgesine dokunarak zikir listesinden favori zikirlerinizi ekleyin."
   }
 }

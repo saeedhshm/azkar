@@ -1,6 +1,3 @@
-import 'dart:math';
-import 'dart:ui';
-
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +6,10 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_radius.dart';
+import '../../../../core/widgets/app_background.dart';
+import '../../../../core/widgets/glass_card.dart';
+import '../../../../core/widgets/glow_button.dart';
 import '../cubit/reader_cubit.dart';
 import '../cubit/reader_state.dart';
 
@@ -28,13 +29,38 @@ class DhikrReaderScreen extends StatefulWidget {
   State<DhikrReaderScreen> createState() => _DhikrReaderScreenState();
 }
 
-class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
+class _DhikrReaderScreenState extends State<DhikrReaderScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _countBounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _countBounce = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+      lowerBound: 1.0,
+      upperBound: 1.15,
+    );
+  }
+
+  @override
+  void dispose() {
+    _countBounce.dispose();
+    super.dispose();
+  }
+
+  void _triggerBounce() {
+    HapticFeedback.lightImpact();
+    _countBounce.forward().then((_) => _countBounce.reverse());
+  }
+
   Future<void> _copyText(BuildContext context, String text) async {
     await Clipboard.setData(ClipboardData(text: text));
     if (context.mounted) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('reader.copied'.tr())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('reader.copied'.tr())),
+      );
     }
   }
 
@@ -45,8 +71,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final appColors = AppThemeColors.of(context);
+    final colors = AppThemeColors.of(context);
 
     return BlocProvider<ReaderCubit>(
       create: (_) => getIt<ReaderCubit>()
@@ -58,15 +83,40 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
       child: Scaffold(
         extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: Text('reader.title'.tr()),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
+          leading: IconButton(
+            icon: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: colors.pillBg,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: colors.softBorder),
+              ),
+              child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+          title: Text(
+            'reader.title'.tr(),
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w800,
+            ),
+          ),
         ),
         body: Stack(
           children: [
-            _ReaderBackground(isDark: isDark, colors: appColors),
+            AppScaffoldBackground(
+              particleCount: 90,
+              particleSeed: 7,
+              showRadialGlow: true,
+              glowCenter: const Alignment(0, 0.6),
+            ),
             SafeArea(
-              child: BlocBuilder<ReaderCubit, ReaderState>(
+              child: BlocConsumer<ReaderCubit, ReaderState>(
+                listener: (context, state) {
+                  if (state.remainingCount > 0) return;
+                  // completed
+                },
                 builder: (context, state) {
                   if (state.status == ReaderStatus.loading) {
                     return const Center(child: CircularProgressIndicator());
@@ -85,179 +135,261 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
                     return Center(child: Text('reader.no_dhikr'.tr()));
                   }
 
-                  final isFavorite = state.favoriteIds.contains(current.id);
+                  final isFav = state.favoriteIds.contains(current.id);
                   final total = current.count;
                   final done = (total - state.remainingCount).clamp(0, total);
                   final progress = total == 0 ? 0.0 : done / total;
-                  final percent = (progress * 100).clamp(0, 100).round();
-
-                  final accent = theme.colorScheme.primary;
+                  final isCompleted = state.remainingCount == 0;
 
                   return LayoutBuilder(
                     builder: (context, constraints) {
                       final isCompact = constraints.maxWidth < 390;
 
                       return SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(18, 8, 18, 28),
+                        padding: const EdgeInsets.fromLTRB(16, 6, 16, 24),
                         child: ConstrainedBox(
                           constraints: BoxConstraints(
-                            minHeight: constraints.maxHeight - 36,
+                            minHeight: constraints.maxHeight - 30,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              _GlassCard(
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      '${state.currentIndex + 1} / ${state.items.length}',
-                                      style: theme.textTheme.titleSmall
-                                          ?.copyWith(
-                                            letterSpacing: 1.2,
-                                            color: appColors.mutedText,
-                                          ),
+                              // Index indicator
+                              Center(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: colors.pillBg,
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.pill),
+                                    border:
+                                        Border.all(color: colors.softBorder),
+                                  ),
+                                  child: Text(
+                                    '${state.currentIndex + 1} / ${state.items.length}',
+                                    style:
+                                        theme.textTheme.labelSmall?.copyWith(
+                                      color: colors.mutedText,
+                                      fontWeight: FontWeight.w700,
+                                      letterSpacing: 1.2,
                                     ),
-                                    const SizedBox(height: 12),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 14),
+
+                              // Main dhikr card
+                              AppGlassCard(
+                                padding: const EdgeInsets.all(20),
+                                child: Column(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    // Dhikr text
                                     AnimatedSwitcher(
-                                      duration: const Duration(
-                                        milliseconds: 280,
-                                      ),
+                                      duration:
+                                          const Duration(milliseconds: 300),
+                                      transitionBuilder: (child, anim) =>
+                                          FadeTransition(
+                                              opacity: anim, child: child),
                                       child: Text(
                                         current.text,
                                         key: ValueKey<int>(current.id),
                                         textAlign: TextAlign.center,
                                         textDirection: TextDirection.rtl,
-                                        style: theme.textTheme.headlineSmall
+                                        style: theme.textTheme.titleLarge
                                             ?.copyWith(
-                                              height: 1.8,
-                                              color:
-                                                  theme.colorScheme.onSurface,
-                                            ),
+                                          height: 1.9,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      'reader.repeat_label'.tr(
-                                        namedArgs: {'count': total.toString()},
-                                      ),
-                                      style: theme.textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color: appColors.mutedText,
+                                    const SizedBox(height: 16),
+
+                                    // Repeat label
+                                    Center(
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 12, vertical: 5),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              (colors.accentColor ?? theme.colorScheme.primary)
+                                                  .withValues(alpha: 0.12),
+                                          borderRadius: BorderRadius.circular(
+                                              AppRadius.pill),
+                                        ),
+                                        child: Text(
+                                          'reader.repeat_label'.tr(namedArgs: {
+                                            'count': total.toString()
+                                          }),
+                                          style: theme.textTheme.bodySmall
+                                              ?.copyWith(
+                                            color: colors.accentColor ??
+                                                theme.colorScheme.primary,
+                                            fontWeight: FontWeight.w700,
                                           ),
+                                        ),
+                                      ),
                                     ),
                                     const SizedBox(height: 18),
+
+                                    // Progress bar
                                     _ProgressBar(
-                                      progress: progress,
-                                      accent: accent,
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Text(
-                                      '$percent%',
-                                      style: theme.textTheme.titleMedium
-                                          ?.copyWith(
-                                            color: appColors.mutedText,
-                                          ),
-                                    ),
-                                    if (current.description.isNotEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 16),
-                                        child: Text(
-                                          current.description,
-                                          textAlign: TextAlign.center,
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                                color: appColors.mutedText,
-                                              ),
+                                        progress: progress,
+                                        isCompleted: isCompleted,
+                                        colors: colors),
+                                    const SizedBox(height: 8),
+
+                                    // Progress text
+                                    Center(
+                                      child: Text(
+                                        isCompleted
+                                            ? '✓ ${'reader.completed'.tr()}'
+                                            : '${done} / ${total}',
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                          color: isCompleted
+                                              ? colors.successColor
+                                              : colors.mutedText,
+                                          fontWeight: FontWeight.w700,
                                         ),
                                       ),
-                                    if (current.reference.isNotEmpty)
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 6),
-                                        child: Text(
-                                          current.reference,
-                                          style: theme.textTheme.bodySmall
-                                              ?.copyWith(
-                                                color: appColors.mutedText,
-                                              ),
+                                    ),
+
+                                    // Description
+                                    if (current.description.isNotEmpty) ...[
+                                      const SizedBox(height: 14),
+                                      const Divider(),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                        current.description,
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                          color: colors.mutedText,
+                                          height: 1.6,
                                         ),
                                       ),
+                                    ],
+
+                                    // Reference
+                                    if (current.reference.isNotEmpty) ...[
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        current.reference,
+                                        textAlign: TextAlign.center,
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(
+                                          color: colors.mutedText
+                                              .withValues(alpha: 0.7),
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 20),
-                              _GlowButton(
-                                enabled: state.remainingCount > 0,
-                                onTap: state.remainingCount > 0
-                                    ? () => context
-                                          .read<ReaderCubit>()
-                                          .decrementCounter()
-                                    : null,
+                              const SizedBox(height: 18),
+
+                              // Main count button
+                              AppGlowButton(
+                                enabled: !isCompleted,
+                                onTap: isCompleted
+                                    ? null
+                                    : () {
+                                        _triggerBounce();
+                                        context
+                                            .read<ReaderCubit>()
+                                            .decrementCounter();
+                                      },
                                 label: Text(
-                                  'reader.tasbeeh_button'.tr(),
-                                  style: theme.textTheme.titleMedium?.copyWith(
-                                    color: theme.colorScheme.onPrimary,
-                                    fontWeight: FontWeight.w600,
+                                  isCompleted
+                                      ? '✓ ${'reader.completed'.tr()}'
+                                      : 'reader.tasbeeh_button'.tr(),
+                                ),
+                                height: 64,
+                              ),
+                              const SizedBox(height: 10),
+
+                              // Remaining display
+                              Center(
+                                child: AnimatedBuilder(
+                                  animation: _countBounce,
+                                  builder: (_, child) => Transform.scale(
+                                    scale: _countBounce.value,
+                                    child: child,
+                                  ),
+                                  child: Text(
+                                    !isCompleted
+                                        ? '${'reader.remaining'.tr()}: ${state.remainingCount}'
+                                        : 'reader.completed'.tr(),
+                                    style:
+                                        theme.textTheme.bodyMedium?.copyWith(
+                                      color: isCompleted
+                                          ? colors.successColor
+                                          : colors.mutedText,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 10),
-                              Text(
-                                state.remainingCount > 0
-                                    ? '${'reader.remaining'.tr()}: ${state.remainingCount}'
-                                    : 'reader.completed'.tr(),
-                                textAlign: TextAlign.center,
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  color: appColors.mutedText,
-                                ),
-                              ),
-                              const SizedBox(height: 18),
+                              const SizedBox(height: 20),
+
+                              // Action circle row
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceEvenly,
                                 children: [
-                                  _ActionCircle(
-                                    onTap: null,
+                                  AppActionCircle(
                                     icon: Icons.volume_up_rounded,
-                                    isDark: isDark,
+                                    onTap: null,
+                                    tooltip: 'common.audio'.tr(),
+                                    size: isCompact ? 46 : 52,
                                   ),
-                                  _ActionCircle(
-                                    onTap: () {
-                                      context
-                                          .read<ReaderCubit>()
-                                          .toggleFavorite();
-                                    },
-                                    icon: isFavorite
+                                  AppActionCircle(
+                                    icon: isFav
                                         ? Icons.star_rounded
                                         : Icons.star_border_rounded,
-                                    isDark: isDark,
+                                    isActive: isFav,
+                                    onTap: () => context
+                                        .read<ReaderCubit>()
+                                        .toggleFavorite(),
+                                    tooltip: 'common.favorites'.tr(),
+                                    size: isCompact ? 46 : 52,
                                   ),
-                                  _ActionCircle(
+                                  AppActionCircle(
+                                    icon: Icons.copy_all_rounded,
                                     onTap: () =>
                                         _copyText(context, current.text),
-                                    icon: Icons.copy_all_rounded,
-                                    isDark: isDark,
+                                    tooltip: 'common.copy'.tr(),
+                                    size: isCompact ? 46 : 52,
                                   ),
-                                  _ActionCircle(
-                                    onTap: () => _shareText(current.text),
+                                  AppActionCircle(
                                     icon: Icons.share_rounded,
-                                    isDark: isDark,
+                                    onTap: () => _shareText(current.text),
+                                    tooltip: 'common.share'.tr(),
+                                    size: isCompact ? 46 : 52,
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 18),
+                              const SizedBox(height: 20),
+
+                              // Navigation pill
                               _NavigationPill(
-                                isDark: isDark,
                                 onPrevious: state.currentIndex > 0
                                     ? () =>
-                                          context.read<ReaderCubit>().previous()
+                                        context.read<ReaderCubit>().previous()
                                     : null,
                                 onNext:
                                     state.currentIndex < state.items.length - 1
-                                    ? () => context.read<ReaderCubit>().next()
-                                    : null,
-                                isCompact: isCompact,
+                                        ? () =>
+                                            context.read<ReaderCubit>().next()
+                                        : null,
+                                currentIndex: state.currentIndex,
+                                total: state.items.length,
                               ),
-                              const SizedBox(height: 16),
+                              const SizedBox(height: 12),
                             ],
                           ),
                         ),
@@ -274,140 +406,52 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen> {
   }
 }
 
-class _ReaderBackground extends StatelessWidget {
-  const _ReaderBackground({required this.isDark, required this.colors});
+// ─── Progress Bar ─────────────────────────────────────────────────────────────
 
-  final bool isDark;
+class _ProgressBar extends StatelessWidget {
+  const _ProgressBar({
+    required this.progress,
+    required this.isCompleted,
+    required this.colors,
+  });
+
+  final double progress;
+  final bool isCompleted;
   final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final gradient = LinearGradient(
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-      colors: [
-        theme.scaffoldBackgroundColor,
-        Color.alphaBlend(
-          colors.heroCardBackground.withValues(alpha: isDark ? 0.08 : 0.35),
-          theme.scaffoldBackgroundColor,
-        ),
-      ],
-    );
-
-    return DecoratedBox(
-      decoration: BoxDecoration(gradient: gradient),
-      child: CustomPaint(
-        painter: _StarFieldPainter(
-          isDark: isDark,
-          glowColor: isDark ? colors.countdownText : colors.heroCardBackground,
-        ),
-        child: Container(),
-      ),
-    );
-  }
-}
-
-class _StarFieldPainter extends CustomPainter {
-  _StarFieldPainter({required this.isDark, required this.glowColor});
-
-  final bool isDark;
-  final Color glowColor;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final random = Random(7);
-    final starCount = isDark ? 120 : 60;
-    final baseOpacity = isDark ? 0.45 : 0.2;
-
-    for (var i = 0; i < starCount; i++) {
-      final dx = random.nextDouble() * size.width;
-      final dy = random.nextDouble() * size.height;
-      final radius = random.nextDouble() * 1.4 + 0.3;
-      final opacity = baseOpacity + random.nextDouble() * 0.4;
-      final paint = Paint()
-        ..color = (isDark ? const Color(0xFFDAA520) : const Color(0xFF4A5D23)).withValues(
-          alpha: opacity * 0.35,
-        );
-      canvas.drawCircle(Offset(dx, dy), radius, paint);
-    }
-
-    final glowPaint = Paint()
-      ..shader =
-          RadialGradient(
-            colors: isDark
-                ? [glowColor.withValues(alpha: 0.16), Colors.transparent]
-                : [glowColor.withValues(alpha: 0.55), Colors.transparent],
-          ).createShader(
-            Rect.fromCircle(
-              center: Offset(size.width * 0.5, size.height * 0.7),
-              radius: size.width * 0.8,
-            ),
-          );
-    canvas.drawRect(Offset.zero & size, glowPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _GlassCard extends StatelessWidget {
-  const _GlassCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
-    final borderColor = colors.softBorder;
-    final background = colors.cardSurface;
+    final accent = isCompleted
+        ? colors.successColor
+        : (colors.accentColor ?? Theme.of(context).colorScheme.primary);
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(colors.cardRadius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: background,
-            borderRadius: BorderRadius.circular(colors.cardRadius),
-            border: Border.all(color: borderColor, width: 1.2),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
-            child: child,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProgressBar extends StatelessWidget {
-  const _ProgressBar({required this.progress, required this.accent});
-
-  final double progress;
-  final Color accent;
-
-  @override
-  Widget build(BuildContext context) {
-    final background = AppThemeColors.of(context).softBorder;
-    final gradient = LinearGradient(
-      colors: [accent.withValues(alpha: 0.9), accent.withValues(alpha: 0.6)],
-    );
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(50),
-      child: SizedBox(
-        height: 10,
+      borderRadius: BorderRadius.circular(AppRadius.pill),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        height: 8,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            ColoredBox(color: background),
+            ColoredBox(color: colors.softBorder),
             FractionallySizedBox(
               alignment: Alignment.centerLeft,
-              widthFactor: progress,
+              widthFactor: progress.clamp(0, 1),
               child: DecoratedBox(
-                decoration: BoxDecoration(gradient: gradient),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      accent.withValues(alpha: 0.85),
+                      accent,
+                    ],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: accent.withValues(alpha: 0.4),
+                      blurRadius: 6,
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -417,469 +461,133 @@ class _ProgressBar extends StatelessWidget {
   }
 }
 
-class _GlowButton extends StatelessWidget {
-  const _GlowButton({
-    required this.enabled,
-    required this.onTap,
-    required this.label,
-  });
-
-  final bool enabled;
-  final VoidCallback? onTap;
-  final Widget label;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final glowColor = theme.colorScheme.primary;
-    final metallicStart = Color.alphaBlend(
-      colors.countdownText.withValues(alpha: isDark ? 0.18 : 0.08),
-      theme.colorScheme.primary,
-    );
-    final metallicMid = theme.colorScheme.primary;
-    final metallicEnd = Color.alphaBlend(
-      Colors.black.withValues(alpha: isDark ? 0.18 : 0.08),
-      theme.colorScheme.primary,
-    );
-
-    return SizedBox(
-      height: 70,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Glowing outer shadow
-          if (enabled)
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(44),
-                boxShadow: [
-                  BoxShadow(
-                    color: glowColor.withValues(alpha: 0.25),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                  BoxShadow(
-                    color: glowColor.withValues(alpha: 0.1),
-                    blurRadius: 20,
-                  ),
-                ],
-              ),
-            ),
-          // Main metallic button
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(44),
-              border: Border.all(
-                color: enabled
-                    ? glowColor.withValues(alpha: 0.8)
-                    : Colors.grey.withValues(alpha: 0.6),
-                width: 2,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(42),
-              child: Stack(
-                children: [
-                  // Metallic gradient background
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: enabled
-                            ? [metallicStart, metallicMid, metallicEnd]
-                            : [
-                                Colors.grey.shade400.withValues(alpha: 0.8),
-                                Colors.grey.shade500.withValues(alpha: 0.85),
-                                Colors.grey.shade600.withValues(alpha: 0.8),
-                              ],
-                      ),
-                    ),
-                  ),
-                  // Metallic highlight effect
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Container(
-                      width: double.infinity,
-                      height: 25,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.white.withValues(
-                              alpha: enabled ? (isDark ? 0.3 : 0.4) : 0.15,
-                            ),
-                            Colors.transparent,
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Subtle texture overlay
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                    ),
-                  ),
-                  // Inner border
-                  Container(
-                    margin: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(36),
-                      border: Border.all(
-                        color: enabled
-                            ? glowColor.withValues(alpha: 0.3)
-                            : Colors.grey.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  // Touch area
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(42),
-                      onTap: enabled ? onTap : null,
-                      child: Center(
-                        child: DefaultTextStyle(
-                          style: TextStyle(
-                            color: enabled
-                                ? theme.colorScheme.onPrimary
-                                : colors.mutedText,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 18,
-                          ),
-                          child: label,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ActionCircle extends StatelessWidget {
-  const _ActionCircle({
-    required this.onTap,
-    required this.icon,
-    required this.isDark,
-  });
-
-  final VoidCallback? onTap;
-  final IconData icon;
-  final bool isDark;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final glowColor = theme.colorScheme.primary;
-    final metallicStart = Color.alphaBlend(
-      colors.countdownText.withValues(alpha: isDark ? 0.18 : 0.08),
-      theme.colorScheme.primary,
-    );
-    final metallicMid = theme.colorScheme.primary;
-    final metallicEnd = Color.alphaBlend(
-      Colors.black.withValues(alpha: isDark ? 0.18 : 0.08),
-      theme.colorScheme.primary,
-    );
-
-    return SizedBox(
-      height: 56,
-      width: 56,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Glowing outer shadow
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: glowColor.withValues(alpha: 0.25),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: glowColor.withValues(alpha: 0.1),
-                  blurRadius: 20,
-                ),
-              ],
-            ),
-          ),
-          // Main metallic button
-          Container(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: glowColor.withValues(alpha: 0.8),
-                width: 2,
-              ),
-            ),
-            child: ClipOval(
-              child: Stack(
-                children: [
-                  // Metallic gradient background
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [metallicStart, metallicMid, metallicEnd],
-                      ),
-                    ),
-                  ),
-                  // Metallic highlight effect
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Container(
-                      width: 28,
-                      height: 28,
-                      decoration: BoxDecoration(
-                        gradient: RadialGradient(
-                          colors: [
-                            Colors.white.withValues(alpha: isDark ? 0.3 : 0.4),
-                            Colors.transparent,
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Subtle texture overlay
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                    ),
-                  ),
-                  // Inner border
-                  Container(
-                    margin: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: glowColor.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  // Touch area
-                  Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: onTap,
-                      customBorder: const CircleBorder(),
-                      child: Center(
-                        child: Icon(
-                          icon,
-                          color: theme.colorScheme.onPrimary,
-                          size: 24,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+// ─── Navigation Pill ──────────────────────────────────────────────────────────
 
 class _NavigationPill extends StatelessWidget {
   const _NavigationPill({
-    required this.isDark,
     required this.onPrevious,
     required this.onNext,
-    required this.isCompact,
+    required this.currentIndex,
+    required this.total,
   });
 
-  final bool isDark;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
-  final bool isCompact;
+  final int currentIndex;
+  final int total;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
-    final glowColor = theme.colorScheme.primary;
-    final metallicStart = colors.cardSurface;
-    final metallicMid = Color.alphaBlend(
-      colors.cardSurfaceTint.withValues(alpha: isDark ? 0.28 : 0.1),
-      colors.cardSurface,
-    );
-    final metallicEnd = colors.cardSurface;
+    final primary = theme.colorScheme.primary;
 
-    return SizedBox(
-      height: isCompact ? 54 : 58,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Glowing outer shadow
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              boxShadow: [
-                BoxShadow(
-                  color: glowColor.withValues(alpha: 0.2),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-                BoxShadow(
-                  color: glowColor.withValues(alpha: 0.08),
-                  blurRadius: 20,
-                ),
-              ],
-            ),
+    return Container(
+      height: 54,
+      decoration: BoxDecoration(
+        color: colors.cardSurface,
+        borderRadius: BorderRadius.circular(AppRadius.xxl),
+        border: Border.all(
+          color: primary.withValues(alpha: 0.6),
+          width: 1.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withValues(alpha: 0.15),
+            blurRadius: 14,
+            offset: const Offset(0, 4),
           ),
-          // Main metallic pill
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(
-                color: glowColor.withValues(alpha: 0.8),
-                width: 2,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(28),
-              child: Stack(
-                children: [
-                  // Metallic gradient background
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [metallicStart, metallicMid, metallicEnd],
-                      ),
-                    ),
-                  ),
-                  // Metallic highlight effect
-                  Align(
-                    alignment: Alignment.topLeft,
-                    child: Container(
-                      width: double.infinity,
-                      height: 20,
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.white.withValues(
-                              alpha: isDark ? 0.25 : 0.35,
-                            ),
-                            Colors.transparent,
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Subtle texture overlay
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.05),
-                    ),
-                  ),
-                  // Inner border
-                  Container(
-                    margin: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(26),
-                      border: Border.all(
-                        color: glowColor.withValues(alpha: 0.3),
-                        width: 1,
-                      ),
-                    ),
-                  ),
-                  // Navigation buttons
-                  Row(
+        ],
+      ),
+      child: Row(
+        children: [
+          // Previous
+          Expanded(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: const BorderRadius.horizontal(
+                    left: Radius.circular(AppRadius.xxl)),
+                onTap: onPrevious,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Expanded(
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: onPrevious,
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(28),
-                              bottomLeft: Radius.circular(28),
-                            ),
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.arrow_back,
-                                    color: glowColor,
-                                    size: 20,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'common.previous'.tr(),
-                                    style: TextStyle(
-                                      color: glowColor,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: isCompact ? 14 : 15,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                      Icon(
+                        Icons.chevron_left_rounded,
+                        color: onPrevious != null
+                            ? primary
+                            : colors.mutedText.withValues(alpha: 0.4),
+                        size: 22,
                       ),
-                      Container(
-                        width: 1,
-                        height: isCompact ? 30 : 34,
-                        color: glowColor.withValues(alpha: 0.4),
-                      ),
-                      Expanded(
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: onNext,
-                            borderRadius: const BorderRadius.only(
-                              topRight: Radius.circular(28),
-                              bottomRight: Radius.circular(28),
-                            ),
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'common.next'.tr(),
-                                    style: TextStyle(
-                                      color: glowColor,
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: isCompact ? 14 : 15,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    color: glowColor,
-                                    size: 20,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
+                      Text(
+                        'reader.previous'.tr(),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: onPrevious != null
+                              ? primary
+                              : colors.mutedText.withValues(alpha: 0.4),
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ],
                   ),
-                ],
+                ),
+              ),
+            ),
+          ),
+          // Divider with index
+          Container(
+            width: 1,
+            height: 28,
+            color: colors.softBorder,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Text(
+              '${currentIndex + 1}/$total',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colors.mutedText,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ),
+          Container(
+            width: 1,
+            height: 28,
+            color: colors.softBorder,
+          ),
+          // Next
+          Expanded(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                borderRadius: const BorderRadius.horizontal(
+                    right: Radius.circular(AppRadius.xxl)),
+                onTap: onNext,
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        'reader.next'.tr(),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: onNext != null
+                              ? primary
+                              : colors.mutedText.withValues(alpha: 0.4),
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: onNext != null
+                            ? primary
+                            : colors.mutedText.withValues(alpha: 0.4),
+                        size: 22,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

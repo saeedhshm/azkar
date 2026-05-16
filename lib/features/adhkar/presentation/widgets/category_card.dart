@@ -1,9 +1,8 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/utils/app_categories.dart';
 
 class CategoryCard extends StatelessWidget {
@@ -25,123 +24,115 @@ class CategoryCard extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = AppThemeColors.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final iconColor = colors.prayerIcon;
-    final titleColor = theme.colorScheme.onSurface;
-    final countColor = theme.colorScheme.primary;
+    final accent = colors.accentColor ?? theme.colorScheme.primary;
 
     return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 20, end: 0),
-      duration: Duration(milliseconds: 320 + (index * 45)),
+      tween: Tween(begin: 24, end: 0),
+      duration: Duration(milliseconds: 280 + (index * 38)),
       curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
-        return Transform.translate(offset: Offset(0, value), child: child);
-      },
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(colors.cardRadius),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(colors.cardRadius),
-            child: Stack(
-              children: [
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        colors.cardSurface,
-                        Color.alphaBlend(
-                          colors.cardSurfaceTint.withValues(
-                            alpha: isDark ? 0.38 : 0.12,
+      builder: (context, offset, child) =>
+          Transform.translate(offset: Offset(0, offset), child: child),
+      child: TweenAnimationBuilder<double>(
+        tween: Tween(begin: 0, end: 1),
+        duration: Duration(milliseconds: 260 + (index * 38)),
+        curve: Curves.easeOut,
+        builder: (context, opacity, child) =>
+            Opacity(opacity: opacity, child: child),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    colors.cardSurface,
+                    Color.alphaBlend(
+                      colors.cardSurfaceTint.withValues(
+                          alpha: isDark ? 0.35 : 0.1),
+                      colors.cardSurface,
+                    ),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                border: Border.all(color: colors.softBorder, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                    blurRadius: 12,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Icon container
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: colors.prayerIcon.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          colors.cardSurface,
+                          child: Icon(
+                            category.icon,
+                            color: colors.prayerIcon,
+                            size: 20,
+                          ),
+                        ),
+                        const Spacer(),
+                        // Count badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: accent.withValues(alpha: isDark ? 0.16 : 0.1),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '$itemCount',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: accent,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 11,
+                            ),
+                          ),
                         ),
                       ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(
-                          alpha: isDark ? 0.18 : 0.05,
-                        ),
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
+                    const Spacer(),
+                    Text(
+                      category.titleKey.tr(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        height: 1.3,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      category.subtitleKey.tr(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colors.mutedText,
+                        fontSize: 10,
+                      ),
+                    ),
+                  ],
                 ),
-                if (isDark)
-                  BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: colors.softBorder, width: 1),
-                        borderRadius: BorderRadius.circular(colors.cardRadius),
-                      ),
-                    ),
-                  )
-                else
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: colors.softBorder, width: 1),
-                      borderRadius: BorderRadius.circular(colors.cardRadius),
-                    ),
-                  ),
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(category.icon, color: iconColor, size: 28),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: theme.colorScheme.primary.withValues(
-                                alpha: isDark ? 0.16 : 0.1,
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              '$itemCount',
-                              style: theme.textTheme.labelMedium?.copyWith(
-                                color: countColor,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Text(
-                        category.titleKey.tr(),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: titleColor,
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        category.subtitleKey.tr(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colors.mutedText,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),

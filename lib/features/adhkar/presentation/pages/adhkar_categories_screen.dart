@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/service_locator.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_radius.dart';
 import '../../../../core/utils/app_categories.dart';
+import '../../../../core/widgets/app_loading.dart';
 import '../../domain/repositories/adhkar_repository.dart';
 import '../widgets/category_card.dart';
 
@@ -27,24 +30,23 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
     final repository = getIt<AdhkarRepository>();
     final all = await repository.getAllAdhkar();
     final counts = <String, int>{};
-
     for (final item in all) {
       counts[item.category] = (counts[item.category] ?? 0) + 1;
     }
-
     return counts;
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        toolbarHeight: 68,
+        toolbarHeight: 64,
         title: Text(
           'home.tabs.adhkar'.tr(),
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
         ),
       ),
       body: SafeArea(
@@ -53,59 +55,32 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
           future: _countsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const AppGridShimmer(count: 6);
             }
 
             final counts = snapshot.data ?? <String, int>{};
 
             return ListView.builder(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 100),
               itemCount: AppCategories.sections.length,
               itemBuilder: (context, sectionIndex) {
                 final section = AppCategories.sections[sectionIndex];
                 final sectionItems = AppCategories.itemsBySection(section.key);
-
-                if (sectionItems.isEmpty) {
-                  return const SizedBox.shrink();
-                }
+                if (sectionItems.isEmpty) return const SizedBox.shrink();
 
                 return Padding(
-                  padding: const EdgeInsets.only(bottom: 20),
+                  padding: const EdgeInsets.only(bottom: 28),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              section.titleKey.tr(),
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(fontWeight: FontWeight.w800),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              section.subtitleKey.tr(),
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurface
-                                        .withValues(alpha: 0.68),
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // Section Header
+                      _SectionHeader(section: section),
+                      const SizedBox(height: 14),
+                      // Grid
                       LayoutBuilder(
                         builder: (context, constraints) {
                           final width = constraints.maxWidth;
-                          final crossAxisCount = width >= 1000
-                              ? 4
-                              : width >= 700
-                              ? 3
-                              : 2;
+                          final crossCount = width >= 1000 ? 4 : width >= 700 ? 3 : 2;
 
                           return GridView.builder(
                             shrinkWrap: true,
@@ -113,21 +88,19 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
                             itemCount: sectionItems.length,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: crossAxisCount,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 1.05,
-                                ),
-                            itemBuilder: (context, itemIndex) {
-                              final category = sectionItems[itemIndex];
-
+                              crossAxisCount: crossCount,
+                              crossAxisSpacing: 12,
+                              mainAxisSpacing: 12,
+                              childAspectRatio: 1.05,
+                            ),
+                            itemBuilder: (context, i) {
+                              final category = sectionItems[i];
                               return CategoryCard(
                                 category: category,
-                                index: itemIndex,
+                                index: i + (sectionIndex * 10),
                                 itemCount: counts[category.key] ?? 0,
-                                onTap: () {
-                                  context.push('/adhkar/${category.key}');
-                                },
+                                onTap: () =>
+                                    context.push('/adhkar/${category.key}'),
                               );
                             },
                           );
@@ -141,6 +114,56 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
           },
         ),
       ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.section});
+  final dynamic section;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = AppThemeColors.of(context);
+    final accent = colors.accentColor ?? theme.colorScheme.primary;
+
+    return Row(
+      children: [
+        // Colored left accent bar
+        Container(
+          width: 4,
+          height: 32,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [accent, accent.withValues(alpha: 0.3)],
+            ),
+            borderRadius: BorderRadius.circular(AppRadius.pill),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                section.titleKey.tr(),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Text(
+                section.subtitleKey.tr(),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colors.mutedText,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

@@ -25,7 +25,8 @@
     "retry": "إعادة",
     "reset_progress": "إعادة الضبط",
     "progress_reset": "تمت إعادة ضبط التقدّم.",
-    "copied": "تم النسخ"
+    "copied": "تم النسخ",
+    "audio": "الصوت"
   },
   "home": {
     "sections": {
@@ -59,7 +60,14 @@
       "settings": "الإعدادات",
       "more": "المزيد"
     },
-    "placeholder": "قريبًا"
+    "placeholder": "قريبًا",
+    "greetings": {
+      "night": "🌙 مرحباً بك",
+      "morning": "🌤️ صباح الخير",
+      "afternoon": "☀️ مساء النور",
+      "evening": "🌅 مساء الخير",
+      "late_night": "🌙 تصبح على خير"
+    }
   },
   "prayer_times": {
     "date": "تاريخ اليوم",
@@ -245,7 +253,11 @@
     "sleep_reminder": "تذكير النوم",
     "waking_reminder": "تذكير الاستيقاظ",
     "friday_reminder": "تذكير الجمعة",
-    "save_notifications": "حفظ إعدادات التذكير"
+    "save_notifications": "حفظ إعدادات التذكير",
+    "footer": {
+      "app_name": "أذكاري — تطبيق الأذكار اليومية",
+      "version": "الإصدار {version}"
+    }
   },
   "tasbeeh": {
     "default_phrase": "سبحان الله",
@@ -349,5 +361,8 @@
     "madani": "مدنية",
     "grid_view": "عرض شبكي",
     "list_view": "عرض قائمة"
+  },
+  "favorites": {
+    "empty_subtitle": "أضف أذكارك المفضلة من قائمة الأذكار بالضغط على أيقونة الإشارة المرجعية"
   }
 }
