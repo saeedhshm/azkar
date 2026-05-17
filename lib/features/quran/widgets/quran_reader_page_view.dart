@@ -114,7 +114,7 @@ class _QuranReaderPageViewState extends State<QuranReaderPageView>
       allowImplicitScrolling: true,
       dragStartBehavior: DragStartBehavior.down,
       itemCount: QuranSvgPageService.lastPage,
-      reverse: isHorizontal,
+      reverse: !isHorizontal,
       onPageChanged: (index) {
         final pageNumber = index + 1;
         _currentPage = pageNumber;
