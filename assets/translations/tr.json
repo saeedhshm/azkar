@@ -353,6 +353,8 @@
     "exit_fullscreen": "Tam Ekrandan Çık",
     "dim_on": "Ekranı Kıs",
     "dim_off": "Kısmayı Kapat",
+    "scroll_horizontal": "Yatay Kaydırma",
+    "scroll_vertical": "Dikey Kaydırma",
     "dim_intensity": "Kısma yoğunluğu",
     "juz_index": "Cüz İndeksi",
     "jump_to_juz": "Cüze Git",

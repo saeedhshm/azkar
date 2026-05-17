@@ -354,6 +354,8 @@
     "dim_on": "Dim Screen",
     "dim_off": "Disable Dim",
     "dim_intensity": "Dim intensity",
+    "scroll_horizontal": "Horizontal Scroll",
+    "scroll_vertical": "Vertical Scroll",
     "juz_index": "Juz Index",
     "jump_to_juz": "Jump to Juz",
     "recently_read": "Recently Read",

@@ -29,6 +29,7 @@ class AppConstants {
   static const quranDimModeKey = 'quran_dim_mode';
   static const quranDimIntensityKey = 'quran_dim_intensity';
   static const quranContinuousScrollKey = 'quran_continuous_scroll';
+  static const quranScrollDirectionKey = 'quran_scroll_direction';
 
   static const defaultMorningReminder = '06:00';
   static const defaultEveningReminder = '18:00';

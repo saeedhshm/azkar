@@ -68,6 +68,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   bool _showZoomHint = false;
   Timer? _zoomHintTimer;
   bool _continuousScroll = false;
+  Axis _scrollDirection = Axis.horizontal;
   QuranCubit? _quranCubit;
 
   @override
@@ -93,6 +94,10 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     _continuousScroll = getIt<LocalStorageService>().getRaw(
       AppConstants.quranContinuousScrollKey,
     ) as bool? ?? false;
+    final savedDirection = getIt<LocalStorageService>().getRaw(
+      AppConstants.quranScrollDirectionKey,
+    ) as String?;
+    _scrollDirection = savedDirection == 'vertical' ? Axis.vertical : Axis.horizontal;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _pageService.preloadWindow(_resolvedInitialPage, radius: 3);
       _scheduleChromeHide();
@@ -245,6 +250,18 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     getIt<LocalStorageService>().putRaw(
       AppConstants.quranContinuousScrollKey,
       _continuousScroll,
+    );
+  }
+
+  void _toggleScrollDirection() {
+    setState(() {
+      _scrollDirection = _scrollDirection == Axis.horizontal
+          ? Axis.vertical
+          : Axis.horizontal;
+    });
+    getIt<LocalStorageService>().putRaw(
+      AppConstants.quranScrollDirectionKey,
+      _scrollDirection == Axis.vertical ? 'vertical' : 'horizontal',
     );
   }
 
@@ -559,6 +576,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                               ),
                               readingMode:
                                   _readingMode && _continuousScroll,
+                              scrollDirection: _scrollDirection,
                             );
                         }
                       },
@@ -663,6 +681,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                       dimIntensity: _dimIntensity,
                       warmthIntensity: _warmthIntensity,
                       continuousScroll: _continuousScroll,
+                      scrollDirection: _scrollDirection,
                       state: state,
                       searchController: _searchController,
                       onBack: () => context.pop(),
@@ -695,6 +714,7 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                       onDimIntensityChanged: _dimmed ? _adjustDimIntensity : null,
                       onWarmthChanged: _adjustWarmth,
                       onToggleContinuousScroll: _toggleContinuousScroll,
+                      onToggleScrollDirection: _toggleScrollDirection,
                     );
                   },
                 ),
@@ -1017,6 +1037,7 @@ class _QuranChromeOverlay extends StatelessWidget {
     required this.dimIntensity,
     required this.warmthIntensity,
     required this.continuousScroll,
+    required this.scrollDirection,
     required this.state,
     required this.searchController,
     required this.onBack,
@@ -1035,6 +1056,7 @@ class _QuranChromeOverlay extends StatelessWidget {
     this.onDimIntensityChanged,
     this.onWarmthChanged,
     this.onToggleContinuousScroll,
+    this.onToggleScrollDirection,
   });
 
   final bool visible;
@@ -1045,6 +1067,7 @@ class _QuranChromeOverlay extends StatelessWidget {
   final double dimIntensity;
   final double warmthIntensity;
   final bool continuousScroll;
+  final Axis scrollDirection;
   final QuranState state;
   final TextEditingController searchController;
   final VoidCallback onBack;
@@ -1063,6 +1086,7 @@ class _QuranChromeOverlay extends StatelessWidget {
   final ValueChanged<double>? onDimIntensityChanged;
   final ValueChanged<double>? onWarmthChanged;
   final VoidCallback? onToggleContinuousScroll;
+  final VoidCallback? onToggleScrollDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -1181,6 +1205,8 @@ class _QuranChromeOverlay extends StatelessWidget {
                                   onToggleFullscreen?.call();
                                 case 'dim':
                                   onToggleDimmed?.call();
+                                case 'scroll_direction':
+                                  onToggleScrollDirection?.call();
                               }
                             },
                             itemBuilder: (context) => [
@@ -1253,6 +1279,23 @@ class _QuranChromeOverlay extends StatelessWidget {
                                     dimmed
                                         ? 'quran.dim_off'.tr()
                                         : 'quran.dim_on'.tr(),
+                                  ),
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: 'scroll_direction',
+                                child: ListTile(
+                                  dense: true,
+                                  leading: Icon(
+                                    scrollDirection == Axis.horizontal
+                                        ? Icons.swap_horiz_rounded
+                                        : Icons.swap_vert_rounded,
+                                  ),
+                                  title: Text(
+                                    scrollDirection == Axis.horizontal
+                                        ? 'quran.scroll_horizontal'.tr()
+                                        : 'quran.scroll_vertical'.tr(),
                                   ),
                                   contentPadding: EdgeInsets.zero,
                                 ),

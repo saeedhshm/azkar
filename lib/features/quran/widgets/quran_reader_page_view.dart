@@ -14,6 +14,7 @@ class QuranReaderPageView extends StatefulWidget {
     required this.onPageChanged,
     this.onAyahLongPress,
     this.readingMode = false,
+    this.scrollDirection = Axis.horizontal,
   });
 
   final PageController pageController;
@@ -21,6 +22,7 @@ class QuranReaderPageView extends StatefulWidget {
   final ValueChanged<int> onPageChanged;
   final void Function(QuranSelectedAyah selectedAyah)? onAyahLongPress;
   final bool readingMode;
+  final Axis scrollDirection;
 
   @override
   State<QuranReaderPageView> createState() => _QuranReaderPageViewState();
@@ -100,8 +102,10 @@ class _QuranReaderPageViewState extends State<QuranReaderPageView>
 
   @override
   Widget build(BuildContext context) {
+    final isHorizontal = widget.scrollDirection == Axis.horizontal;
     return PageView.builder(
       controller: widget.pageController,
+      scrollDirection: widget.scrollDirection,
       physics: widget.readingMode
           ? const ClampingScrollPhysics()
           : const PageScrollPhysics(
@@ -110,7 +114,7 @@ class _QuranReaderPageViewState extends State<QuranReaderPageView>
       allowImplicitScrolling: true,
       dragStartBehavior: DragStartBehavior.down,
       itemCount: QuranSvgPageService.lastPage,
-      reverse: Directionality.of(context) == TextDirection.rtl,
+      reverse: isHorizontal,
       onPageChanged: (index) {
         final pageNumber = index + 1;
         _currentPage = pageNumber;
@@ -162,12 +166,15 @@ class _QuranReaderPageViewState extends State<QuranReaderPageView>
                       scale: scale,
                       child: Opacity(
                         opacity: opacity,
-                        child: SizedBox.expand(
-                          child: QuranInteractiveMushafPage(
-                            key: ValueKey<int>(pageNumber),
-                            pageNumber: pageNumber,
-                            pageService: widget.pageService,
-                            onAyahLongPress: widget.onAyahLongPress,
+                        child: Center(
+                          child: AspectRatio(
+                            aspectRatio: 345 / 550,
+                            child: QuranInteractiveMushafPage(
+                              key: ValueKey<int>(pageNumber),
+                              pageNumber: pageNumber,
+                              pageService: widget.pageService,
+                              onAyahLongPress: widget.onAyahLongPress,
+                            ),
                           ),
                         ),
                       ),

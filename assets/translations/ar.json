@@ -353,6 +353,8 @@
     "exit_fullscreen": "خروج من ملء الشاشة",
     "dim_on": "تعتيم الشاشة",
     "dim_off": "إلغاء التعتيم",
+    "scroll_horizontal": "تمرير أفقي",
+    "scroll_vertical": "تمرير عمودي",
     "dim_intensity": "شدة التعتيم",
     "juz_index": "فهرس الأجزاء",
     "jump_to_juz": "الذهاب إلى جزء",
