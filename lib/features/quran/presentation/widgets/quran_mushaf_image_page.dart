@@ -307,21 +307,43 @@ class _SvgPageContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     if (data is Uint8List) {
-      return SvgPicture.memory(
-        data as Uint8List,
+      return ColorFiltered(
+        colorFilter: isDark
+            ? const ColorFilter.matrix([
+                0.2126, 0.7152, 0.0722, 0, 200,
+                0.2126, 0.7152, 0.0722, 0, 200,
+                0.2126, 0.7152, 0.0722, 0, 200,
+                0, 0, 0, 1, 0,
+              ])
+            : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+        child: SvgPicture.memory(
+          data as Uint8List,
+          width: width,
+          height: height,
+          fit: BoxFit.fill,
+          alignment: Alignment.topCenter,
+        ),
+      );
+    }
+    return ColorFiltered(
+      colorFilter: isDark
+          ? const ColorFilter.matrix([
+              0.2126, 0.7152, 0.0722, 0, 200,
+              0.2126, 0.7152, 0.0722, 0, 200,
+              0.2126, 0.7152, 0.0722, 0, 200,
+              0, 0, 0, 1, 0,
+            ])
+          : const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
+      child: SvgPicture.file(
+        data as File,
         width: width,
         height: height,
         fit: BoxFit.fill,
         alignment: Alignment.topCenter,
-      );
-    }
-    return SvgPicture.file(
-      data as File,
-      width: width,
-      height: height,
-      fit: BoxFit.fill,
-      alignment: Alignment.topCenter,
+      ),
     );
   }
 }
