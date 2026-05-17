@@ -737,8 +737,26 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
                         if (state.status != QuranStatus.loaded) {
                           return const SizedBox.shrink();
                         }
-                        return QuranReaderPageIndicator(
-                          pageNumber: _currentPage,
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            FloatingActionButton.small(
+                              heroTag: 'scrollDirection',
+                              onPressed: _toggleScrollDirection,
+                              tooltip: _scrollDirection == Axis.horizontal
+                                  ? 'quran.scroll_vertical'.tr()
+                                  : 'quran.scroll_horizontal'.tr(),
+                              child: Icon(
+                                _scrollDirection == Axis.horizontal
+                                    ? Icons.swap_horiz_rounded
+                                    : Icons.swap_vert_rounded,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            QuranReaderPageIndicator(
+                              pageNumber: _currentPage,
+                            ),
+                          ],
                         );
                       },
                     ),
