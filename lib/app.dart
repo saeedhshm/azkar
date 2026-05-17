@@ -79,7 +79,7 @@ class _AdhkarAppState extends State<AdhkarApp> {
         builder: (context, themeMode) {
           if (_isReady) {
             return MaterialApp.router(
-              title: 'app.name'.tr(),
+              title: 'Adhkar',
               debugShowCheckedModeBanner: false,
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
@@ -92,7 +92,7 @@ class _AdhkarAppState extends State<AdhkarApp> {
           }
 
           return MaterialApp(
-            title: 'app.name'.tr(),
+            title: 'Adhkar',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,

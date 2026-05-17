@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/di/service_locator.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/widgets/app_background.dart';
 import '../../../../core/widgets/glass_card.dart';
@@ -71,7 +70,6 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     return BlocProvider<ReaderCubit>(
       create: (_) => getIt<ReaderCubit>()
@@ -88,9 +86,9 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen>
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: colors.pillBg,
+                color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colors.softBorder),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
               ),
               child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
             ),
@@ -105,12 +103,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen>
         ),
         body: Stack(
           children: [
-            AppScaffoldBackground(
-              particleCount: 90,
-              particleSeed: 7,
-              showRadialGlow: true,
-              glowCenter: const Alignment(0, 0.6),
-            ),
+            const AppScaffoldBackground(),
             SafeArea(
               child: BlocConsumer<ReaderCubit, ReaderState>(
                 listener: (context, state) {
@@ -160,17 +153,17 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen>
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 14, vertical: 5),
                                   decoration: BoxDecoration(
-                                    color: colors.pillBg,
+                                    color: theme.colorScheme.surfaceContainerHighest,
                                     borderRadius:
                                         BorderRadius.circular(AppRadius.pill),
                                     border:
-                                        Border.all(color: colors.softBorder),
+                                        Border.all(color: theme.colorScheme.outlineVariant),
                                   ),
                                   child: Text(
                                     '${state.currentIndex + 1} / ${state.items.length}',
                                     style:
                                         theme.textTheme.labelSmall?.copyWith(
-                                      color: colors.mutedText,
+                                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                       fontWeight: FontWeight.w700,
                                       letterSpacing: 1.2,
                                     ),
@@ -214,7 +207,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen>
                                             horizontal: 12, vertical: 5),
                                         decoration: BoxDecoration(
                                           color:
-                                              (colors.accentColor ?? theme.colorScheme.primary)
+                                              theme.colorScheme.primary
                                                   .withValues(alpha: 0.12),
                                           borderRadius: BorderRadius.circular(
                                               AppRadius.pill),
@@ -225,8 +218,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen>
                                           }),
                                           style: theme.textTheme.bodySmall
                                               ?.copyWith(
-                                            color: colors.accentColor ??
-                                                theme.colorScheme.primary,
+                                            color: theme.colorScheme.primary,
                                             fontWeight: FontWeight.w700,
                                           ),
                                         ),
@@ -238,7 +230,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen>
                                     _ProgressBar(
                                         progress: progress,
                                         isCompleted: isCompleted,
-                                        colors: colors),
+                                        theme: theme),
                                     const SizedBox(height: 8),
 
                                     // Progress text
@@ -246,12 +238,12 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen>
                                       child: Text(
                                         isCompleted
                                             ? '✓ ${'reader.completed'.tr()}'
-                                            : '${done} / ${total}',
+                                             : '$done / $total',
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(
                                           color: isCompleted
-                                              ? colors.successColor
-                                              : colors.mutedText,
+                                              ? theme.colorScheme.primary
+                                              : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                           fontWeight: FontWeight.w700,
                                         ),
                                       ),
@@ -267,7 +259,7 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen>
                                         textAlign: TextAlign.center,
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(
-                                          color: colors.mutedText,
+                                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                           height: 1.6,
                                         ),
                                       ),
@@ -281,8 +273,8 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen>
                                         textAlign: TextAlign.center,
                                         style: theme.textTheme.bodySmall
                                             ?.copyWith(
-                                          color: colors.mutedText
-                                              .withValues(alpha: 0.7),
+                                          color: theme.colorScheme.onSurface
+                                              .withValues(alpha: 0.35),
                                           fontStyle: FontStyle.italic,
                                         ),
                                       ),
@@ -327,8 +319,8 @@ class _DhikrReaderScreenState extends State<DhikrReaderScreen>
                                     style:
                                         theme.textTheme.bodyMedium?.copyWith(
                                       color: isCompleted
-                                          ? colors.successColor
-                                          : colors.mutedText,
+                                          ? theme.colorScheme.primary
+                                          : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -412,18 +404,18 @@ class _ProgressBar extends StatelessWidget {
   const _ProgressBar({
     required this.progress,
     required this.isCompleted,
-    required this.colors,
+    required this.theme,
   });
 
   final double progress;
   final bool isCompleted;
-  final AppThemeColors colors;
+  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
     final accent = isCompleted
-        ? colors.successColor
-        : (colors.accentColor ?? Theme.of(context).colorScheme.primary);
+        ? theme.colorScheme.primary
+        : theme.colorScheme.primary;
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppRadius.pill),
@@ -433,7 +425,7 @@ class _ProgressBar extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            ColoredBox(color: colors.softBorder),
+            ColoredBox(color: theme.colorScheme.outlineVariant),
             FractionallySizedBox(
               alignment: Alignment.centerLeft,
               widthFactor: progress.clamp(0, 1),
@@ -479,13 +471,12 @@ class _NavigationPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final primary = theme.colorScheme.primary;
 
     return Container(
       height: 54,
       decoration: BoxDecoration(
-        color: colors.cardSurface,
+        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(AppRadius.xxl),
         border: Border.all(
           color: primary.withValues(alpha: 0.6),
@@ -517,7 +508,7 @@ class _NavigationPill extends StatelessWidget {
                         Icons.chevron_left_rounded,
                         color: onPrevious != null
                             ? primary
-                            : colors.mutedText.withValues(alpha: 0.4),
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.2),
                         size: 22,
                       ),
                       Text(
@@ -525,7 +516,7 @@ class _NavigationPill extends StatelessWidget {
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: onPrevious != null
                               ? primary
-                              : colors.mutedText.withValues(alpha: 0.4),
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.2),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -539,14 +530,14 @@ class _NavigationPill extends StatelessWidget {
           Container(
             width: 1,
             height: 28,
-            color: colors.softBorder,
+            color: theme.colorScheme.outlineVariant,
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Text(
               '${currentIndex + 1}/$total',
               style: theme.textTheme.labelSmall?.copyWith(
-                color: colors.mutedText,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 fontWeight: FontWeight.w700,
                 letterSpacing: 0.5,
               ),
@@ -555,7 +546,7 @@ class _NavigationPill extends StatelessWidget {
           Container(
             width: 1,
             height: 28,
-            color: colors.softBorder,
+            color: theme.colorScheme.outlineVariant,
           ),
           // Next
           Expanded(
@@ -574,7 +565,7 @@ class _NavigationPill extends StatelessWidget {
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: onNext != null
                               ? primary
-                              : colors.mutedText.withValues(alpha: 0.4),
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.2),
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -582,7 +573,7 @@ class _NavigationPill extends StatelessWidget {
                         Icons.chevron_right_rounded,
                         color: onNext != null
                             ? primary
-                            : colors.mutedText.withValues(alpha: 0.4),
+                            : theme.colorScheme.onSurface.withValues(alpha: 0.2),
                         size: 22,
                       ),
                     ],

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/service_locator.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/utils/time_formatter.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
@@ -89,7 +88,10 @@ class _PrayerTimesLoadingSkeletonState
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final shimmerBase = isDark ? const Color(0xFF303030) : const Color(0xFFE0E0E0);
+    final shimmerHighlight = isDark ? const Color(0xFF424242) : const Color(0xFFF5F5F5);
 
     return AnimatedBuilder(
       animation: _anim,
@@ -98,9 +100,9 @@ class _PrayerTimesLoadingSkeletonState
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
           colors: [
-            colors.shimmerBase,
-            colors.shimmerHighlight,
-            colors.shimmerBase,
+            shimmerBase,
+            shimmerHighlight,
+            shimmerBase,
           ],
           stops: [
             (_anim.value - 0.3).clamp(0.0, 1.0),
@@ -119,7 +121,7 @@ class _PrayerTimesLoadingSkeletonState
             Container(
               height: 190,
               decoration: BoxDecoration(
-                color: colors.shimmerBase,
+                color: shimmerBase,
                 borderRadius: BorderRadius.circular(AppRadius.lg),
               ),
             ),
@@ -135,9 +137,9 @@ class _PrayerTimesLoadingSkeletonState
                   mainAxisSpacing: 10,
                   childAspectRatio: 1.1,
                 ),
-                itemBuilder: (_, __) => Container(
+                itemBuilder: (_, _) => Container(
                   decoration: BoxDecoration(
-                    color: colors.shimmerBase,
+                    color: shimmerBase,
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                 ),
@@ -343,13 +345,13 @@ class _PrayerTimesContent extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            'prayer_times.location_hint'.tr(),
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppThemeColors.of(context).mutedText,
-                ),
-          ),
+            Text(
+              'prayer_times.location_hint'.tr(),
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+            ),
           const SizedBox(height: 16),
           AppSheetActionButton(
             label: 'prayer_times.use_device_location'.tr(),
@@ -521,7 +523,6 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     if (_loading) {
       return Padding(
@@ -529,11 +530,11 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(color: colors.accentColor),
+            CircularProgressIndicator(color: theme.colorScheme.primary),
             const SizedBox(height: 16),
             Text(
               'prayer_times.downloading_cities'.tr(),
-              style: theme.textTheme.bodyMedium?.copyWith(color: colors.mutedText),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
           ],
         ),
@@ -577,7 +578,7 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
             padding: const EdgeInsets.symmetric(vertical: 20),
             child: CircularProgressIndicator(
               strokeWidth: 2,
-              color: colors.accentColor,
+              color: theme.colorScheme.primary,
             ),
           )
         else if (_results.isEmpty && _controller.text.trim().length >= 2)
@@ -591,9 +592,9 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
             child: ListView.separated(
               shrinkWrap: true,
               itemCount: _results.length,
-              separatorBuilder: (_, __) => Divider(
+              separatorBuilder: (_, _) => Divider(
                 height: 1,
-                color: colors.softBorder,
+                color: theme.colorScheme.outlineVariant,
               ),
               itemBuilder: (context, index) {
                 final city = _results[index];
@@ -604,13 +605,13 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      color: colors.pillBg,
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Icon(
                       Icons.location_city_rounded,
                       size: 18,
-                      color: colors.accentColor,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
                   title: Text(
@@ -623,7 +624,7 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
                     '${city.latitude.toStringAsFixed(2)}° N, '
                     '${city.longitude.toStringAsFixed(2)}° E',
                     style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.mutedText,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                   onTap: () => Navigator.pop(context, city),
@@ -645,8 +646,7 @@ class _PermissionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final accentColor = colors.accentColor ?? theme.colorScheme.primary;
+    final accentColor = theme.colorScheme.primary;
 
     final message = switch (state.status) {
       PrayerTimesStatus.permissionDeniedForever =>
@@ -662,9 +662,9 @@ class _PermissionCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
-            color: colors.cardSurface,
+            color: theme.colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(AppRadius.xl),
-            border: Border.all(color: colors.softBorder),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.06),
@@ -694,7 +694,7 @@ class _PermissionCard extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyLarge?.copyWith(
                   height: 1.5,
-                  color: colors.secondaryText,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
               ),
               const SizedBox(height: 24),

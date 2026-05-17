@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../domain/entities/ayah_highlight.dart';
 import '../presentation/cubit/quran_cubit.dart';
 import '../presentation/cubit/quran_highlight_cubit.dart';
@@ -27,7 +26,6 @@ class _QuranBookmarksSheetState extends State<QuranBookmarksSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     return SafeArea(
       top: false,
@@ -58,7 +56,7 @@ class _QuranBookmarksSheetState extends State<QuranBookmarksSheet> {
               builder: (context, state) {
                 final bookmarks = state.bookmarkHighlights;
                 if (bookmarks.isEmpty) {
-                  return _EmptyState(colors: colors, theme: theme);
+                  return _EmptyState(theme: theme);
                 }
                 return Flexible(
                   child: ListView.separated(
@@ -116,9 +114,8 @@ class _QuranBookmarksSheetState extends State<QuranBookmarksSheet> {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState({required this.colors, required this.theme});
+  const _EmptyState({required this.theme});
 
-  final AppThemeColors colors;
   final ThemeData theme;
 
   @override
@@ -132,13 +129,13 @@ class _EmptyState extends StatelessWidget {
             Icon(
               Icons.bookmark_border_rounded,
               size: 48,
-              color: colors.mutedText,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 12),
             Text(
               'quran.no_bookmarks'.tr(),
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.mutedText,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ],
@@ -162,13 +159,12 @@ class _BookmarkTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.cardSurface,
+        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: colors.softBorder),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: InkWell(
         onTap: onTap,
@@ -206,7 +202,7 @@ class _BookmarkTile extends StatelessWidget {
                     Text(
                       '${'quran.ayah_number'.tr()} ${highlight.ayahNumber} • ${'quran.page'.tr()} ${highlight.pageNumber}',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.mutedText,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ],
@@ -216,7 +212,7 @@ class _BookmarkTile extends StatelessWidget {
                 icon: Icon(
                   Icons.close_rounded,
                   size: 18,
-                  color: colors.mutedText,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 onPressed: onDelete,
                 splashRadius: 18,

@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'dart:ui' as ui;
 
-import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/quran_surah.dart';
 import '../../services/quran_juz_data.dart';
 
@@ -68,7 +67,6 @@ class _QuranSurahSheetState extends State<QuranSurahSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final filtered = _filtered;
     final showGrouped = _showGrouped && _query.isEmpty;
 
@@ -80,11 +78,11 @@ class _QuranSurahSheetState extends State<QuranSurahSheet> {
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: colors.cardSurface,
+            color: theme.colorScheme.surfaceContainerLow,
             borderRadius: const BorderRadius.vertical(
               top: Radius.circular(30),
             ),
-            border: Border(top: BorderSide(color: colors.softBorder)),
+            border: Border(top: BorderSide(color: theme.colorScheme.outlineVariant)),
           ),
           child: Column(
             children: [
@@ -93,7 +91,7 @@ class _QuranSurahSheetState extends State<QuranSurahSheet> {
                 width: 42,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: colors.mutedText.withValues(alpha: 0.28),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.28),
                   borderRadius: BorderRadius.circular(999),
                 ),
               ),
@@ -106,7 +104,7 @@ class _QuranSurahSheetState extends State<QuranSurahSheet> {
                       children: [
                         Icon(
                           Icons.format_list_bulleted_rounded,
-                          color: colors.accentColor ?? colors.countdownText,
+                          color: theme.colorScheme.primary,
                           size: 22,
                         ),
                         const SizedBox(width: 8),
@@ -265,7 +263,6 @@ class _GroupedSurahList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     return ListView(
       controller: scrollController,
@@ -277,12 +274,12 @@ class _GroupedSurahList extends StatelessWidget {
             child: Row(
               children: [
                 Icon(Icons.location_city_rounded,
-                    size: 16, color: colors.accentColor),
+                    size: 16, color: theme.colorScheme.primary),
                 const SizedBox(width: 6),
                 Text(
                   'quran.makki'.tr(),
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: colors.accentColor,
+                    color: theme.colorScheme.primary,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
@@ -290,7 +287,7 @@ class _GroupedSurahList extends StatelessWidget {
                 Text(
                   '(${makki.length})',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: colors.mutedText,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               ],
@@ -325,7 +322,7 @@ class _GroupedSurahList extends StatelessWidget {
                 Text(
                   '(${madani.length})',
                   style: theme.textTheme.labelSmall?.copyWith(
-                    color: colors.mutedText,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
               ],
@@ -419,8 +416,7 @@ class _SurahRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final gold = colors.accentColor ?? colors.countdownText;
+    final gold = theme.colorScheme.primary;
     final juz = QuranJuzData.juzForSurah(surah.number);
 
     return InkWell(
@@ -433,12 +429,12 @@ class _SurahRow extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? gold.withValues(alpha: 0.14)
-              : colors.cardSurfaceTint.withValues(alpha: 0.2),
+              : theme.colorScheme.primary.withValues(alpha: 0.2),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
             color: selected
                 ? gold.withValues(alpha: 0.5)
-                : colors.softBorder,
+                : theme.colorScheme.outlineVariant,
           ),
         ),
         child: Row(
@@ -480,7 +476,7 @@ class _SurahRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: colors.mutedText,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                       if (juz != null) ...[
@@ -489,16 +485,15 @@ class _SurahRow extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 4, vertical: 1),
                           decoration: BoxDecoration(
-                            color: colors.accentColor
-                                    ?.withValues(alpha: 0.1) ??
-                                colors.countdownText.withValues(alpha: 0.1),
+                            color: theme.colorScheme.primary
+                                    .withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
                             'Juz ${juz.number}',
                             style: theme.textTheme.labelSmall?.copyWith(
                               fontSize: 9,
-                              color: colors.accentColor ?? colors.countdownText,
+                              color: theme.colorScheme.primary,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
@@ -518,7 +513,7 @@ class _SurahRow extends StatelessWidget {
                   textDirection: ui.TextDirection.rtl,
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w900,
-                    color: colors.secondaryText,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 if (surah.revelationType == 'Meccan')
@@ -526,7 +521,7 @@ class _SurahRow extends StatelessWidget {
                     'quran.makki'.tr(),
                     style: theme.textTheme.labelSmall?.copyWith(
                       fontSize: 9,
-                      color: colors.accentColor,
+                      color: theme.colorScheme.primary,
                     ),
                   )
                 else

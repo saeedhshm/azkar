@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 
-/// زر Primary موحّد مع Glow effect
+/// زر Primary موحّد
 class AppGlowButton extends StatelessWidget {
   const AppGlowButton({
     super.key,
@@ -21,49 +20,39 @@ class AppGlowButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final glowColor = theme.colorScheme.primary;
-    final metallicStart = Color.alphaBlend(
-      colors.countdownText.withValues(alpha: isDark ? 0.18 : 0.08),
-      theme.colorScheme.primary,
-    );
-    final metallicMid = theme.colorScheme.primary;
-    final metallicEnd = Color.alphaBlend(
-      Colors.black.withValues(alpha: isDark ? 0.18 : 0.08),
-      theme.colorScheme.primary,
-    );
+    final primary = theme.colorScheme.primary;
+    final onPrimary = theme.colorScheme.onPrimary;
+    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.4);
 
     return SizedBox(
       height: height,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          // Glow shadow
           if (enabled)
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(radius),
                 boxShadow: [
                   BoxShadow(
-                    color: glowColor.withValues(alpha: 0.28),
+                    color: primary.withValues(alpha: 0.28),
                     blurRadius: 16,
                     offset: const Offset(0, 6),
                   ),
                   BoxShadow(
-                    color: glowColor.withValues(alpha: 0.12),
+                    color: primary.withValues(alpha: 0.12),
                     blurRadius: 28,
                   ),
                 ],
               ),
             ),
-          // Main button
           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(radius),
               border: Border.all(
                 color: enabled
-                    ? glowColor.withValues(alpha: 0.8)
+                    ? primary.withValues(alpha: 0.8)
                     : Colors.grey.withValues(alpha: 0.5),
                 width: 2,
               ),
@@ -72,14 +61,17 @@ class AppGlowButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(radius - 2),
               child: Stack(
                 children: [
-                  // Metallic gradient
                   Container(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: enabled
-                            ? [metallicStart, metallicMid, metallicEnd]
+                            ? [
+                                primary.withValues(alpha: 0.85),
+                                primary,
+                                primary.withValues(alpha: 0.85),
+                              ]
                             : [
                                 Colors.grey.shade400.withValues(alpha: 0.8),
                                 Colors.grey.shade500.withValues(alpha: 0.85),
@@ -88,7 +80,6 @@ class AppGlowButton extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Top highlight
                   Positioned(
                     top: 0,
                     left: 0,
@@ -109,20 +100,18 @@ class AppGlowButton extends StatelessWidget {
                       ),
                     ),
                   ),
-                  // Inner border
                   Container(
                     margin: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(radius - 7),
                       border: Border.all(
                         color: enabled
-                            ? glowColor.withValues(alpha: 0.3)
+                            ? primary.withValues(alpha: 0.3)
                             : Colors.grey.withValues(alpha: 0.2),
                         width: 1,
                       ),
                     ),
                   ),
-                  // Touch surface
                   Material(
                     color: Colors.transparent,
                     child: InkWell(
@@ -131,9 +120,7 @@ class AppGlowButton extends StatelessWidget {
                       child: Center(
                         child: DefaultTextStyle(
                           style: TextStyle(
-                            color: enabled
-                                ? theme.colorScheme.onPrimary
-                                : colors.mutedText,
+                            color: enabled ? onPrimary : muted,
                             fontWeight: FontWeight.w700,
                             fontSize: 17,
                             fontFamily: 'Cairo',
@@ -153,7 +140,7 @@ class AppGlowButton extends StatelessWidget {
   }
 }
 
-/// زر Outline موحّد مع Glow effect
+/// زر Outline موحّد
 class AppOutlineGlowButton extends StatelessWidget {
   const AppOutlineGlowButton({
     super.key,
@@ -173,21 +160,21 @@ class AppOutlineGlowButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final glowColor = theme.colorScheme.primary;
+    final primary = theme.colorScheme.primary;
+    final surface = theme.colorScheme.surfaceContainerLow;
 
     return Container(
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: glowColor.withValues(alpha: 0.6),
+          color: primary.withValues(alpha: 0.6),
           width: 1.5,
         ),
-        color: colors.cardSurface,
+        color: surface,
         boxShadow: [
           BoxShadow(
-            color: glowColor.withValues(alpha: 0.18),
+            color: primary.withValues(alpha: 0.18),
             blurRadius: 10,
           ),
         ],
@@ -203,12 +190,12 @@ class AppOutlineGlowButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (icon != null) ...[
-                  Icon(icon, color: glowColor, size: 18),
+                  Icon(icon, color: primary, size: 18),
                   const SizedBox(width: 8),
                 ],
                 DefaultTextStyle(
                   style: TextStyle(
-                    color: glowColor,
+                    color: primary,
                     fontWeight: FontWeight.w700,
                     fontSize: 14,
                     fontFamily: 'Cairo',
@@ -224,7 +211,7 @@ class AppOutlineGlowButton extends StatelessWidget {
   }
 }
 
-/// زر دائري للـ Action Icons في شاشة القارئ
+/// زر دائري للـ Action Icons
 class AppActionCircle extends StatelessWidget {
   const AppActionCircle({
     super.key,
@@ -246,9 +233,8 @@ class AppActionCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final primary = theme.colorScheme.primary;
+    final onPrimary = theme.colorScheme.onPrimary;
     final effective = activeColor ?? primary;
 
     Widget circle = SizedBox(
@@ -282,15 +268,9 @@ class AppActionCircle extends StatelessWidget {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color.alphaBlend(
-                    colors.countdownText.withValues(alpha: isDark ? 0.16 : 0.06),
-                    primary,
-                  ),
+                  primary.withValues(alpha: 0.85),
                   primary,
-                  Color.alphaBlend(
-                    Colors.black.withValues(alpha: isDark ? 0.16 : 0.06),
-                    primary,
-                  ),
+                  primary.withValues(alpha: 0.85),
                 ],
               ),
             ),
@@ -304,8 +284,8 @@ class AppActionCircle extends StatelessWidget {
                     child: Icon(
                       icon,
                       color: isActive
-                          ? theme.colorScheme.onPrimary
-                          : theme.colorScheme.onPrimary.withValues(alpha: 0.9),
+                          ? onPrimary
+                          : onPrimary.withValues(alpha: 0.9),
                       size: size * 0.42,
                     ),
                   ),

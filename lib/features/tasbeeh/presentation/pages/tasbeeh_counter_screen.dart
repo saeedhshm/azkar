@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/service_locator.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/widgets/app_background.dart';
 import '../../../../core/widgets/glass_card.dart';
@@ -81,7 +80,7 @@ class _TasbeehCounterScreenState extends State<TasbeehCounterScreen>
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
+    final theme = Theme.of(context);
 
     return BlocProvider<TasbeehCubit>(
       create: (_) => getIt<TasbeehCubit>()..load(),
@@ -93,9 +92,9 @@ class _TasbeehCounterScreenState extends State<TasbeehCounterScreen>
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: colors.pillBg,
+                color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colors.softBorder),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
               ),
               child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
             ),
@@ -110,12 +109,7 @@ class _TasbeehCounterScreenState extends State<TasbeehCounterScreen>
         ),
         body: Stack(
           children: [
-            AppScaffoldBackground(
-              particleCount: 100,
-              particleSeed: 42,
-              showRadialGlow: true,
-              glowCenter: const Alignment(0, 0.2),
-            ),
+            const AppScaffoldBackground(),
             SafeArea(
               child: BlocBuilder<TasbeehCubit, TasbeehState>(
                 builder: (context, state) {
@@ -135,7 +129,7 @@ class _TasbeehCounterScreenState extends State<TasbeehCounterScreen>
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           scrollDirection: Axis.horizontal,
                           itemCount: _presets.length,
-                          separatorBuilder: (_, __) =>
+                          separatorBuilder: (_, _) =>
                               const SizedBox(width: 8),
                           itemBuilder: (context, i) => _PresetChip(
                             preset: _presets[i],
@@ -262,10 +256,9 @@ class _CounterRing extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final accent = isCompleted
-        ? colors.successColor
-        : (colors.accentColor ?? theme.colorScheme.primary);
+        ? theme.colorScheme.primary
+        : theme.colorScheme.primary;
 
     return AnimatedBuilder(
       animation: Listenable.merge([bounceAnimation, glowAnimation]),
@@ -304,7 +297,7 @@ class _CounterRing extends StatelessWidget {
                     painter: _RingPainter(
                       progress: progress,
                       color: accent,
-                      trackColor: colors.softBorder,
+                      trackColor: theme.colorScheme.outlineVariant,
                       strokeWidth: 8,
                     ),
                   ),
@@ -452,8 +445,7 @@ class _PresetChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final accent = colors.accentColor ?? theme.colorScheme.primary;
+    final accent = theme.colorScheme.primary;
 
     return GestureDetector(
       onTap: onTap,
@@ -463,12 +455,12 @@ class _PresetChip extends StatelessWidget {
         decoration: BoxDecoration(
           color: selected
               ? accent.withValues(alpha: 0.15)
-              : colors.pillBg,
+              : theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(AppRadius.pill),
           border: Border.all(
             color: selected
                 ? accent.withValues(alpha: 0.5)
-                : colors.softBorder,
+                : theme.colorScheme.outlineVariant,
             width: selected ? 1.5 : 1,
           ),
         ),
@@ -480,7 +472,7 @@ class _PresetChip extends StatelessWidget {
               style: theme.textTheme.bodySmall?.copyWith(
                 fontWeight:
                     selected ? FontWeight.w800 : FontWeight.w600,
-                color: selected ? accent : colors.mutedText,
+                color: selected ? accent : theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
           ],
@@ -501,15 +493,14 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: colors.cardSurface,
+          color: theme.colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(AppRadius.md),
-          border: Border.all(color: colors.softBorder),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
         ),
         child: Column(
           children: [
@@ -517,7 +508,7 @@ class _StatCard extends StatelessWidget {
               value,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w900,
-                color: colors.accentColor ?? theme.colorScheme.primary,
+                color: theme.colorScheme.primary,
               ),
             ),
             const SizedBox(height: 2),
@@ -525,7 +516,7 @@ class _StatCard extends StatelessWidget {
               label,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: colors.mutedText,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 fontSize: 10,
               ),
             ),

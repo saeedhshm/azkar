@@ -1,8 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
-
 class QuranSearchBar extends StatelessWidget {
   const QuranSearchBar({
     super.key,
@@ -22,8 +20,7 @@ class QuranSearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final gold = colors.accentColor ?? colors.countdownText;
+    final gold = theme.colorScheme.primary;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 220),
@@ -47,7 +44,7 @@ class QuranSearchBar extends StatelessWidget {
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: 'quran.search_hint'.tr(),
-          prefixIcon: Icon(Icons.search_rounded, color: colors.secondaryText),
+          prefixIcon: Icon(Icons.search_rounded, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
           suffixIcon: hasQuery
               ? IconButton(
                   tooltip: 'quran.clear_search'.tr(),
@@ -56,18 +53,18 @@ class QuranSearchBar extends StatelessWidget {
                 )
               : null,
           filled: true,
-          fillColor: colors.cardSurface,
+          fillColor: theme.colorScheme.surfaceContainerLow,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 14,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(22),
-            borderSide: BorderSide(color: colors.softBorder),
+            borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(22),
-            borderSide: BorderSide(color: colors.softBorder),
+            borderSide: BorderSide(color: theme.colorScheme.outlineVariant),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(22),

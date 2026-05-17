@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/quran_ayah.dart';
 
 class QuranAyahTile extends StatelessWidget {
@@ -18,8 +17,7 @@ class QuranAyahTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final gold = colors.accentColor ?? colors.countdownText;
+    final gold = theme.colorScheme.primary;
     final isDark = theme.brightness == Brightness.dark;
 
     return AnimatedContainer(
@@ -62,7 +60,7 @@ class QuranAyahTile extends StatelessWidget {
               fontWeight: FontWeight.w700,
               fontSize: 25,
               color: selected
-                  ? colors.countdownText
+                  ? theme.colorScheme.primary
                   : theme.colorScheme.onSurface,
             ),
           ),
@@ -80,8 +78,8 @@ class _VerseMarker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
-    final gold = colors.accentColor ?? colors.countdownText;
+    final theme = Theme.of(context);
+    final gold = theme.colorScheme.primary;
 
     return Container(
       width: 28,

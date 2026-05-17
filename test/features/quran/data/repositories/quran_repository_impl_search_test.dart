@@ -4,7 +4,6 @@ import 'package:azkar/features/quran/data/models/quran_ayah_model.dart';
 import 'package:azkar/features/quran/data/models/quran_surah_model.dart';
 import 'package:azkar/features/quran/data/repositories/quran_repository_impl.dart';
 import 'package:azkar/features/quran/domain/entities/quran_ayah.dart';
-import 'package:azkar/features/quran/domain/entities/quran_surah.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _MockDataSource extends QuranLocalDataSource {

@@ -10,7 +10,6 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/storage/local_storage_service.dart';
 import '../../../../core/constants/app_constants.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../data/datasources/quran_recently_read_service.dart';
 import '../../domain/entities/ayah_highlight.dart';
 import '../../domain/entities/quran_search_result.dart';
@@ -1068,7 +1067,6 @@ class _QuranChromeOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return AnimatedSlide(
@@ -1087,11 +1085,11 @@ class _QuranChromeOverlay extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: colors.cardSurface.withValues(
+                  color: theme.colorScheme.surfaceContainerLow.withValues(
                     alpha: isDark ? 0.92 : 0.96,
                   ),
                   borderRadius: BorderRadius.circular(24),
-                  border: Border.all(color: colors.softBorder),
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(
@@ -1139,7 +1137,8 @@ class _QuranChromeOverlay extends StatelessWidget {
                                   textDirection: ui.TextDirection.rtl,
                                   style:
                                       theme.textTheme.labelMedium?.copyWith(
-                                    color: colors.mutedText,
+                                    color: theme.colorScheme.onSurface
+                                        .withValues(alpha: 0.5),
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -1361,7 +1360,6 @@ class _QuranError extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -1371,7 +1369,7 @@ class _QuranError extends StatelessWidget {
             Icon(
               Icons.error_outline_rounded,
               size: 48,
-              color: colors.countdownText,
+              color: theme.colorScheme.error,
             ),
             const SizedBox(height: 12),
             Text(

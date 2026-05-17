@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../../prayer_times/presentation/pages/prayer_times_tab.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -29,8 +28,6 @@ class _HomeAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final isDark = theme.brightness == Brightness.dark;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 8, 12, 0),
@@ -51,7 +48,7 @@ class _HomeAppBar extends StatelessWidget {
               Text(
                 _getGreeting(),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: colors.mutedText,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -63,16 +60,12 @@ class _HomeAppBar extends StatelessWidget {
             icon: Icons.bookmark_rounded,
             tooltip: 'common.favorites'.tr(),
             onTap: () => context.push('/favorites'),
-            colors: colors,
-            isDark: isDark,
           ),
           const SizedBox(width: 6),
           _AppBarAction(
             icon: Icons.touch_app_rounded,
             tooltip: 'common.tasbeeh_counter'.tr(),
             onTap: () => context.push('/tasbeeh'),
-            colors: colors,
-            isDark: isDark,
           ),
           const SizedBox(width: 6),
         ],
@@ -95,18 +88,15 @@ class _AppBarAction extends StatelessWidget {
     required this.icon,
     required this.tooltip,
     required this.onTap,
-    required this.colors,
-    required this.isDark,
   });
 
   final IconData icon;
   final String tooltip;
   final VoidCallback onTap;
-  final AppThemeColors colors;
-  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Tooltip(
       message: tooltip,
       child: InkWell(
@@ -116,14 +106,14 @@ class _AppBarAction extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: colors.pillBg,
+            color: theme.colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: colors.softBorder),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Icon(
             icon,
             size: 20,
-            color: colors.accentColor ?? Theme.of(context).colorScheme.primary,
+            color: theme.colorScheme.primary,
           ),
         ),
       ),

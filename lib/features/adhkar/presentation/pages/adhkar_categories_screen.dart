@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/service_locator.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/utils/app_categories.dart';
 import '../../../../core/widgets/app_loading.dart';
@@ -120,13 +119,12 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
 
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({required this.section});
-  final dynamic section;
+  final CategorySection section;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final accent = colors.accentColor ?? theme.colorScheme.primary;
+    final accent = theme.colorScheme.primary;
 
     return Row(
       children: [
@@ -157,7 +155,7 @@ class _SectionHeader extends StatelessWidget {
               Text(
                 section.subtitleKey.tr(),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: colors.mutedText,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
               ),
             ],

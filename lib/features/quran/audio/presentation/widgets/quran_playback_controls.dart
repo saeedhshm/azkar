@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../../core/theme/app_theme.dart';
 import '../../domain/entities/reciter.dart';
 import '../../data/datasources/quran_audio_player_service.dart';
 import '../cubit/quran_audio_cubit.dart';
@@ -14,7 +13,6 @@ class QuranPlaybackControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
     final theme = Theme.of(context);
 
     return BlocBuilder<QuranAudioCubit, QuranAudioState>(
@@ -46,11 +44,11 @@ class QuranPlaybackControls extends StatelessWidget {
           },
           child: Container(
             decoration: BoxDecoration(
-              color: colors.cardSurface.withValues(
+              color: theme.colorScheme.surfaceContainerLow.withValues(
                 alpha: isDark ? 0.94 : 0.97,
               ),
               borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: colors.softBorder),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(alpha: isDark ? 0.34 : 0.1),
@@ -63,9 +61,9 @@ class QuranPlaybackControls extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _PlaybackProgress(colors: colors),
+                _PlaybackProgress(theme: theme),
                 const SizedBox(height: 6),
-                _PlaybackRow(colors: colors),
+                _PlaybackRow(theme: theme),
               ],
             ),
           ),
@@ -76,9 +74,9 @@ class QuranPlaybackControls extends StatelessWidget {
 }
 
 class _PlaybackProgress extends StatelessWidget {
-  const _PlaybackProgress({required this.colors});
+  const _PlaybackProgress({required this.theme});
 
-  final AppThemeColors colors;
+  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +102,7 @@ class _PlaybackProgress extends StatelessWidget {
                 Container(
                   height: 3,
                   decoration: BoxDecoration(
-                    color: colors.softBorder,
+                    color: theme.colorScheme.outlineVariant,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -113,7 +111,7 @@ class _PlaybackProgress extends StatelessWidget {
                   child: Container(
                     height: 3,
                     decoration: BoxDecoration(
-                      color: colors.accentColor ?? colors.countdownText,
+                      color: theme.colorScheme.primary,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -127,9 +125,9 @@ class _PlaybackProgress extends StatelessWidget {
                     height: 12,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: colors.accentColor ?? colors.countdownText,
+                      color: theme.colorScheme.primary,
                       border: Border.all(
-                        color: colors.cardSurface,
+                        color: theme.colorScheme.surfaceContainerLow,
                         width: 2,
                       ),
                     ),
@@ -145,14 +143,13 @@ class _PlaybackProgress extends StatelessWidget {
 }
 
 class _PlaybackRow extends StatelessWidget {
-  const _PlaybackRow({required this.colors});
+  const _PlaybackRow({required this.theme});
 
-  final AppThemeColors colors;
+  final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
     final state = context.watch<QuranAudioCubit>().state;
-    final theme = Theme.of(context);
     final audioCubit = context.read<QuranAudioCubit>();
     final isFavorite = state.reciter != null &&
         audioCubit.isFavoriteReciter(state.reciter!);
@@ -166,7 +163,7 @@ class _PlaybackRow extends StatelessWidget {
                 ? 'آية ${state.currentAyahNumber}'
                 : _formatDuration(state.positionMs),
             style: theme.textTheme.labelSmall?.copyWith(
-              color: colors.secondaryText,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -184,7 +181,7 @@ class _PlaybackRow extends StatelessWidget {
                       child: Icon(
                         Icons.star_rounded,
                         size: 14,
-                        color: colors.accentColor ?? colors.countdownText,
+                        color: theme.colorScheme.primary,
                       ),
                     ),
                   Flexible(
@@ -193,7 +190,7 @@ class _PlaybackRow extends StatelessWidget {
                           ? 'سورة ${state.currentSurahNumber}'
                           : '',
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.mutedText,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         fontWeight: FontWeight.w500,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -210,7 +207,7 @@ class _PlaybackRow extends StatelessWidget {
             HapticFeedback.lightImpact();
             context.read<QuranAudioCubit>().stop();
           },
-          icon: Icon(Icons.stop_rounded, color: colors.secondaryText),
+          icon: Icon(Icons.stop_rounded, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
           tooltip: 'common.stop'.tr(),
         ),
         IconButton(
@@ -228,7 +225,7 @@ class _PlaybackRow extends StatelessWidget {
             state.isPlaying
                 ? Icons.pause_circle_filled
                 : Icons.play_circle_filled,
-            color: colors.accentColor ?? colors.countdownText,
+            color: theme.colorScheme.primary,
           ),
           tooltip: state.isPlaying ? 'common.pause'.tr() : 'common.play'.tr(),
         ),
@@ -240,7 +237,7 @@ class _PlaybackRow extends StatelessWidget {
             children: [
               Icon(
                 Icons.headphones_rounded,
-                color: colors.secondaryText,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
               ),
               if (isFavorite)
                 Positioned(
@@ -249,7 +246,7 @@ class _PlaybackRow extends StatelessWidget {
                   child: Icon(
                     Icons.star_rounded,
                     size: 10,
-                    color: colors.accentColor ?? colors.countdownText,
+                    color: theme.colorScheme.primary,
                   ),
                 ),
             ],
@@ -262,7 +259,7 @@ class _PlaybackRow extends StatelessWidget {
             _formatDuration(state.durationMs),
             textAlign: TextAlign.end,
             style: theme.textTheme.labelSmall?.copyWith(
-              color: colors.mutedText,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -287,7 +284,6 @@ class _ReciterSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final state = context.watch<QuranAudioCubit>().state;
     final reciters = Reciter.defaults;
     final currentReciter = state.reciter;
@@ -315,12 +311,12 @@ class _ReciterSheet extends StatelessWidget {
                 padding: const EdgeInsets.only(bottom: 4),
                 child: ListTile(
                   selected: isSelected,
-                  selectedTileColor: colors.cardSurface,
+                  selectedTileColor: theme.colorScheme.surfaceContainerLow,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(14),
                     side: isSelected
                         ? BorderSide(
-                            color: colors.accentColor ?? colors.countdownText,
+                            color: theme.colorScheme.primary,
                           )
                         : BorderSide.none,
                   ),
@@ -346,8 +342,8 @@ class _ReciterSheet extends StatelessWidget {
                               ? Icons.star_rounded
                               : Icons.star_border_rounded,
                           color: isFav
-                              ? (colors.accentColor ?? colors.countdownText)
-                              : colors.mutedText,
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                         tooltip: 'quran.set_favorite_reciter'.tr(),
                       ),
@@ -356,7 +352,7 @@ class _ReciterSheet extends StatelessWidget {
                   subtitle: Text(
                     reciter.arabicName,
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: colors.mutedText,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                   trailing: Row(
@@ -366,14 +362,14 @@ class _ReciterSheet extends StatelessWidget {
                         Icon(
                           Icons.star_rounded,
                           size: 16,
-                          color: colors.accentColor ?? colors.countdownText,
+                          color: theme.colorScheme.primary,
                         ),
                       if (isSelected)
                         Padding(
                           padding: const EdgeInsets.only(left: 4),
                           child: Icon(
                             Icons.check_circle_rounded,
-                            color: colors.accentColor ?? colors.countdownText,
+                            color: theme.colorScheme.primary,
                           ),
                         ),
                     ],

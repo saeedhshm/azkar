@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
-
 class ProgressPrayerBar extends StatelessWidget {
   const ProgressPrayerBar({
     super.key,
@@ -20,10 +18,9 @@ class ProgressPrayerBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
     final theme = Theme.of(context);
     final clampedProgress = progress.clamp(0.0, 1.0);
-    final activeColor = colors.countdownText;
+    final activeColor = theme.colorScheme.primary;
 
     return Directionality(
       // Prayer progress is time-based, so it should fill in the same visual
@@ -50,7 +47,7 @@ class ProgressPrayerBar extends StatelessWidget {
                           height: 3,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(999),
-                            color: colors.mutedText.withValues(alpha: 0.22),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.22),
                           ),
                         ),
                         Container(
@@ -111,7 +108,7 @@ class ProgressPrayerBar extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.mutedText,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         fontWeight: FontWeight.w800,
                         fontSize: 10,
                       ),
@@ -122,7 +119,7 @@ class ProgressPrayerBar extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: colors.mutedText.withValues(alpha: 0.7),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
                           fontWeight: FontWeight.w600,
                           fontSize: 9,
                         ),
@@ -142,7 +139,7 @@ class ProgressPrayerBar extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.end,
                       style: theme.textTheme.labelSmall?.copyWith(
-                        color: colors.mutedText,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         fontWeight: FontWeight.w800,
                         fontSize: 10,
                       ),
@@ -154,7 +151,7 @@ class ProgressPrayerBar extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         textAlign: TextAlign.end,
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: colors.mutedText.withValues(alpha: 0.7),
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
                           fontWeight: FontWeight.w600,
                           fontSize: 9,
                         ),

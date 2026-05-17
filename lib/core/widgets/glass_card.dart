@@ -1,9 +1,7 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import '../theme/app_radius.dart';
 
-/// بطاقة زجاجية موحّدة — Glassmorphism Card
+/// بطاقة موحّدة — Modern Card
 /// تُستخدم في جميع الشاشات بدلاً من تكرار نفس الكود
 class AppGlassCard extends StatelessWidget {
   const AppGlassCard({
@@ -11,9 +9,6 @@ class AppGlassCard extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
     this.radius,
-    this.applyBlur = true,
-    this.blurSigma = 10,
-    this.borderWidth = 1.2,
     this.onTap,
     this.margin,
   });
@@ -21,28 +16,23 @@ class AppGlassCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final double? radius;
-  final bool applyBlur;
-  final double blurSigma;
-  final double borderWidth;
   final VoidCallback? onTap;
   final EdgeInsetsGeometry? margin;
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
-    final r = radius ?? colors.cardRadius;
+    final theme = Theme.of(context);
+    final r = radius ?? AppRadius.lg;
 
     Widget card = Container(
       decoration: BoxDecoration(
-        color: colors.cardSurface,
+        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(r),
-        border: Border.all(color: colors.softBorder, width: borderWidth),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(
-              alpha: Theme.of(context).brightness == Brightness.dark
-                  ? 0.18
-                  : 0.05,
+              alpha: theme.brightness == Brightness.dark ? 0.18 : 0.05,
             ),
             blurRadius: 16,
             offset: const Offset(0, 8),
@@ -51,16 +41,6 @@ class AppGlassCard extends StatelessWidget {
       ),
       child: Padding(padding: padding, child: child),
     );
-
-    if (applyBlur) {
-      card = ClipRRect(
-        borderRadius: BorderRadius.circular(r),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: blurSigma, sigmaY: blurSigma),
-          child: card,
-        ),
-      );
-    }
 
     if (onTap != null) {
       card = Material(
@@ -81,7 +61,7 @@ class AppGlassCard extends StatelessWidget {
   }
 }
 
-/// بطاقة Hero Card — للبطاقات الرئيسية مثل بطاقة وقت الصلاة
+/// بطاقة Hero Card — للبطاقات الرئيسية
 class AppHeroCard extends StatelessWidget {
   const AppHeroCard({
     super.key,
@@ -96,9 +76,10 @@ class AppHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accent = colors.accentColor ?? colors.cardSurfaceTint;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primary = theme.colorScheme.primary;
+    final surface = theme.colorScheme.surfaceContainerHighest;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -109,23 +90,21 @@ class AppHeroCard extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            colors.heroCardBackground,
+            surface,
             Color.alphaBlend(
-              accent.withValues(alpha: isDark ? 0.15 : 0.12),
-              colors.heroCardBackground,
+              primary.withValues(alpha: isDark ? 0.15 : 0.12),
+              surface,
             ),
           ],
         ),
         borderRadius: BorderRadius.circular(radius),
         border: Border.all(
-          color: (colors.accentColor ?? colors.softBorder)
-              .withValues(alpha: isDark ? 0.3 : 0.25),
+          color: primary.withValues(alpha: isDark ? 0.3 : 0.25),
           width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: (colors.accentColor ?? Colors.black)
-                .withValues(alpha: isDark ? 0.25 : 0.1),
+            color: primary.withValues(alpha: isDark ? 0.25 : 0.1),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),

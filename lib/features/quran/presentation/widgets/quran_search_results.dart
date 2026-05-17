@@ -3,7 +3,6 @@ import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/quran_search_result.dart';
 import '../../services/quran_search_text_utils.dart';
 
@@ -20,8 +19,7 @@ class QuranSearchResults extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final gold = colors.accentColor ?? colors.countdownText;
+    final gold = theme.colorScheme.primary;
 
     if (results.isEmpty) {
       return Center(
@@ -30,7 +28,7 @@ class QuranSearchResults extends StatelessWidget {
           child: Text(
             'quran.no_results'.tr(),
             style: theme.textTheme.titleMedium?.copyWith(
-              color: colors.mutedText,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
             ),
             textAlign: TextAlign.center,
           ),
@@ -59,9 +57,9 @@ class QuranSearchResults extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: colors.cardSurface,
+              color: theme.colorScheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(22),
-              border: Border.all(color: colors.softBorder),
+              border: Border.all(color: theme.colorScheme.outlineVariant),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withValues(
@@ -95,18 +93,18 @@ class QuranSearchResults extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        '${result.surah.englishName} • ${result.surah.name}',
-                        textDirection: ui.TextDirection.ltr,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: colors.secondaryText,
-                          fontWeight: FontWeight.w900,
+                        Expanded(
+                          child: Text(
+                            '${result.surah.englishName} • ${result.surah.name}',
+                            textDirection: ui.TextDirection.ltr,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
                   ],
                 ),
                 const SizedBox(height: 10),

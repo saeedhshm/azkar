@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/quran_ayah.dart';
 import '../../domain/entities/quran_surah.dart';
 import 'quran_ayah_tile.dart';
@@ -100,8 +99,7 @@ class _SurahHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final gold = colors.accentColor ?? colors.countdownText;
+    final gold = theme.colorScheme.primary;
     final revelationKey = surah.revelationType.toLowerCase() == 'meccan'
         ? 'quran.meccan'
         : 'quran.medinan';
@@ -141,7 +139,7 @@ class _SurahHeader extends StatelessWidget {
             '${surah.number}. ${surah.englishName} • ${surah.englishNameTranslation}',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.mutedText,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -172,8 +170,8 @@ class _MetaChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
-    final gold = colors.accentColor ?? colors.countdownText;
+    final theme = Theme.of(context);
+    final gold = theme.colorScheme.primary;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -183,8 +181,8 @@ class _MetaChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-          color: colors.secondaryText,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
           fontWeight: FontWeight.w800,
         ),
       ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 
 /// Empty State موحّد مع أيقونة + عنوان + وصف + زر اختياري
 class AppEmptyState extends StatelessWidget {
@@ -23,7 +22,10 @@ class AppEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
+    final onSurface = theme.colorScheme.onSurface;
+    final outline = theme.colorScheme.outlineVariant;
+    final surface = theme.colorScheme.surfaceContainerHighest;
+    final muted = onSurface.withValues(alpha: 0.5);
 
     return Center(
       child: Padding(
@@ -35,14 +37,14 @@ class AppEmptyState extends StatelessWidget {
               width: iconSize + 32,
               height: iconSize + 32,
               decoration: BoxDecoration(
-                color: colors.pillBg,
+                color: surface,
                 shape: BoxShape.circle,
-                border: Border.all(color: colors.softBorder),
+                border: Border.all(color: outline),
               ),
               child: Icon(
                 icon,
                 size: iconSize * 0.65,
-                color: colors.mutedText,
+                color: muted,
               ),
             ),
             const SizedBox(height: 20),
@@ -51,7 +53,6 @@ class AppEmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: theme.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: theme.colorScheme.onSurface,
               ),
             ),
             if (subtitle != null) ...[
@@ -60,7 +61,7 @@ class AppEmptyState extends StatelessWidget {
                 subtitle!,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colors.mutedText,
+                  color: muted,
                   height: 1.5,
                 ),
               ),
@@ -95,7 +96,7 @@ class AppErrorState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
+    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.5);
 
     return Center(
       child: Padding(
@@ -121,7 +122,7 @@ class AppErrorState extends StatelessWidget {
               message,
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyLarge?.copyWith(
-                color: colors.secondaryText,
+                color: muted,
                 height: 1.5,
               ),
             ),

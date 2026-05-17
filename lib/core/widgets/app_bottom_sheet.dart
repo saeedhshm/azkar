@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 import '../theme/app_radius.dart';
 
-/// Bottom Sheet موحّد مع Handle + Glassmorphism
+/// Bottom Sheet موحّد مع Handle
 class AppBottomSheet extends StatelessWidget {
   const AppBottomSheet({
     super.key,
@@ -39,9 +38,10 @@ class AppBottomSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final surface = theme.colorScheme.surfaceContainerLow;
+    final outline = theme.colorScheme.outlineVariant;
     final viewInsets = MediaQuery.of(context).viewInsets;
 
     return Container(
@@ -53,13 +53,13 @@ class AppBottomSheet extends StatelessWidget {
             bottom: viewInsets.bottom + 20,
           ),
       decoration: BoxDecoration(
-        color: colors.cardSurface,
+        color: surface,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppRadius.xxl),
         ),
         border: Border(
           top: BorderSide(
-            color: colors.softBorder,
+            color: outline,
             width: isDark ? 0.5 : 1,
           ),
         ),
@@ -81,7 +81,7 @@ class AppBottomSheet extends StatelessWidget {
                 height: 4,
                 margin: const EdgeInsets.only(bottom: 16),
                 decoration: BoxDecoration(
-                  color: colors.softBorder,
+                  color: outline,
                   borderRadius: BorderRadius.circular(AppRadius.pill),
                 ),
               ),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import '../theme/app_theme.dart';
 
-/// Loading Shimmer موحّد — يستبدل CircularProgressIndicator العادي
+/// Loading Shimmer موحّد
 class AppLoadingShimmer extends StatefulWidget {
   const AppLoadingShimmer({
     super.key,
@@ -42,7 +41,10 @@ class _AppLoadingShimmerState extends State<AppLoadingShimmer>
   @override
   Widget build(BuildContext context) {
     if (!widget.isLoading) return widget.child;
-    final colors = AppThemeColors.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final base = isDark ? const Color(0xFF303030) : const Color(0xFFE0E0E0);
+    final highlight = isDark ? const Color(0xFF424242) : const Color(0xFFF5F5F5);
 
     return AnimatedBuilder(
       animation: _animation,
@@ -50,11 +52,7 @@ class _AppLoadingShimmerState extends State<AppLoadingShimmer>
         shaderCallback: (bounds) => LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [
-            colors.shimmerBase,
-            colors.shimmerHighlight,
-            colors.shimmerBase,
-          ],
+          colors: [base, highlight, base],
           stops: [
             (_animation.value - 0.3).clamp(0.0, 1.0),
             _animation.value.clamp(0.0, 1.0),
@@ -69,7 +67,7 @@ class _AppLoadingShimmerState extends State<AppLoadingShimmer>
   }
 }
 
-/// Shimmer Box — صندوق shimmer لملء مكان المحتوى
+/// Shimmer Box
 class ShimmerBox extends StatelessWidget {
   const ShimmerBox({
     super.key,
@@ -84,20 +82,22 @@ class ShimmerBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final base = isDark ? const Color(0xFF303030) : const Color(0xFFE0E0E0);
 
     return Container(
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: colors.shimmerBase,
+        color: base,
         borderRadius: BorderRadius.circular(radius),
       ),
     );
   }
 }
 
-/// Grid Shimmer للـ Category Cards
+/// Grid Shimmer
 class AppGridShimmer extends StatelessWidget {
   const AppGridShimmer({
     super.key,
@@ -125,7 +125,7 @@ class AppGridShimmer extends StatelessWidget {
             mainAxisSpacing: 12,
             childAspectRatio: childAspectRatio,
           ),
-          itemBuilder: (_, __) => const _ShimmerCard(),
+          itemBuilder: (_, _) => const _ShimmerCard(),
         ),
       ),
     );
@@ -137,12 +137,12 @@ class _ShimmerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colors.shimmerBase,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF303030)
+            : const Color(0xFFE0E0E0),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -165,7 +165,7 @@ class _ShimmerCard extends StatelessWidget {
   }
 }
 
-/// List Shimmer للـ Adhkar tiles
+/// List Shimmer
 class AppListShimmer extends StatelessWidget {
   const AppListShimmer({super.key, this.count = 5});
 
@@ -177,8 +177,8 @@ class AppListShimmer extends StatelessWidget {
       child: ListView.separated(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
         itemCount: count,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (_, __) => const _ShimmerTile(),
+        separatorBuilder: (_, _) => const SizedBox(height: 12),
+        itemBuilder: (_, _) => const _ShimmerTile(),
       ),
     );
   }
@@ -189,12 +189,12 @@ class _ShimmerTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
-
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colors.shimmerBase,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF303030)
+            : const Color(0xFFE0E0E0),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(

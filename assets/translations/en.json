@@ -26,7 +26,8 @@
     "reset_progress": "Reset progress",
     "progress_reset": "Progress reset.",
     "copied": "Copied",
-    "audio": "Audio"
+    "audio": "Audio",
+    "more": "More"
   },
   "home": {
     "sections": {
@@ -225,7 +226,9 @@
     "audio_unavailable": "No audio available for this dhikr.",
     "audio_failed": "Failed to play audio.",
     "repeat_label": "Repeat {count} times",
-    "tasbeeh_button": "Tasbeeh"
+    "tasbeeh_button": "Tasbeeh",
+    "previous": "Previous",
+    "next": "Next"
   },
   "settings": {
     "saved": "Settings saved.",

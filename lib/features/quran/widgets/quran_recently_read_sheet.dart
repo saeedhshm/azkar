@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/di/service_locator.dart';
-import '../../../core/theme/app_theme.dart';
 import '../data/datasources/quran_recently_read_service.dart';
 import '../domain/entities/quran_surah.dart';
 
@@ -63,7 +62,6 @@ class _QuranRecentlyReadSheetState extends State<QuranRecentlyReadSheet> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     return SafeArea(
       top: false,
@@ -78,7 +76,7 @@ class _QuranRecentlyReadSheetState extends State<QuranRecentlyReadSheet> {
                 Icon(
                   Icons.history_rounded,
                   size: 22,
-                  color: colors.accentColor ?? colors.countdownText,
+                  color: theme.colorScheme.primary,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -107,13 +105,13 @@ class _QuranRecentlyReadSheetState extends State<QuranRecentlyReadSheet> {
                       Icon(
                         Icons.history_rounded,
                         size: 48,
-                        color: colors.mutedText.withValues(alpha: 0.5),
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                       const SizedBox(height: 12),
                       Text(
                         'quran.no_recently_read'.tr(),
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: colors.mutedText,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ],
@@ -151,7 +149,7 @@ class _QuranRecentlyReadSheetState extends State<QuranRecentlyReadSheet> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: colors.softBorder.withValues(alpha: 0.5),
+                            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Center(
@@ -159,7 +157,7 @@ class _QuranRecentlyReadSheetState extends State<QuranRecentlyReadSheet> {
                               '${entry.pageNumber}',
                               style: theme.textTheme.labelLarge?.copyWith(
                                 fontWeight: FontWeight.w900,
-                                color: colors.secondaryText,
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                               ),
                             ),
                           ),
@@ -173,7 +171,7 @@ class _QuranRecentlyReadSheetState extends State<QuranRecentlyReadSheet> {
                         subtitle: Text(
                           '${'quran.ayah'.tr()} ${entry.ayahNumber} • ${'quran.page'.tr()} ${entry.pageNumber}',
                           style: theme.textTheme.labelSmall?.copyWith(
-                            color: colors.mutedText,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
                         trailing: Row(
@@ -182,14 +180,14 @@ class _QuranRecentlyReadSheetState extends State<QuranRecentlyReadSheet> {
                             Text(
                               _formatTimestamp(entry.timestamp),
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: colors.mutedText,
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                 fontSize: 10,
                               ),
                             ),
                             const SizedBox(width: 4),
                             Icon(
                               Icons.chevron_left_rounded,
-                              color: colors.mutedText,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                               size: 18,
                             ),
                           ],

@@ -26,7 +26,8 @@
     "reset_progress": "İlerlemeyi sıfırla",
     "progress_reset": "İlerleme sıfırlandı.",
     "copied": "Kopyalandı",
-    "audio": "Ses"
+    "audio": "Ses",
+    "more": "Daha Fazla"
   },
   "home": {
     "sections": {
@@ -225,7 +226,9 @@
     "audio_unavailable": "Bu zikir için ses dosyası yok.",
     "audio_failed": "Ses oynatılamadı.",
     "repeat_label": "{count} kez tekrarla",
-    "tasbeeh_button": "Tesbih"
+    "tasbeeh_button": "Tesbih",
+    "previous": "Önceki",
+    "next": "Sonraki"
   },
   "settings": {
     "saved": "Ayarlar kaydedildi.",

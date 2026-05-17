@@ -26,7 +26,8 @@
     "reset_progress": "Reset progres",
     "progress_reset": "Progres direset.",
     "copied": "Disalin",
-    "audio": "Audio"
+    "audio": "Audio",
+    "more": "Lainnya"
   },
   "home": {
     "sections": {
@@ -225,7 +226,9 @@
     "audio_unavailable": "Audio tidak tersedia untuk dzikir ini.",
     "audio_failed": "Gagal memutar audio.",
     "repeat_label": "Ulangi {count} kali",
-    "tasbeeh_button": "Tasbih"
+    "tasbeeh_button": "Tasbih",
+    "previous": "Sebelumnya",
+    "next": "Berikutnya"
   },
   "settings": {
     "saved": "Pengaturan tersimpan.",

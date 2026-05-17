@@ -7,7 +7,6 @@ import 'package:flutter/services.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../services/quran_svg_page_service.dart';
 import 'quran_mushaf_frame.dart';
 
@@ -147,8 +146,7 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
   Widget build(BuildContext context) {
     super.build(context);
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final gold = colors.accentColor ?? colors.countdownText;
+    final gold = theme.colorScheme.primary;
 
     return FutureBuilder<Object>(
       future: _future,
@@ -247,10 +245,10 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
             child: _MushafStatusContent(
               icon: Icon(Icons.cloud_off_rounded, color: gold, size: 36),
               message: 'quran.download_page_error'.tr(),
-              messageStyle: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.secondaryText,
-                fontWeight: FontWeight.w700,
-              ),
+            messageStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              fontWeight: FontWeight.w700,
+            ),
               action: FilledButton.icon(
                 onPressed: _retry,
                 style: FilledButton.styleFrom(
@@ -275,7 +273,7 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
             ),
             message: 'quran.preparing_pages_title'.tr(),
             messageStyle: theme.textTheme.bodyMedium?.copyWith(
-              color: colors.mutedText,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               fontWeight: FontWeight.w700,
             ),
           ),

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 import '../../../../core/di/service_locator.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/utils/app_categories.dart';
 import '../../../../core/widgets/app_background.dart';
@@ -18,7 +17,7 @@ class FavoritesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
+    final theme = Theme.of(context);
 
     return BlocProvider<FavoritesCubit>(
       create: (_) => getIt<FavoritesCubit>()..loadFavorites(),
@@ -30,9 +29,9 @@ class FavoritesScreen extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: colors.pillBg,
+                color: theme.colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: colors.softBorder),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
               ),
               child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
             ),
@@ -47,7 +46,7 @@ class FavoritesScreen extends StatelessWidget {
         ),
         body: Stack(
           children: [
-            const AppScaffoldBackground(particleCount: 55, particleSeed: 8),
+            const AppScaffoldBackground(),
             SafeArea(
               child: BlocBuilder<FavoritesCubit, FavoritesState>(
                 builder: (context, state) {
@@ -76,7 +75,7 @@ class FavoritesScreen extends StatelessWidget {
                   return ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 10, 16, 100),
                     itemCount: state.items.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final item = state.items[index];
                       final category = AppCategories.byKey(item.category);
@@ -123,8 +122,7 @@ class _FavoriteTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final accent = colors.accentColor ?? theme.colorScheme.primary;
+    final accent = theme.colorScheme.primary;
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
@@ -183,12 +181,12 @@ class _FavoriteTile extends StatelessWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(Icons.category_outlined,
-                                  size: 11, color: colors.mutedText),
+                                  size: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                               const SizedBox(width: 4),
                               Text(
                                 categoryTitle,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: colors.mutedText,
+                                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),

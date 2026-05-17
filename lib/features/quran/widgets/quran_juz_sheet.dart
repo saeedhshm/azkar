@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../services/quran_juz_data.dart';
 
 class QuranJuzSheet extends StatelessWidget {
@@ -17,7 +16,6 @@ class QuranJuzSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final juzList = QuranJuzData.all;
 
     return DraggableScrollableSheet(
@@ -40,7 +38,7 @@ class QuranJuzSheet extends StatelessWidget {
                   children: [
                     Icon(
                       Icons.auto_stories_rounded,
-                      color: colors.accentColor ?? colors.countdownText,
+                      color: theme.colorScheme.primary,
                       size: 22,
                     ),
                     const SizedBox(width: 8),
@@ -55,14 +53,14 @@ class QuranJuzSheet extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: (colors.accentColor ?? colors.countdownText)
+                        color: theme.colorScheme.primary
                             .withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         '${juzList.length} ${'quran.juz'.tr()}',
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: colors.accentColor ?? colors.countdownText,
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
@@ -128,13 +126,12 @@ class _JuzTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final gold = colors.accentColor ?? colors.countdownText;
+    final gold = theme.colorScheme.primary;
 
     return Material(
       color: isSelected
           ? gold.withValues(alpha: 0.15)
-          : colors.cardSurface,
+          : theme.colorScheme.surfaceContainerLow,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -144,7 +141,7 @@ class _JuzTile extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: isSelected
                 ? Border.all(color: gold, width: 1.5)
-                : Border.all(color: colors.softBorder.withValues(alpha: 0.5)),
+                : Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -156,7 +153,7 @@ class _JuzTile extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: isSelected
                       ? gold
-                      : colors.softBorder.withValues(alpha: 0.5),
+                      : theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
                 ),
                 child: Center(
                   child: Text(
@@ -165,7 +162,7 @@ class _JuzTile extends StatelessWidget {
                       fontWeight: FontWeight.w900,
                       color: isSelected
                           ? Colors.white
-                          : colors.secondaryText,
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                   ),
                 ),
@@ -176,21 +173,21 @@ class _JuzTile extends StatelessWidget {
                 style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight:
                       isSelected ? FontWeight.w800 : FontWeight.w500,
-                  color: isSelected ? gold : colors.secondaryText,
+                  color: isSelected ? gold : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 textAlign: TextAlign.center,
               ),
               Text(
                 '${'quran.page'.tr()} ${juz.startPage}',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: colors.mutedText,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   fontSize: 10,
                 ),
               ),
               Text(
                 'Surah ${juz.startSurah}:${juz.startAyah}',
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: colors.mutedText,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   fontSize: 9,
                 ),
               ),
@@ -200,7 +197,7 @@ class _JuzTile extends StatelessWidget {
                   borderRadius: BorderRadius.circular(2),
                   child: LinearProgressIndicator(
                     value: progress,
-                    backgroundColor: colors.softBorder.withValues(alpha: 0.5),
+                    backgroundColor: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
                     valueColor: AlwaysStoppedAnimation<Color>(gold),
                     minHeight: 2,
                   ),

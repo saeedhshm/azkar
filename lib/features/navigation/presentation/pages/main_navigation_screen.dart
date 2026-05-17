@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/widgets/app_background.dart';
 import '../../../adhkar/presentation/pages/adhkar_categories_screen.dart';
@@ -64,7 +63,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
       extendBody: true,
       body: Stack(
         children: [
-          const AppScaffoldBackground(particleCount: 80, particleSeed: 19),
+          const AppScaffoldBackground(),
           IndexedStack(
             index: _index,
             children: const [
@@ -101,9 +100,11 @@ class _ShellNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final accentColor = colors.accentColor ?? Theme.of(context).colorScheme.primary;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final accentColor = theme.colorScheme.primary;
+    final navBarBg = theme.colorScheme.surfaceContainerLow;
+    final softBorder = theme.colorScheme.outlineVariant;
 
     final items = [
       _NavItemData(Icons.home_rounded, Icons.home_outlined, 'home.tabs.home'.tr()),
@@ -127,9 +128,9 @@ class _ShellNavigationBar extends StatelessWidget {
               top: 10,
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  color: colors.navBarBg,
+                  color: navBarBg,
                   borderRadius: BorderRadius.circular(AppRadius.xxl),
-                  border: Border.all(color: colors.softBorder),
+                  border: Border.all(color: softBorder),
                   boxShadow: [
                     BoxShadow(
                       color: accentColor.withValues(alpha: isDark ? 0.22 : 0.1),
@@ -281,7 +282,7 @@ class _CenterNavButton extends StatelessWidget {
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: selected
                       ? accentColor
-                      : AppThemeColors.of(context).mutedText,
+                      : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                   fontWeight: FontWeight.w800,
                   fontSize: 9,
                 ),
@@ -314,8 +315,8 @@ class _NavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final accentColor = colors.accentColor ?? theme.colorScheme.primary;
+    final accentColor = theme.colorScheme.primary;
+    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.5);
     final selected = index == selectedIndex;
 
     return Expanded(
@@ -345,7 +346,7 @@ class _NavItem extends StatelessWidget {
                       size: 22,
                       color: selected
                           ? accentColor
-                          : colors.mutedText.withValues(alpha: 0.75),
+                          : muted.withValues(alpha: 0.75),
                     ),
                   ),
                   const SizedBox(height: 3),
@@ -354,7 +355,7 @@ class _NavItem extends StatelessWidget {
                     style: (theme.textTheme.labelSmall ?? const TextStyle()).copyWith(
                       color: selected
                           ? accentColor
-                          : colors.mutedText.withValues(alpha: 0.82),
+                          : muted.withValues(alpha: 0.82),
                       fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
                       fontSize: 9.5,
                     ),

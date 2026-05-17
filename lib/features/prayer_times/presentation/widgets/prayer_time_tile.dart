@@ -1,8 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
-
 class PrayerTimeTile extends StatefulWidget {
   const PrayerTimeTile({
     super.key,
@@ -31,35 +29,32 @@ class _PrayerTimeTileState extends State<PrayerTimeTile> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final isHighlighted = widget.isCurrent || widget.isNext;
     final opacity = widget.isPast && !isHighlighted ? 0.72 : 1.0;
 
-    // Current prayer: dark olive green bg in light, darker olive in dark
     final currentBg =
-        colors.currentPrayerBg ??
         Color.alphaBlend(
           theme.colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.12),
-          colors.cardSurface,
+          theme.colorScheme.surfaceContainerLow,
         );
-    final currentFg = colors.currentPrayerFg ?? theme.colorScheme.onSurface;
+    final currentFg = theme.colorScheme.onSurface;
     final nextBg = Color.alphaBlend(
-      (colors.accentColor ?? colors.countdownText).withValues(
+      theme.colorScheme.primary.withValues(
         alpha: isDark ? 0.18 : 0.2,
       ),
-      colors.cardSurface,
+      theme.colorScheme.surfaceContainerLow,
     );
-    final nextFg = isDark ? theme.colorScheme.onSurface : colors.secondaryText;
+    final nextFg = isDark ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withValues(alpha: 0.6);
 
     final badgeBg = widget.isCurrent
-        ? (colors.accentColor ?? colors.countdownText)
-        : (colors.accentColor ?? colors.countdownText).withValues(
+        ? theme.colorScheme.primary
+        : theme.colorScheme.primary.withValues(
             alpha: isDark ? 0.24 : 0.18,
           );
     final badgeFg = widget.isCurrent
         ? (isDark ? const Color(0xFF1A1F15) : const Color(0xFF3B2A12))
-        : (colors.accentColor ?? colors.countdownText);
+        : theme.colorScheme.primary;
     final foreground = widget.isCurrent
         ? currentFg
         : widget.isNext
@@ -88,19 +83,19 @@ class _PrayerTimeTileState extends State<PrayerTimeTile> {
                     ? currentBg
                     : widget.isNext
                     ? nextBg
-                    : colors.cardSurface,
+                    : theme.colorScheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: isHighlighted
-                      ? (colors.accentColor ?? theme.colorScheme.primary)
+                      ? theme.colorScheme.primary
                             .withValues(alpha: isDark ? 0.58 : 0.46)
-                      : colors.softBorder,
+                      : theme.colorScheme.outlineVariant,
                   width: isHighlighted ? 2 : 1,
                 ),
                 boxShadow: [
                   BoxShadow(
                     color: isHighlighted
-                        ? (colors.accentColor ?? theme.colorScheme.primary)
+                        ? theme.colorScheme.primary
                               .withValues(alpha: isDark ? 0.28 : 0.18)
                         : Colors.black.withValues(alpha: isDark ? 0.16 : 0.06),
                     blurRadius: isHighlighted ? 16 : 10,
@@ -142,7 +137,7 @@ class _PrayerTimeTileState extends State<PrayerTimeTile> {
                         Icon(
                           widget.icon,
                           size: 24,
-                          color: isHighlighted ? foreground : colors.prayerIcon,
+                          color: isHighlighted ? foreground : theme.colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                         const SizedBox(height: 6),
                         Text(
@@ -163,7 +158,7 @@ class _PrayerTimeTileState extends State<PrayerTimeTile> {
                           style: theme.textTheme.labelLarge?.copyWith(
                             color: isHighlighted
                                 ? foreground.withValues(alpha: 0.92)
-                                : colors.mutedText,
+                                : theme.colorScheme.onSurface.withValues(alpha: 0.5),
                             fontWeight: FontWeight.w800,
                           ),
                         ),

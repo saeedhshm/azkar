@@ -26,7 +26,8 @@
     "reset_progress": "إعادة الضبط",
     "progress_reset": "تمت إعادة ضبط التقدّم.",
     "copied": "تم النسخ",
-    "audio": "الصوت"
+    "audio": "الصوت",
+    "more": "المزيد"
   },
   "home": {
     "sections": {
@@ -225,7 +226,9 @@
     "audio_unavailable": "لا يوجد ملف صوتي لهذا الذكر.",
     "audio_failed": "تعذر تشغيل الصوت.",
     "repeat_label": "كرر {count} مرة",
-    "tasbeeh_button": "سبّح"
+    "tasbeeh_button": "سبّح",
+    "previous": "السابق",
+    "next": "التالي"
   },
   "settings": {
     "saved": "تم حفظ الإعدادات.",

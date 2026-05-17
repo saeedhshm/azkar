@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../presentation/cubit/quran_highlight_cubit.dart';
 import '../presentation/cubit/quran_highlight_state.dart';
 
@@ -13,8 +12,11 @@ class QuranReaderPageIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
     final theme = Theme.of(context);
+    final surface = theme.colorScheme.surfaceContainerLow;
+    final outline = theme.colorScheme.outlineVariant;
+    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.5);
+    const bookmarkGreen = Color(0xFF28A745);
 
     return BlocBuilder<QuranHighlightCubit, QuranHighlightState>(
       buildWhen: (previous, current) {
@@ -27,9 +29,9 @@ class QuranReaderPageIndicator extends StatelessWidget {
 
         return DecoratedBox(
           decoration: BoxDecoration(
-            color: colors.cardSurface.withValues(alpha: 0.78),
+            color: surface.withValues(alpha: 0.78),
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: colors.softBorder),
+            border: Border.all(color: outline),
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
@@ -39,18 +41,18 @@ class QuranReaderPageIndicator extends StatelessWidget {
                 Text(
                   '${'quran.page'.tr()} $pageNumber',
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: colors.secondaryText,
+                    color: muted,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 if (bookmarkCount > 0) ...[
                   const SizedBox(width: 6),
-                  Icon(Icons.bookmark_rounded, size: 14, color: const Color(0xFF28A745)),
+                  Icon(Icons.bookmark_rounded, size: 14, color: bookmarkGreen),
                   const SizedBox(width: 2),
                   Text(
                     '$bookmarkCount',
                     style: theme.textTheme.labelSmall?.copyWith(
-                      color: const Color(0xFF28A745),
+                      color: bookmarkGreen,
                       fontWeight: FontWeight.w900,
                     ),
                   ),

@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
 import '../../../../core/di/service_locator.dart';
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/utils/app_categories.dart';
 import '../../../../core/widgets/app_background.dart';
@@ -40,7 +39,6 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
   Widget build(BuildContext context) {
     final category = AppCategories.byKey(widget.categoryKey);
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     return BlocProvider<AdhkarCubit>(
       create: (_) => getIt<AdhkarCubit>()..loadCategory(widget.categoryKey),
@@ -53,9 +51,9 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: colors.pillBg,
+                  color: theme.colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: colors.softBorder),
+                  border: Border.all(color: theme.colorScheme.outlineVariant),
                 ),
                 child: const Icon(Icons.arrow_back_ios_new_rounded, size: 16),
               ),
@@ -75,7 +73,6 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
             actions: [
               _AppBarIconBtn(
                 icon: _isSearching ? Icons.close_rounded : Icons.search_rounded,
-                colors: colors,
                 onTap: () {
                   setState(() => _isSearching = !_isSearching);
                   if (!_isSearching) {
@@ -88,7 +85,6 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
               _AppBarIconBtn(
                 icon: Icons.restart_alt_rounded,
                 tooltip: 'common.reset_progress'.tr(),
-                colors: colors,
                 onTap: () async {
                   await context.read<AdhkarCubit>().resetProgress();
                   if (!context.mounted) return;
@@ -102,7 +98,7 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
           ),
           body: Stack(
             children: [
-              const AppScaffoldBackground(particleCount: 60, particleSeed: 9),
+              const AppScaffoldBackground(),
               SafeArea(
                 child: BlocBuilder<AdhkarCubit, AdhkarState>(
                   builder: (context, state) {
@@ -132,7 +128,7 @@ class _AdhkarListScreenState extends State<AdhkarListScreen> {
                     return ListView.separated(
                       padding: const EdgeInsets.fromLTRB(16, 6, 16, 100),
                       itemCount: state.items.length,
-                      separatorBuilder: (_, __) =>
+                      separatorBuilder: (_, _) =>
                           const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final item = state.items[index];
@@ -185,15 +181,15 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
+    final theme = Theme.of(context);
 
     return TextField(
       controller: controller,
       autofocus: true,
-      style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+      style: TextStyle(color: theme.colorScheme.onSurface),
       decoration: InputDecoration(
         hintText: 'common.search_adhkar'.tr(),
-        hintStyle: TextStyle(color: colors.mutedText),
+        hintStyle: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
         border: InputBorder.none,
         isDense: true,
         contentPadding: const EdgeInsets.symmetric(vertical: 8),
@@ -208,18 +204,17 @@ class _SearchField extends StatelessWidget {
 class _AppBarIconBtn extends StatelessWidget {
   const _AppBarIconBtn({
     required this.icon,
-    required this.colors,
     required this.onTap,
     this.tooltip,
   });
 
   final IconData icon;
-  final AppThemeColors colors;
   final VoidCallback onTap;
   final String? tooltip;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     Widget btn = InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -227,11 +222,11 @@ class _AppBarIconBtn extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: colors.pillBg,
+          color: theme.colorScheme.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: colors.softBorder),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
         ),
-        child: Icon(icon, size: 18, color: colors.accentColor),
+        child: Icon(icon, size: 18, color: theme.colorScheme.primary),
       ),
     );
     if (tooltip != null) btn = Tooltip(message: tooltip!, child: btn);
@@ -263,7 +258,6 @@ class _AdhkarTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final normalizedRemaining = remainingCount.clamp(0, adhkar.count);
     final isCompleted = normalizedRemaining == 0;
     final progress = adhkar.count == 0
@@ -288,13 +282,13 @@ class _AdhkarTile extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: isCompleted
-                      ? colors.successColor.withValues(alpha: 0.06)
-                      : colors.cardSurface,
+                      ? theme.colorScheme.primary.withValues(alpha: 0.06)
+                      : theme.colorScheme.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(AppRadius.xl),
                   border: Border.all(
                     color: isCompleted
-                        ? colors.successColor.withValues(alpha: 0.3)
-                        : colors.softBorder,
+                        ? theme.colorScheme.primary.withValues(alpha: 0.3)
+                        : theme.colorScheme.outlineVariant,
                     width: isCompleted ? 1.5 : 1,
                   ),
                   boxShadow: [
@@ -337,12 +331,12 @@ class _AdhkarTile extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: isFavorite
                                   ? accent.withValues(alpha: 0.15)
-                                  : colors.pillBg,
+                                  : theme.colorScheme.surfaceContainerHighest,
                               borderRadius: BorderRadius.circular(10),
                               border: Border.all(
                                 color: isFavorite
                                     ? accent.withValues(alpha: 0.4)
-                                    : colors.softBorder,
+                                    : theme.colorScheme.outlineVariant,
                               ),
                             ),
                             child: Icon(
@@ -369,7 +363,7 @@ class _AdhkarTile extends StatelessWidget {
                           label: isCompleted
                               ? '✓ ${'common.completed'.tr()}'
                               : '${'reader.remaining'.tr()}: $normalizedRemaining',
-                          color: isCompleted ? colors.successColor : accent,
+                          color: isCompleted ? theme.colorScheme.primary : accent,
                         ),
                       ],
                     ),
@@ -380,9 +374,9 @@ class _AdhkarTile extends StatelessWidget {
                       child: LinearProgressIndicator(
                         value: progress,
                         minHeight: 5,
-                        backgroundColor: colors.softBorder,
+                        backgroundColor: theme.colorScheme.outlineVariant,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          isCompleted ? colors.successColor : accent,
+                          isCompleted ? theme.colorScheme.primary : accent,
                         ),
                       ),
                     ),
@@ -393,7 +387,7 @@ class _AdhkarTile extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: colors.mutedText,
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ],

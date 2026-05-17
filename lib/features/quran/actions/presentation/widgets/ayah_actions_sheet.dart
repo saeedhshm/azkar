@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/di/service_locator.dart';
-import '../../../../../core/theme/app_theme.dart';
 import '../../../domain/entities/quran_selected_ayah.dart';
 import '../../../tafsir/domain/entities/tafsir_entry.dart';
 import '../../../tafsir/presentation/widgets/tafsir_reader_sheet.dart';
@@ -41,7 +40,6 @@ class AyahActionsSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     return BlocProvider(
       create: (_) => getIt<AyahActionsCubit>(),
@@ -56,19 +54,17 @@ class AyahActionsSheet extends StatelessWidget {
               _Header(
                 surahName: surahName,
                 selectedAyah: selectedAyah,
-                colors: colors,
                 theme: theme,
                 isFavoriteReciter: isFavoriteReciter,
                 onToggleFavoriteReciter: onToggleFavoriteReciter,
               ),
               const SizedBox(height: 14),
-              _AyahTextField(ayahText: ayahText, colors: colors, theme: theme),
+              _AyahTextField(ayahText: ayahText, theme: theme),
               const SizedBox(height: 16),
               _ActionRow(
                 selectedAyah: selectedAyah,
                 surahName: surahName,
                 ayahText: ayahText,
-                colors: colors,
                 isBookmarked: isBookmarked,
                 onToggleBookmark: onToggleBookmark,
                 onPlayAyah: onPlayAyah,
@@ -81,7 +77,6 @@ class AyahActionsSheet extends StatelessWidget {
                 surahName: surahName,
                 ayahText: ayahText,
                 theme: theme,
-                colors: colors,
               ),
             ],
           ),
@@ -95,7 +90,6 @@ class _Header extends StatelessWidget {
   const _Header({
     required this.surahName,
     required this.selectedAyah,
-    required this.colors,
     required this.theme,
     required this.isFavoriteReciter,
     required this.onToggleFavoriteReciter,
@@ -103,7 +97,6 @@ class _Header extends StatelessWidget {
 
   final String surahName;
   final QuranSelectedAyah selectedAyah;
-  final AppThemeColors colors;
   final ThemeData theme;
   final bool isFavoriteReciter;
   final VoidCallback onToggleFavoriteReciter;
@@ -124,7 +117,7 @@ class _Header extends StatelessWidget {
                     ? '${'quran.ayah_number'.tr()} ${selectedAyah.ayahNumber}'
                     : 'quran.ayah_metadata_unavailable'.tr(),
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colors.secondaryText,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -134,7 +127,7 @@ class _Header extends StatelessWidget {
         IconButton(
           icon: Icon(
             isFavoriteReciter ? Icons.favorite_rounded : Icons.favorite_outline_rounded,
-            color: isFavoriteReciter ? Colors.red : colors.mutedText,
+            color: isFavoriteReciter ? Colors.red : theme.colorScheme.onSurface.withValues(alpha: 0.5),
             size: 22,
           ),
           onPressed: onToggleFavoriteReciter,
@@ -146,19 +139,18 @@ class _Header extends StatelessWidget {
 }
 
 class _AyahTextField extends StatelessWidget {
-  const _AyahTextField({required this.ayahText, required this.colors, required this.theme});
+  const _AyahTextField({required this.ayahText, required this.theme});
 
   final String ayahText;
-  final AppThemeColors colors;
   final ThemeData theme;
 
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: colors.cardSurface,
+        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: colors.softBorder),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -177,7 +169,6 @@ class _ActionRow extends StatelessWidget {
     required this.selectedAyah,
     required this.surahName,
     required this.ayahText,
-    required this.colors,
     required this.isBookmarked,
     required this.onToggleBookmark,
     required this.onPlayAyah,
@@ -188,7 +179,6 @@ class _ActionRow extends StatelessWidget {
   final QuranSelectedAyah selectedAyah;
   final String surahName;
   final String ayahText;
-  final AppThemeColors colors;
   final bool isBookmarked;
   final VoidCallback onToggleBookmark;
   final VoidCallback onPlayAyah;
@@ -323,14 +313,12 @@ class _TafsirPreview extends StatelessWidget {
     required this.surahName,
     required this.ayahText,
     required this.theme,
-    required this.colors,
   });
 
   final QuranSelectedAyah selectedAyah;
   final String surahName;
   final String ayahText;
   final ThemeData theme;
-  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
@@ -352,7 +340,6 @@ class _TafsirPreview extends StatelessWidget {
               ayahNumber: selectedAyah.ayahNumber,
             ),
             theme: theme,
-            colors: colors,
           );
         }
 
@@ -363,7 +350,6 @@ class _TafsirPreview extends StatelessWidget {
               ayahNumber: selectedAyah.ayahNumber,
             ),
             theme: theme,
-            colors: colors,
           );
         }
 
@@ -395,11 +381,10 @@ class _TafsirPreview extends StatelessWidget {
 }
 
 class _TafsirPrompt extends StatelessWidget {
-  const _TafsirPrompt({required this.onTap, required this.theme, required this.colors});
+  const _TafsirPrompt({required this.onTap, required this.theme});
 
   final VoidCallback onTap;
   final ThemeData theme;
-  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
@@ -410,19 +395,19 @@ class _TafsirPrompt extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         decoration: BoxDecoration(
-          color: colors.cardSurface,
+          color: theme.colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: colors.softBorder),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.auto_stories_rounded, size: 18, color: colors.secondaryText),
+            Icon(Icons.auto_stories_rounded, size: 18, color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
             const SizedBox(width: 8),
             Text(
               'quran.view_tafsir'.tr(),
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: colors.secondaryText,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -434,11 +419,10 @@ class _TafsirPrompt extends StatelessWidget {
 }
 
 class _TafsirError extends StatelessWidget {
-  const _TafsirError({required this.onRetry, required this.theme, required this.colors});
+  const _TafsirError({required this.onRetry, required this.theme});
 
   final VoidCallback onRetry;
   final ThemeData theme;
-  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
@@ -446,14 +430,14 @@ class _TafsirError extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: colors.cardSurface,
+        color: theme.colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: colors.softBorder),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline_rounded, size: 18, color: colors.countdownText),
+          Icon(Icons.error_outline_rounded, size: 18, color: theme.colorScheme.primary),
           const SizedBox(width: 8),
           Text('quran.tafsir_load_failed'.tr(), style: theme.textTheme.bodySmall),
           const SizedBox(width: 8),
@@ -476,7 +460,6 @@ class _TafsirContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     return InkWell(
       onTap: onViewMore,
@@ -485,9 +468,9 @@ class _TafsirContent extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: colors.cardSurface,
+          color: theme.colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: colors.softBorder),
+          border: Border.all(color: theme.colorScheme.outlineVariant),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -507,9 +490,9 @@ class _TafsirContent extends StatelessWidget {
                 const Spacer(),
                 Text(
                   'quran.view_full'.tr(),
-                  style: theme.textTheme.labelSmall?.copyWith(color: colors.mutedText),
+                  style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                 ),
-                Icon(Icons.chevron_right, size: 16, color: colors.mutedText),
+                Icon(Icons.chevron_right, size: 16, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
               ],
             ),
             const SizedBox(height: 8),

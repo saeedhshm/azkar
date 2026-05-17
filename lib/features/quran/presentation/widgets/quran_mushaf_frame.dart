@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
-
 class QuranMushafFrame extends StatelessWidget {
   const QuranMushafFrame({super.key, required this.child});
 
@@ -10,9 +8,8 @@ class QuranMushafFrame extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final gold = colors.accentColor ?? colors.countdownText;
+    final gold = theme.colorScheme.secondary;
     final ivory = isDark ? const Color(0xFF10170F) : const Color(0xFFFFFBF0);
     final mint = isDark ? const Color(0xFF16221B) : const Color(0xFFE9F5E5);
     final blush = isDark ? const Color(0xFF1A1812) : const Color(0xFFF7EFD9);

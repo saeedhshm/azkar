@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import '../../data/datasources/quran_page_image_cache_service.dart';
 
 class QuranInitialDownloadScreen extends StatelessWidget {
@@ -19,8 +18,7 @@ class QuranInitialDownloadScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
-    final accent = colors.accentColor ?? theme.colorScheme.primary;
+    final accent = theme.colorScheme.primary;
     final hasError = errorMessage != null;
 
     return Scaffold(
@@ -29,7 +27,7 @@ class QuranInitialDownloadScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [theme.scaffoldBackgroundColor, colors.cardSurface],
+            colors: [theme.scaffoldBackgroundColor, theme.colorScheme.surfaceContainerLow],
           ),
         ),
         child: SafeArea(
@@ -40,9 +38,9 @@ class QuranInitialDownloadScreen extends StatelessWidget {
                 padding: const EdgeInsets.all(24),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: colors.cardSurface.withValues(alpha: 0.96),
+                    color: theme.colorScheme.surfaceContainerLow.withValues(alpha: 0.96),
                     borderRadius: BorderRadius.circular(28),
-                    border: Border.all(color: colors.softBorder),
+                    border: Border.all(color: theme.colorScheme.outlineVariant),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.black.withValues(alpha: 0.08),
@@ -78,7 +76,7 @@ class QuranInitialDownloadScreen extends StatelessWidget {
                               : 'quran.preparing_pages_once'.tr(),
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colors.secondaryText,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                             height: 1.5,
                             fontWeight: FontWeight.w600,
                           ),
@@ -89,7 +87,7 @@ class QuranInitialDownloadScreen extends StatelessWidget {
                             errorMessage!,
                             textAlign: TextAlign.center,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: colors.mutedText,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                               height: 1.4,
                             ),
                           ),
@@ -101,7 +99,7 @@ class QuranInitialDownloadScreen extends StatelessWidget {
                             minHeight: 10,
                             value: progress.ratio,
                             color: accent,
-                            backgroundColor: colors.softBorder,
+                            backgroundColor: theme.colorScheme.outlineVariant,
                           ),
                         ),
                         const SizedBox(height: 14),
@@ -117,7 +115,7 @@ class QuranInitialDownloadScreen extends StatelessWidget {
                                 ),
                           textAlign: TextAlign.center,
                           style: theme.textTheme.bodyMedium?.copyWith(
-                            color: colors.secondaryText,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                             fontWeight: FontWeight.w700,
                           ),
                         ),

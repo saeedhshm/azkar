@@ -4,7 +4,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../core/theme/app_theme.dart';
 import '../../../actions/presentation/cubit/ayah_actions_cubit.dart';
 import '../../../actions/presentation/cubit/ayah_actions_state.dart';
 import '../../../tafsir/domain/entities/tafsir_source.dart';
@@ -89,7 +88,6 @@ class _TafsirReaderSheetBodyState extends State<_TafsirReaderSheetBody> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     return DraggableScrollableSheet(
       initialChildSize: 0.7,
@@ -106,7 +104,6 @@ class _TafsirReaderSheetBodyState extends State<_TafsirReaderSheetBody> {
                 ayahNumber: widget.ayahNumber,
                 ayahText: widget.ayahText,
                 theme: theme,
-                colors: colors,
               ),
               const SizedBox(height: 12),
               _SourceSelector(
@@ -120,7 +117,6 @@ class _TafsirReaderSheetBodyState extends State<_TafsirReaderSheetBody> {
                   );
                 },
                 theme: theme,
-                colors: colors,
               ),
               const SizedBox(height: 12),
               Expanded(
@@ -142,14 +138,12 @@ class _TafsirHeader extends StatelessWidget {
     required this.ayahNumber,
     required this.ayahText,
     required this.theme,
-    required this.colors,
   });
 
   final String surahName;
   final int ayahNumber;
   final String ayahText;
   final ThemeData theme;
-  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
@@ -166,9 +160,9 @@ class _TafsirHeader extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            color: colors.cardSurface,
+            color: theme.colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: colors.softBorder),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Text(
             ayahText,
@@ -186,13 +180,11 @@ class _SourceSelector extends StatelessWidget {
     required this.selectedSourceId,
     required this.onChanged,
     required this.theme,
-    required this.colors,
   });
 
   final String selectedSourceId;
   final ValueChanged<String> onChanged;
   final ThemeData theme;
-  final AppThemeColors colors;
 
   @override
   Widget build(BuildContext context) {
@@ -211,10 +203,10 @@ class _SourceSelector extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF6C63FF) : colors.cardSurface,
+                color: isSelected ? const Color(0xFF6C63FF) : theme.colorScheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF6C63FF) : colors.softBorder,
+                  color: isSelected ? const Color(0xFF6C63FF) : theme.colorScheme.outlineVariant,
                 ),
               ),
               alignment: Alignment.center,
@@ -241,7 +233,6 @@ class _TafsirBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
 
     return BlocBuilder<AyahActionsCubit, AyahActionsState>(
       builder: (context, state) {
@@ -254,7 +245,7 @@ class _TafsirBody extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.cloud_off_rounded, size: 48, color: colors.mutedText),
+                Icon(Icons.cloud_off_rounded, size: 48, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
                 const SizedBox(height: 12),
                 Text('quran.tafsir_load_failed'.tr(), style: theme.textTheme.bodyMedium),
                 const SizedBox(height: 8),
@@ -279,7 +270,7 @@ class _TafsirBody extends StatelessWidget {
           return Center(
             child: Text(
               'quran.tafsir_empty'.tr(),
-              style: theme.textTheme.bodyMedium?.copyWith(color: colors.mutedText),
+              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
             ),
           );
         }

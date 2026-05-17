@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_theme.dart';
 import 'progress_prayer_bar.dart';
 
 class NextPrayerHeroCard extends StatelessWidget {
@@ -41,7 +40,6 @@ class NextPrayerHeroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final textScaler = MediaQuery.textScalerOf(context);
     final compact = textScaler.scale(1) > 1.18;
@@ -58,23 +56,23 @@ class NextPrayerHeroCard extends StatelessWidget {
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              colors.heroCardBackground,
+              theme.colorScheme.surfaceContainerHighest,
               Color.alphaBlend(
-                (colors.accentColor ?? colors.cardSurfaceTint)
+                theme.colorScheme.primary
                     .withValues(alpha: isDark ? 0.15 : 0.12),
-                colors.heroCardBackground,
+                theme.colorScheme.surfaceContainerHighest,
               ),
             ],
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: (colors.accentColor ?? colors.softBorder)
+            color: theme.colorScheme.primary
                 .withValues(alpha: isDark ? 0.3 : 0.25),
             width: 1.5,
           ),
           boxShadow: [
             BoxShadow(
-              color: (colors.accentColor ?? Colors.black)
+              color: theme.colorScheme.primary
                   .withValues(alpha: isDark ? 0.25 : 0.12),
               blurRadius: 20,
               offset: const Offset(0, 10),
@@ -97,9 +95,9 @@ class NextPrayerHeroCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      (colors.accentColor ?? colors.countdownText)
+                      theme.colorScheme.primary
                           .withValues(alpha: isDark ? 0.35 : 0.22),
-                      (colors.accentColor ?? colors.countdownText)
+                      theme.colorScheme.primary
                           .withValues(alpha: 0),
                     ],
                     radius: 0.6,
@@ -120,15 +118,15 @@ class NextPrayerHeroCard extends StatelessWidget {
                 // Row 2: gregorian date
                 if (gregorianDate.isNotEmpty) ...[
                   const SizedBox(height: 3),
-                  Text(
-                    gregorianDate,
-                    textAlign: TextAlign.center,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: colors.mutedText,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 10,
-                    ),
+                Text(
+                  gregorianDate,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                    fontWeight: FontWeight.w600,
+                    fontSize: 10,
                   ),
+                ),
                 ],
                 const SizedBox(height: 14),
                 // "You're in Asr time"
@@ -138,7 +136,7 @@ class NextPrayerHeroCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colors.mutedText,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     fontWeight: FontWeight.w800,
                     height: 1,
                   ),
@@ -153,7 +151,7 @@ class NextPrayerHeroCard extends StatelessWidget {
                     child: Text(
                       countdown,
                       style: theme.textTheme.displayMedium?.copyWith(
-                        color: colors.countdownText,
+                        color: theme.colorScheme.primary,
                         fontSize: 34,
                         fontWeight: FontWeight.w900,
                         height: 1.05,
@@ -170,7 +168,7 @@ class NextPrayerHeroCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colors.mutedText,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -206,9 +204,9 @@ class _HeroMetaRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = AppThemeColors.of(context);
-    final style = Theme.of(context).textTheme.bodySmall?.copyWith(
-      color: colors.mutedText,
+    final theme = Theme.of(context);
+    final style = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
       fontWeight: FontWeight.w700,
       fontSize: 10,
       height: 1.2,
@@ -240,8 +238,7 @@ class _HeroMetaRow extends StatelessWidget {
               Icon(
                 Icons.location_on,
                 size: 11,
-                color: colors.accentColor ??
-                    Theme.of(context).colorScheme.primary,
+                color: theme.colorScheme.primary,
               ),
               const SizedBox(width: 3),
               Flexible(

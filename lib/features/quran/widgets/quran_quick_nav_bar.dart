@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/theme/app_theme.dart';
 import '../services/quran_juz_data.dart';
 
 class QuranQuickNavBar extends StatelessWidget {
@@ -25,7 +24,12 @@ class QuranQuickNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
+    final onSurface = theme.colorScheme.onSurface;
+    final primary = theme.colorScheme.primary;
+    final surface = theme.colorScheme.surfaceContainerLow;
+    final outline = theme.colorScheme.outlineVariant;
+    final muted = onSurface.withValues(alpha: 0.5);
+
     final currentJuz = QuranJuzData.juzForPage(currentPage);
     final juzProgress = QuranJuzData.juzProgress(currentPage);
 
@@ -34,9 +38,9 @@ class QuranQuickNavBar extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: colors.cardSurface.withValues(alpha: 0.88),
+          color: surface.withValues(alpha: 0.88),
           borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: colors.softBorder),
+          border: Border.all(color: outline),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.08),
@@ -52,23 +56,21 @@ class QuranQuickNavBar extends StatelessWidget {
               label: currentSurahName,
               icon: Icons.article_rounded,
               onTap: onSurahTap,
-              theme: theme,
-              colors: colors,
+              color: muted,
             ),
             Container(
               width: 1,
               height: 18,
-              color: colors.softBorder,
+              color: outline,
               margin: const EdgeInsets.symmetric(horizontal: 4),
             ),
             _NavChip(
               label: '${'quran.juz'.tr()} $currentJuz',
               icon: Icons.auto_stories_rounded,
               onTap: onJuzTap,
-              theme: theme,
-              colors: colors,
+              color: muted,
               suffix: juzProgress > 0 && juzProgress < 1
-                  ? _buildJuzProgress(juzProgress, colors)
+                  ? _buildJuzProgress(juzProgress, primary, outline)
                   : null,
             ),
           ],
@@ -77,7 +79,7 @@ class QuranQuickNavBar extends StatelessWidget {
     );
   }
 
-  Widget _buildJuzProgress(double progress, AppThemeColors colors) {
+  Widget _buildJuzProgress(double progress, Color primary, Color outline) {
     return Padding(
       padding: const EdgeInsets.only(left: 4),
       child: SizedBox(
@@ -87,10 +89,8 @@ class QuranQuickNavBar extends StatelessWidget {
           borderRadius: BorderRadius.circular(2),
           child: LinearProgressIndicator(
             value: progress,
-            backgroundColor: colors.softBorder.withValues(alpha: 0.5),
-            valueColor: AlwaysStoppedAnimation<Color>(
-              colors.accentColor ?? colors.countdownText,
-            ),
+            backgroundColor: outline.withValues(alpha: 0.5),
+            valueColor: AlwaysStoppedAnimation<Color>(primary),
             minHeight: 3,
           ),
         ),
@@ -104,20 +104,19 @@ class _NavChip extends StatelessWidget {
     required this.label,
     required this.icon,
     required this.onTap,
-    required this.theme,
-    required this.colors,
+    required this.color,
     this.suffix,
   });
 
   final String label;
   final IconData icon;
   final VoidCallback onTap;
-  final ThemeData theme;
-  final AppThemeColors colors;
+  final Color color;
   final Widget? suffix;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -127,19 +126,19 @@ class _NavChip extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           child: Row(
             mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 13, color: colors.secondaryText),
-                const SizedBox(width: 4),
-                Text(
-                  label,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: colors.secondaryText,
-                    fontSize: 11,
-                  ),
+            children: [
+              Icon(icon, size: 13, color: color),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: color,
+                  fontSize: 11,
                 ),
-                if (suffix != null) suffix!,
-              ],
+              ),
+              if (suffix != null) suffix!,
+            ],
           ),
         ),
       ),

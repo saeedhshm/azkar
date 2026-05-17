@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 
-import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/utils/app_categories.dart';
 
@@ -22,9 +21,8 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colors = AppThemeColors.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final accent = colors.accentColor ?? theme.colorScheme.primary;
+    final accent = theme.colorScheme.primary;
 
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 24, end: 0),
@@ -50,16 +48,16 @@ class CategoryCard extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    colors.cardSurface,
+                    theme.colorScheme.surfaceContainerLow,
                     Color.alphaBlend(
-                      colors.cardSurfaceTint.withValues(
+                      theme.colorScheme.primary.withValues(
                           alpha: isDark ? 0.35 : 0.1),
-                      colors.cardSurface,
+                      theme.colorScheme.surfaceContainerLow,
                     ),
                   ],
                 ),
                 borderRadius: BorderRadius.circular(AppRadius.xl),
-                border: Border.all(color: colors.softBorder, width: 1),
+                border: Border.all(color: theme.colorScheme.outlineVariant, width: 1),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
@@ -81,12 +79,12 @@ class CategoryCard extends StatelessWidget {
                           width: 36,
                           height: 36,
                           decoration: BoxDecoration(
-                            color: colors.prayerIcon.withValues(alpha: 0.12),
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Icon(
                             category.icon,
-                            color: colors.prayerIcon,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
                             size: 20,
                           ),
                         ),
@@ -126,7 +124,7 @@ class CategoryCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: colors.mutedText,
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
                         fontSize: 10,
                       ),
                     ),
