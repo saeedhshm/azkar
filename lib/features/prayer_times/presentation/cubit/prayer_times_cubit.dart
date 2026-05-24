@@ -1,21 +1,34 @@
 import 'dart:async';
 
 import 'package:adhan/adhan.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hijri/hijri_calendar.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/notifications/notification_service.dart';
-import '../../../../core/widgets/prayer_widget_service.dart';
 import '../../data/models/city_entry.dart';
 import '../../data/services/city_database_service.dart';
 import '../../data/services/location_service.dart';
 import '../../data/services/network_service.dart';
 import '../../data/services/prayer_service.dart';
 import '../../data/services/prayer_settings_provider.dart';
+import '../../../../core/services/prayer_schedule_service.dart';
+import '../../data/services/widget_update_service.dart';
 import '../../domain/entities/prayer_settings.dart';
 import 'prayer_times_state.dart';
 
+/// Cubit managing prayer times state and widget updates.
+///
+/// Responsibilities:
+/// - Load and calculate prayer times
+/// - Manage location (GPS or manual)
+/// - Update home widget via WidgetUpdateService
+/// - Schedule notifications
+/// - Maintain 1-second ticker for UI countdown
+///
+/// Widget updates are handled separately by Android's AlarmManager
+/// via WidgetUpdateReceiver for background reliability.
 class PrayerTimesCubit extends Cubit<PrayerTimesState> {
   PrayerTimesCubit({
     required PrayerService prayerService,
@@ -24,14 +37,16 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
     required NetworkService networkService,
     required CityDatabaseService cityDatabaseService,
     required NotificationService notificationService,
-    required PrayerWidgetService widgetService,
+    required PrayerScheduleService prayerScheduleService,
+    required WidgetUpdateService widgetUpdateService,
   }) : _prayerService = prayerService,
        _locationService = locationService,
        _settingsProvider = settingsProvider,
        _networkService = networkService,
        _cityDatabaseService = cityDatabaseService,
        _notificationService = notificationService,
-       _widgetService = widgetService,
+       _prayerScheduleService = prayerScheduleService,
+       _widgetUpdateService = widgetUpdateService,
        super(PrayerTimesState(settings: PrayerSettings.defaults()));
 
   final PrayerService _prayerService;
@@ -40,10 +55,18 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
   final NetworkService _networkService;
   final CityDatabaseService _cityDatabaseService;
   final NotificationService _notificationService;
-  final PrayerWidgetService _widgetService;
+  final PrayerScheduleService _prayerScheduleService;
+  final WidgetUpdateService _widgetUpdateService;
 
   Timer? _ticker;
 
+  /// Method channel for communicating with Android native code
+  static const _platform = MethodChannel('com.example.azkar/widget');
+
+  /// Loads prayer times and initializes all services.
+  ///
+  /// This is the main entry point called when the app starts or
+  /// when the user refreshes prayer times.
   Future<void> load() async {
     emit(state.copyWith(status: PrayerTimesStatus.loading));
 
@@ -281,6 +304,22 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
 
   Future<void> refresh() async => load();
 
+  /// Starts Android native background widget updates.
+  ///
+  /// This triggers the WidgetUpdateReceiver to begin scheduling
+  /// 60-second widget updates via AlarmManager.
+  ///
+  /// Called when the app successfully loads prayer times.
+  Future<void> _startAndroidWidgetUpdates() async {
+    try {
+      await _platform.invokeMethod('startWidgetUpdates');
+    } catch (e) {
+      // Platform channel not available or error - widget updates
+      // will still work when the app is in foreground via the ticker
+    }
+  }
+
+  /// Loads prayer times for specific coordinates and updates all services.
   Future<void> _loadForCoordinates({
     required PrayerSettings settings,
     required double? latitude,
@@ -327,27 +366,62 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
       ),
     );
 
+    // Schedule prayer notifications
     await _notificationService.schedulePrayerNotifications(
       prayerTimes: summary.prayerTimes,
       soundName: settings.customAdhanSound,
     );
 
-    final nextPrayerTime = summary.nextPrayerTime;
-    final countdown = summary.countdown;
-    if (nextPrayerTime != null && countdown != null) {
-      await _widgetService.update(
-        nextPrayer: summary.nextPrayer,
-        nextPrayerTime: nextPrayerTime,
-        remaining: countdown,
-        dateLine: gregorianDate,
-        hijriLine: hijriLine,
-        locationLabel: locationLabel ?? settings.manualLabel ?? 'GPS',
-      );
-    }
+    // Update widget with recalculated data
+    await _updateWidget(
+      latitude: latitude,
+      longitude: longitude,
+      settings: settings,
+      locationLabel: locationLabel ?? settings.manualLabel ?? 'GPS',
+    );
 
+    // Start Android background widget updates
+    await _startAndroidWidgetUpdates();
+
+    // Start UI ticker for in-app countdown display
     _startTicker();
   }
 
+  /// Updates the home widget using the new service architecture.
+  ///
+  /// This method:
+  /// 1. Uses PrayerScheduleService to calculate next prayer dynamically
+  /// 2. Handles Isha → Fajr transition correctly
+  /// 3. Prevents negative countdown values
+  /// 4. Uses WidgetUpdateService to save and trigger widget update
+  Future<void> _updateWidget({
+    required double latitude,
+    required double longitude,
+    required PrayerSettings settings,
+    required String locationLabel,
+  }) async {
+    final use24h = _settingsProvider.getUse24HourFormat();
+
+    final model = _prayerScheduleService.calculateWidgetData(
+      latitude: latitude,
+      longitude: longitude,
+      settings: settings,
+      use24HourFormat: use24h,
+      locationLabel: locationLabel,
+    );
+
+    if (model != null) {
+      await _widgetUpdateService.updateWidget(model);
+    }
+  }
+
+  /// Starts a 1-second ticker for updating the in-app UI countdown.
+  ///
+  /// This ticker:
+  /// - Recalculates prayer times when the next prayer passes
+  /// - Updates widget data every time recalculation happens
+  /// - Handles day transitions (Isha → Fajr)
+  /// - Stops automatically when cubit is closed
   void _startTicker() {
     _ticker?.cancel();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
@@ -359,6 +433,8 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
 
       final now = DateTime.now();
       final nextTime = state.nextPrayerTime;
+
+      // If next prayer time has passed, recalculate everything
       if (nextTime == null || nextTime.isBefore(now)) {
         _loadForCoordinates(
           settings: state.settings,
@@ -369,8 +445,13 @@ class PrayerTimesCubit extends Cubit<PrayerTimesState> {
         return;
       }
 
-      emit(state.copyWith(countdown: nextTime.difference(now)));
+      // Update UI countdown only
+      final remaining = nextTime.difference(now);
+      if (!remaining.isNegative) {
+        emit(state.copyWith(countdown: remaining));
+      }
 
+      // Recalculate at day boundary (after Isha, before Fajr)
       if (now.day != nextTime.day) {
         _loadForCoordinates(
           settings: state.settings,

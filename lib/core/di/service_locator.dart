@@ -60,7 +60,8 @@ import '../../features/quran/tafsir/domain/repositories/tafsir_repository.dart';
 import '../../features/quran/tafsir/domain/usecases/get_tafsir_use_case.dart';
 import '../notifications/notification_service.dart';
 import '../storage/local_storage_service.dart';
-import '../widgets/prayer_widget_service.dart';
+import '../services/prayer_schedule_service.dart';
+import '../../features/prayer_times/data/services/widget_update_service.dart';
 
 final getIt = GetIt.instance;
 
@@ -86,8 +87,15 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<LocationService>(LocationService.new);
   getIt.registerLazySingleton<NetworkService>(NetworkService.new);
   getIt.registerLazySingleton<CityDatabaseService>(CityDatabaseService.new);
-  getIt.registerLazySingleton<PrayerWidgetService>(
-    () => PrayerWidgetService(getIt<LocalStorageService>()),
+  getIt.registerLazySingleton<WidgetUpdateService>(
+    () => WidgetUpdateService(),
+  );
+  getIt.registerLazySingleton<PrayerScheduleService>(
+    () => PrayerScheduleService(
+      getIt<LocalStorageService>(),
+      getIt<PrayerService>(),
+      getIt<PrayerSettingsProvider>(),
+    ),
   );
   final quranLocalDataSource = QuranLocalDataSource();
   getIt.registerSingleton<QuranLocalDataSource>(quranLocalDataSource);
@@ -205,7 +213,8 @@ Future<void> setupLocator() async {
       networkService: getIt<NetworkService>(),
       cityDatabaseService: getIt<CityDatabaseService>(),
       notificationService: getIt<NotificationService>(),
-      widgetService: getIt<PrayerWidgetService>(),
+      prayerScheduleService: getIt<PrayerScheduleService>(),
+      widgetUpdateService: getIt<WidgetUpdateService>(),
     ),
   );
 

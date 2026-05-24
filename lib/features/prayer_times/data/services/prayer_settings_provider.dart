@@ -125,6 +125,10 @@ class PrayerSettingsProvider {
     }
   }
 
+  String? getCustomSound() => _prefs.getString(_customSoundKey);
+
+  bool getUse24HourFormat() => _prefs.getBool('use_24_hour_format') ?? false;
+
   String _methodToKey(CalculationMethod method) {
     return switch (method) {
       CalculationMethod.muslim_world_league => 'mwl',

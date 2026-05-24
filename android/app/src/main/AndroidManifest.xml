@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
         android:label="Adhkar App"
@@ -29,6 +30,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Local notifications receivers -->
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver" />
         <receiver android:exported="false" android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver">
             <intent-filter>
@@ -39,6 +42,7 @@
             </intent-filter>
         </receiver>
 
+        <!-- Prayer times home widget -->
         <receiver
             android:name=".PrayerWidgetProvider"
             android:exported="false">
@@ -48,6 +52,24 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/prayer_widget_info" />
+        </receiver>
+
+        <!-- Widget update receiver - triggers every 60 seconds -->
+        <receiver
+            android:name=".WidgetUpdateReceiver"
+            android:exported="false" />
+
+        <!-- Boot receiver - reschedules widget updates after reboot -->
+        <receiver
+            android:name=".BootReceiver"
+            android:exported="false"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <action android:name="com.htc.intent.action.QUICKBOOT_POWERON" />
+            </intent-filter>
         </receiver>
         
         <meta-data
