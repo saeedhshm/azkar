@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:azkar/features/quran/actions/presentation/cubit/ayah_actions_state.dart';
+import 'package:azkar/features/quran/tafsir/domain/entities/tafsir_entry.dart';
 
 void main() {
   group('AyahActionsState', () {
@@ -64,6 +65,51 @@ void main() {
     test('props are correct', () {
       const state = AyahActionsState.initial();
       expect(state.props.length, 4);
+    });
+
+    group('entryForSource', () {
+      const jalalayn = TafsirEntry(
+        id: 'jalalayn-57:9',
+        surahNumber: 57,
+        ayahNumber: 9,
+        sourceName: 'تفسير الجلالين',
+        sourceLanguage: 'ar',
+        text: 'arabic text',
+      );
+      const ibnKathir = TafsirEntry(
+        id: 'ibn_kathir-57:9',
+        surahNumber: 57,
+        ayahNumber: 9,
+        sourceName: 'Tafsir Ibn Kathir',
+        sourceLanguage: 'en',
+        text: 'english text',
+      );
+
+      AyahActionsState stateWithBoth() {
+        return const AyahActionsState.initial().copyWith(
+          status: AyahActionStatus.tafsirLoaded,
+          tafsirEntries: [jalalayn, ibnKathir],
+        );
+      }
+
+      test('returns the entry of the requested source, not the last one', () {
+        final state = stateWithBoth();
+
+        expect(state.entryForSource('jalalayn'), jalalayn);
+        expect(state.entryForSource('ibn_kathir'), ibnKathir);
+      });
+
+      test('returns null when the source has no entry', () {
+        final state = stateWithBoth();
+
+        expect(state.entryForSource('muyassar'), isNull);
+      });
+
+      test('returns null when there are no entries', () {
+        const state = AyahActionsState.initial();
+
+        expect(state.entryForSource('jalalayn'), isNull);
+      });
     });
   });
 }

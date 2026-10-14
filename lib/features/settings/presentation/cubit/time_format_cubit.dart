@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/storage/local_storage_service.dart';
+import '../../../prayer_times/data/services/prayer_settings_provider.dart';
 
 class TimeFormatState extends Equatable {
   const TimeFormatState({required this.use24h});
@@ -13,11 +14,16 @@ class TimeFormatState extends Equatable {
 }
 
 class TimeFormatCubit extends Cubit<TimeFormatState> {
-  TimeFormatCubit(this._storage) : super(const TimeFormatState(use24h: false));
+  TimeFormatCubit(this._storage, this._settingsProvider)
+    : super(const TimeFormatState(use24h: false));
 
   final LocalStorageService _storage;
+  final PrayerSettingsProvider _settingsProvider;
 
   void load() {
+    // Move any value saved by an earlier release into the shared store so the
+    // app and the home widget read the same preference.
+    _settingsProvider.migrateLegacyTimeFormat();
     emit(TimeFormatState(use24h: _storage.getUse24HourFormat()));
   }
 

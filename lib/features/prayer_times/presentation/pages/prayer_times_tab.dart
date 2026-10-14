@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_radius.dart';
+import '../../../../core/utils/coordinate_validator.dart';
 import '../../../../core/utils/time_formatter.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
 import '../../../../core/widgets/app_empty_state.dart';
@@ -23,8 +24,13 @@ class PrayerTimesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<PrayerTimesCubit>(
-      create: (_) => getIt<PrayerTimesCubit>()..load(),
+    final cubit = getIt<PrayerTimesCubit>();
+    unawaited(cubit.ensureLoaded());
+
+    // The cubit is a shared singleton, so BlocProvider.value is used to avoid
+    // closing it when this tab is disposed.
+    return BlocProvider<PrayerTimesCubit>.value(
+      value: cubit,
       child: BlocBuilder<PrayerTimesCubit, PrayerTimesState>(
         builder: (context, state) {
           if (state.status == PrayerTimesStatus.loading ||
@@ -332,12 +338,6 @@ class _PrayerTimesContent extends StatelessWidget {
     PrayerTimesState state,
   ) async {
     final cubit = context.read<PrayerTimesCubit>();
-    final labelController =
-        TextEditingController(text: state.locationLabel ?? '');
-    final latController =
-        TextEditingController(text: state.latitude?.toStringAsFixed(6) ?? '');
-    final lngController =
-        TextEditingController(text: state.longitude?.toStringAsFixed(6) ?? '');
 
     await AppBottomSheet.show<void>(
       context: context,
@@ -377,63 +377,162 @@ class _PrayerTimesContent extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: labelController,
-            decoration: InputDecoration(
-              labelText: 'prayer_times.city_label'.tr(),
-              prefixIcon: const Icon(Icons.label_outline_rounded, size: 20),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: latController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true, signed: true),
-                  decoration: InputDecoration(
-                    labelText: 'prayer_times.latitude'.tr(),
-                    prefixIcon: const Icon(Icons.north_rounded, size: 20),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: TextField(
-                  controller: lngController,
-                  keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true, signed: true),
-                  decoration: InputDecoration(
-                    labelText: 'prayer_times.longitude'.tr(),
-                    prefixIcon: const Icon(Icons.east_rounded, size: 20),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              onPressed: () async {
-                final lat = double.tryParse(latController.text.trim());
-                final lng = double.tryParse(lngController.text.trim());
-                if (lat == null || lng == null) return;
-                final label = labelController.text.trim().isEmpty
-                    ? '${lat.toStringAsFixed(2)}, ${lng.toStringAsFixed(2)}'
-                    : labelController.text.trim();
-                await context
-                    .read<PrayerTimesCubit>()
-                    .setManualLocation(latitude: lat, longitude: lng, label: label);
-                if (context.mounted) Navigator.pop(context);
-              },
-              icon: const Icon(Icons.save_rounded, size: 18),
-              label: Text('common.save'.tr()),
-            ),
+          _ManualCoordinatesForm(
+            initialLabel: state.locationLabel ?? '',
+            initialLatitude: state.latitude,
+            initialLongitude: state.longitude,
+            cubit: cubit,
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Manual coordinate entry with inline range validation.
+///
+/// Coordinates outside the valid geographic range are rejected so they are
+/// never persisted nor used for prayer calculations. Entered values are kept
+/// in the fields so they can be corrected without retyping.
+class _ManualCoordinatesForm extends StatefulWidget {
+  const _ManualCoordinatesForm({
+    required this.initialLabel,
+    required this.initialLatitude,
+    required this.initialLongitude,
+    required this.cubit,
+  });
+
+  final String initialLabel;
+  final double? initialLatitude;
+  final double? initialLongitude;
+  final PrayerTimesCubit cubit;
+
+  @override
+  State<_ManualCoordinatesForm> createState() => _ManualCoordinatesFormState();
+}
+
+class _ManualCoordinatesFormState extends State<_ManualCoordinatesForm> {
+  late final TextEditingController _labelController;
+  late final TextEditingController _latController;
+  late final TextEditingController _lngController;
+
+  String? _latitudeError;
+  String? _longitudeError;
+
+  @override
+  void initState() {
+    super.initState();
+    _labelController = TextEditingController(text: widget.initialLabel);
+    _latController = TextEditingController(
+      text: widget.initialLatitude?.toStringAsFixed(6) ?? '',
+    );
+    _lngController = TextEditingController(
+      text: widget.initialLongitude?.toStringAsFixed(6) ?? '',
+    );
+  }
+
+  @override
+  void dispose() {
+    _labelController.dispose();
+    _latController.dispose();
+    _lngController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    final lat = CoordinateValidator.parseLatitude(_latController.text);
+    final lng = CoordinateValidator.parseLongitude(_lngController.text);
+
+    final latValid = lat != null;
+    final lngValid = lng != null;
+
+    setState(() {
+      _latitudeError = latValid ? null : 'prayer_times.invalid_latitude'.tr();
+      _longitudeError = lngValid ? null : 'prayer_times.invalid_longitude'.tr();
+    });
+
+    if (!latValid || !lngValid) {
+      return;
+    }
+
+    final label = _labelController.text.trim().isEmpty
+        ? '${lat.toStringAsFixed(2)}, ${lng.toStringAsFixed(2)}'
+        : _labelController.text.trim();
+
+    final result = await widget.cubit.setManualLocation(
+      latitude: lat,
+      longitude: lng,
+      label: label,
+    );
+
+    if (!mounted) return;
+
+    if (result == ManualLocationResult.success) {
+      Navigator.pop(context);
+      return;
+    }
+
+    setState(() {
+      if (result == ManualLocationResult.invalidLatitude) {
+        _latitudeError = 'prayer_times.invalid_latitude'.tr();
+      } else {
+        _longitudeError = 'prayer_times.invalid_longitude'.tr();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        TextField(
+          controller: _labelController,
+          decoration: InputDecoration(
+            labelText: 'prayer_times.city_label'.tr(),
+            prefixIcon: const Icon(Icons.label_outline_rounded, size: 20),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _latController,
+                keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true, signed: true),
+                decoration: InputDecoration(
+                  labelText: 'prayer_times.latitude'.tr(),
+                  prefixIcon: const Icon(Icons.north_rounded, size: 20),
+                  errorText: _latitudeError,
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: TextField(
+                controller: _lngController,
+                keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true, signed: true),
+                decoration: InputDecoration(
+                  labelText: 'prayer_times.longitude'.tr(),
+                  prefixIcon: const Icon(Icons.east_rounded, size: 20),
+                  errorText: _longitudeError,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: _save,
+            icon: const Icon(Icons.save_rounded, size: 18),
+            label: Text('common.save'.tr()),
+          ),
+        ),
+      ],
     );
   }
 }

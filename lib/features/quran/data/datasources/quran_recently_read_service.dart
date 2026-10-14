@@ -39,10 +39,49 @@ class QuranRecentlyReadService {
   List<RecentlyReadEntry> getAll() {
     final raw = _storage.getRaw(_key);
     if (raw is! List) return [];
-    return raw
-        .whereType<Map<String, dynamic>>()
-        .map(RecentlyReadEntry.fromJson)
-        .toList();
+
+    final entries = <RecentlyReadEntry>[];
+    for (final item in raw) {
+      // Hive decodes stored maps as Map<dynamic, dynamic>, so the entries must
+      // be converted rather than filtered by a strict type check.
+      if (item is! Map) {
+        continue;
+      }
+
+      final json = Map<String, dynamic>.from(item);
+      final entry = _tryParse(json);
+      if (entry != null) {
+        entries.add(entry);
+      }
+    }
+    return entries;
+  }
+
+  /// Parses a stored entry, returning `null` for malformed data.
+  ///
+  /// A corrupt entry must never prevent the remaining history from loading.
+  static RecentlyReadEntry? _tryParse(Map<String, dynamic> json) {
+    final page = _asInt(json['page']);
+    final surah = _asInt(json['surah']);
+    final ayah = _asInt(json['ayah']);
+    final timestamp = _asInt(json['ts']);
+
+    if (page == null || surah == null || ayah == null || timestamp == null) {
+      return null;
+    }
+
+    return RecentlyReadEntry(
+      pageNumber: page,
+      surahNumber: surah,
+      ayahNumber: ayah,
+      timestamp: timestamp,
+    );
+  }
+
+  static int? _asInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(value?.toString() ?? '');
   }
 
   void addEntry(int page, int surah, int ayah) {

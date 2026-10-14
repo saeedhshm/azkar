@@ -8,11 +8,111 @@ import 'package:easy_localization/easy_localization.dart';
 
 import '../constants/app_constants.dart';
 
-class NotificationService {
-  NotificationService();
+/// Resolves the next concrete occurrence of every prayer.
+///
+/// Prayer times drift by minutes each day, so a repeating wall-clock schedule
+/// is inaccurate. This plan maps each prayer to its next real occurrence,
+/// falling back to the following day's time once today's has passed.
+class PrayerNotificationPlan {
+  const PrayerNotificationPlan._();
 
-  final FlutterLocalNotificationsPlugin _plugin =
-      FlutterLocalNotificationsPlugin();
+  static const notifications = <Prayer, int>{
+    Prayer.fajr: AppConstants.fajrNotificationId,
+    Prayer.dhuhr: AppConstants.dhuhrNotificationId,
+    Prayer.asr: AppConstants.asrNotificationId,
+    Prayer.maghrib: AppConstants.maghribNotificationId,
+    Prayer.isha: AppConstants.ishaNotificationId,
+  };
+
+  static List<PrayerNotificationEntry> build({
+    required PrayerTimes prayerTimes,
+    PrayerTimes? nextDayPrayerTimes,
+    required DateTime now,
+  }) {
+    final entries = <PrayerNotificationEntry>[];
+    final nowWallClock = _wallClock(now);
+
+    for (final prayer in notifications.keys) {
+      final today = prayerTimes.timeForPrayer(prayer);
+      if (today == null) {
+        continue;
+      }
+
+      final DateTime scheduledAt;
+      if (_wallClock(today).isAfter(nowWallClock)) {
+        scheduledAt = today;
+      } else {
+        final tomorrow = nextDayPrayerTimes?.timeForPrayer(prayer);
+        if (tomorrow == null) {
+          // Without tomorrow's schedule a date-accurate time cannot be derived,
+          // so fall back to the same wall-clock time one day out.
+          scheduledAt = today.add(const Duration(days: 1));
+        } else {
+          scheduledAt = tomorrow;
+        }
+      }
+
+      entries.add(
+        PrayerNotificationEntry(
+          prayer: prayer,
+          notificationId: notifications[prayer]!,
+          scheduledAt: _wallClock(scheduledAt),
+        ),
+      );
+    }
+
+    entries.sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+    return entries;
+  }
+
+  /// Maps a local [DateTime] onto the same wall-clock time in [tz.local].
+  ///
+  /// Prayer times are wall-clock times in the user's own time zone. Converting
+  /// the underlying instant instead would shift the scheduled time whenever the
+  /// device zone differs from the zone the times were calculated in.
+  static tz.TZDateTime _wallClock(DateTime time) {
+    return tz.TZDateTime(
+      tz.local,
+      time.year,
+      time.month,
+      time.day,
+      time.hour,
+      time.minute,
+      time.second,
+    );
+  }
+}
+
+class PrayerNotificationEntry {
+  const PrayerNotificationEntry({
+    required this.prayer,
+    required this.notificationId,
+    required this.scheduledAt,
+  });
+
+  final Prayer prayer;
+  final int notificationId;
+  final tz.TZDateTime scheduledAt;
+}
+
+class NotificationService {
+  NotificationService({FlutterLocalNotificationsPlugin? plugin})
+    : _plugin = plugin ?? FlutterLocalNotificationsPlugin();
+
+  final FlutterLocalNotificationsPlugin _plugin;
+
+  /// Whether [scheduledAt] may be handed to `zonedSchedule`.
+  ///
+  /// The plugin rejects any date that is not strictly in the future, so this
+  /// must be re-checked at schedule time: a date that was valid when the plan
+  /// was built can go stale while earlier platform calls are still in flight
+  /// (e.g. the app starts seconds before a prayer time).
+  static bool isSchedulable({
+    required tz.TZDateTime scheduledAt,
+    required tz.TZDateTime now,
+  }) {
+    return scheduledAt.isAfter(now);
+  }
 
   Future<void> init() async {
     tz.initializeTimeZones();
@@ -134,6 +234,10 @@ class NotificationService {
       schedule = schedule.add(const Duration(days: 1));
     }
 
+    if (!isSchedulable(scheduledAt: schedule, now: tz.TZDateTime.now(tz.local))) {
+      return;
+    }
+
     await _plugin.zonedSchedule(
       id,
       title,
@@ -179,6 +283,10 @@ class NotificationService {
       schedule = schedule.add(const Duration(days: 7));
     }
 
+    if (!isSchedulable(scheduledAt: schedule, now: tz.TZDateTime.now(tz.local))) {
+      return;
+    }
+
     await _plugin.zonedSchedule(
       id,
       title,
@@ -200,64 +308,74 @@ class NotificationService {
     );
   }
 
+  /// Schedules the next concrete occurrence of each prayer.
+  ///
+  /// Prayer times shift by minutes every day, so each notification is
+  /// scheduled for a single specific date instead of repeating a fixed
+  /// wall-clock time via [DateTimeComponents.time]. [now] is injectable for
+  /// testing.
   Future<void> schedulePrayerNotifications({
     required PrayerTimes prayerTimes,
+    PrayerTimes? nextDayPrayerTimes,
     String? soundName,
+    DateTime? now,
   }) async {
-    // We intentionally do not call _plugin.cancel() here because cancelling a scheduled
-    // notification also clears it if it is currently active/visible in the status bar.
-    // zonedSchedule will automatically overwrite the pending alarm with the new time.
+    final reference = now ?? DateTime.now();
 
-    await _schedulePrayerNotification(
-      id: AppConstants.fajrNotificationId,
-      prayer: Prayer.fajr,
-      time: prayerTimes.fajr,
-      soundName: soundName,
+    final plan = PrayerNotificationPlan.build(
+      prayerTimes: prayerTimes,
+      nextDayPrayerTimes: nextDayPrayerTimes,
+      now: reference,
     );
-    await _schedulePrayerNotification(
-      id: AppConstants.dhuhrNotificationId,
-      prayer: Prayer.dhuhr,
-      time: prayerTimes.dhuhr,
-      soundName: soundName,
-    );
-    await _schedulePrayerNotification(
-      id: AppConstants.asrNotificationId,
-      prayer: Prayer.asr,
-      time: prayerTimes.asr,
-      soundName: soundName,
-    );
-    await _schedulePrayerNotification(
-      id: AppConstants.maghribNotificationId,
-      prayer: Prayer.maghrib,
-      time: prayerTimes.maghrib,
-      soundName: soundName,
-    );
-    await _schedulePrayerNotification(
-      id: AppConstants.ishaNotificationId,
-      prayer: Prayer.isha,
-      time: prayerTimes.isha,
-      soundName: soundName,
-    );
+
+    // Cancel first so a stale pending alarm is always removed. zonedSchedule
+    // overwrites the same ids, but cancelling guarantees no leftover alarm
+    // fires after a settings or location change.
+    await _cancelPrayerNotifications();
+
+    for (final entry in plan) {
+      try {
+        await _schedulePrayerNotification(
+          id: entry.notificationId,
+          prayer: entry.prayer,
+          scheduledAt: entry.scheduledAt,
+          soundName: soundName,
+        );
+      } catch (e) {
+        // One stale or rejected entry must never abort the whole batch or
+        // crash startup; the remaining prayers are still scheduled.
+        debugPrint('Skipping prayer notification for ${entry.prayer}: $e');
+      }
+    }
+  }
+
+  Future<void> _cancelPrayerNotifications() async {
+    for (final id in const [
+      AppConstants.fajrNotificationId,
+      AppConstants.dhuhrNotificationId,
+      AppConstants.asrNotificationId,
+      AppConstants.maghribNotificationId,
+      AppConstants.ishaNotificationId,
+    ]) {
+      await _plugin.cancel(id);
+    }
   }
 
   Future<void> _schedulePrayerNotification({
     required int id,
     required Prayer prayer,
-    required DateTime time,
+    required tz.TZDateTime scheduledAt,
     String? soundName,
   }) async {
-    final now = tz.TZDateTime.now(tz.local);
-    var schedule = tz.TZDateTime(
-      tz.local,
-      now.year,
-      now.month,
-      now.day,
-      time.hour,
-      time.minute,
-    );
-
-    if (schedule.isBefore(now)) {
-      schedule = schedule.add(const Duration(days: 1));
+    if (!isSchedulable(
+      scheduledAt: scheduledAt,
+      now: tz.TZDateTime.now(tz.local),
+    )) {
+      // The prayer time passed while earlier notifications were being
+      // scheduled (or the app started right at the boundary). Scheduling it
+      // now would throw "Must be a date in the future" and, worse, show a
+      // stale alert for a prayer that already occurred.
+      return;
     }
 
     final androidDetails = AndroidNotificationDetails(
@@ -266,14 +384,15 @@ class NotificationService {
       channelDescription: 'Prayer time notifications',
       importance: Importance.high,
       priority: Priority.high,
-      ongoing: true,
-      autoCancel: false,
+      ongoing: false,
+      autoCancel: true,
       sound: soundName != null && soundName.isNotEmpty
           ? RawResourceAndroidNotificationSound(soundName)
           : null,
     );
 
     final iosDetails = DarwinNotificationDetails(
+      presentAlert: true,
       sound: soundName != null && soundName.isNotEmpty ? soundName : null,
     );
 
@@ -281,10 +400,9 @@ class NotificationService {
       id,
       _prayerTitle(prayer),
       _prayerBody(prayer),
-      schedule,
+      scheduledAt,
       NotificationDetails(android: androidDetails, iOS: iosDetails),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      matchDateTimeComponents: DateTimeComponents.time,
       payload: 'prayer_time',
     );
   }

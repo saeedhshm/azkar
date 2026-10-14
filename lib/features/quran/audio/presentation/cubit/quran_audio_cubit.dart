@@ -20,6 +20,12 @@ class QuranAudioCubit extends Cubit<QuranAudioState> {
   final QuranAudioPlayerService _playerService;
   final RecitationRepository _recitationRepo;
 
+  /// Whether this cubit disposed its player service.
+  ///
+  /// The service is owned by the cubit, so disposal must happen exactly once
+  /// when the cubit closes.
+  bool get hasDisposedPlayerService => _playerService.isDisposed;
+
   StreamSubscription<AudioPlayerState>? _stateSub;
   Timer? _ayahCheckTimer;
 

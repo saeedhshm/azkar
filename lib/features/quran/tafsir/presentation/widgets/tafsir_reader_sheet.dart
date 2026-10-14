@@ -7,7 +7,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../actions/presentation/cubit/ayah_actions_cubit.dart';
 import '../../../actions/presentation/cubit/ayah_actions_state.dart';
 import '../../../tafsir/domain/entities/tafsir_source.dart';
+import '../utils/default_tafsir_source.dart';
 
+/// Displays the tafsir of a single ayah in a bottom sheet.
+///
+/// Callers must provide an [AyahActionsCubit] above this widget (e.g. via
+/// [BlocProvider.value] when opening a new route), because a modal route
+/// cannot see the providers of the route that opened it.
 class TafsirReaderSheet extends StatelessWidget {
   const TafsirReaderSheet({
     super.key,
@@ -26,15 +32,12 @@ class TafsirReaderSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: context.read<AyahActionsCubit>(),
-      child: _TafsirReaderSheetBody(
-        surahNumber: surahNumber,
-        ayahNumber: ayahNumber,
-        surahName: surahName,
-        ayahText: ayahText,
-        initialSourceId: initialSourceId,
-      ),
+    return _TafsirReaderSheetBody(
+      surahNumber: surahNumber,
+      ayahNumber: ayahNumber,
+      surahName: surahName,
+      ayahText: ayahText,
+      initialSourceId: initialSourceId,
     );
   }
 }
@@ -60,14 +63,27 @@ class _TafsirReaderSheetBody extends StatefulWidget {
 
 class _TafsirReaderSheetBodyState extends State<_TafsirReaderSheetBody> {
   late String _selectedSourceId;
+  List<TafsirSource> _visibleSources = TafsirSource.defaults;
+  bool _initializedSource = false;
 
   @override
-  void initState() {
-    super.initState();
-    _selectedSourceId = widget.initialSourceId ?? 'jalalayn';
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadTafsirIfNeeded();
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The locale (an inherited widget) is unavailable in initState, so the
+    // language-matched sources and default are resolved here, exactly once.
+    if (!_initializedSource) {
+      _initializedSource = true;
+      final languageCode = tafsirLanguageCode(context);
+      _visibleSources = TafsirSource.sourcesForLanguage(languageCode);
+      final initial = widget.initialSourceId;
+      _selectedSourceId =
+          initial != null && _visibleSources.any((s) => s.id == initial)
+          ? initial
+          : TafsirSource.defaultForLanguage(languageCode);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadTafsirIfNeeded();
+      });
+    }
   }
 
   void _loadTafsirIfNeeded() {
@@ -106,22 +122,29 @@ class _TafsirReaderSheetBodyState extends State<_TafsirReaderSheetBody> {
                 theme: theme,
               ),
               const SizedBox(height: 12),
-              _SourceSelector(
-                selectedSourceId: _selectedSourceId,
-                onChanged: (sourceId) {
-                  setState(() => _selectedSourceId = sourceId);
-                  context.read<AyahActionsCubit>().loadTafsirSource(
-                    surahNumber: widget.surahNumber,
-                    ayahNumber: widget.ayahNumber,
-                    sourceId: sourceId,
-                  );
-                },
-                theme: theme,
-              ),
-              const SizedBox(height: 12),
+              // A single matching source needs no selector.
+              if (_visibleSources.length > 1) ...[
+                _SourceSelector(
+                  sources: _visibleSources,
+                  selectedSourceId: _selectedSourceId,
+                  onChanged: (sourceId) {
+                    setState(() => _selectedSourceId = sourceId);
+                    context.read<AyahActionsCubit>().loadTafsirSource(
+                      surahNumber: widget.surahNumber,
+                      ayahNumber: widget.ayahNumber,
+                      sourceId: sourceId,
+                    );
+                  },
+                  theme: theme,
+                ),
+                const SizedBox(height: 12),
+              ],
               Expanded(
                 child: _TafsirBody(
                   scrollController: scrollController,
+                  surahNumber: widget.surahNumber,
+                  ayahNumber: widget.ayahNumber,
+                  selectedSourceId: _selectedSourceId,
                 ),
               ),
             ],
@@ -177,11 +200,13 @@ class _TafsirHeader extends StatelessWidget {
 
 class _SourceSelector extends StatelessWidget {
   const _SourceSelector({
+    required this.sources,
     required this.selectedSourceId,
     required this.onChanged,
     required this.theme,
   });
 
+  final List<TafsirSource> sources;
   final String selectedSourceId;
   final ValueChanged<String> onChanged;
   final ThemeData theme;
@@ -192,10 +217,10 @@ class _SourceSelector extends StatelessWidget {
       height: 36,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: TafsirSource.defaults.length,
+        itemCount: sources.length,
         separatorBuilder: (context, index) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          final source = TafsirSource.defaults[index];
+          final source = sources[index];
           final isSelected = source.id == selectedSourceId;
 
           return GestureDetector(
@@ -226,9 +251,17 @@ class _SourceSelector extends StatelessWidget {
 }
 
 class _TafsirBody extends StatelessWidget {
-  const _TafsirBody({required this.scrollController});
+  const _TafsirBody({
+    required this.scrollController,
+    required this.surahNumber,
+    required this.ayahNumber,
+    required this.selectedSourceId,
+  });
 
   final ScrollController scrollController;
+  final int surahNumber;
+  final int ayahNumber;
+  final String selectedSourceId;
 
   @override
   Widget build(BuildContext context) {
@@ -251,12 +284,11 @@ class _TafsirBody extends StatelessWidget {
                 const SizedBox(height: 8),
                 FilledButton.tonal(
                   onPressed: () {
-                    final cubit = context.read<AyahActionsCubit>();
-                    final currentSourceId = '';
-                    cubit.loadTafsir(
-                      surahNumber: 0,
-                      ayahNumber: 0,
-                      sourceId: currentSourceId,
+                    // Retry the ayah and source that are actually on screen.
+                    context.read<AyahActionsCubit>().loadTafsir(
+                      surahNumber: surahNumber,
+                      ayahNumber: ayahNumber,
+                      sourceId: selectedSourceId,
                     );
                   },
                   child: Text('common.retry'.tr()),
@@ -275,7 +307,10 @@ class _TafsirBody extends StatelessWidget {
           );
         }
 
-        final entry = state.tafsirEntries.last;
+        // Never show `entries.last`: it may belong to a previously selected
+        // source. Fall back to it only when the selected one is missing.
+        final entry =
+            state.entryForSource(selectedSourceId) ?? state.tafsirEntries.last;
         return SingleChildScrollView(
           controller: scrollController,
           child: SelectableText(

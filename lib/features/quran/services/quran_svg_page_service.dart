@@ -19,17 +19,21 @@ class QuranSvgPageService {
     return pageNumber.clamp(firstPage, lastPage).toInt();
   }
 
+  /// Returns the page file, downloading it only when it is not cached yet.
   Future<File> getPageFile(int pageNumber) {
     return _cacheService.getPageFile(clampPage(pageNumber));
   }
 
+  /// Returns the page file only if it is already available offline.
   Future<File?> getCachedPageFile(int pageNumber) async {
     final safe = clampPage(pageNumber);
     if (_memoryCache.containsKey(safe)) {
       return null;
     }
-    final file = await _cacheService.getPageFile(safe);
-    unawaited(_memoryCache.set(safe, file));
+    final file = await _cacheService.getCachedPageFile(safe);
+    if (file != null) {
+      unawaited(_memoryCache.set(safe, file));
+    }
     return file;
   }
 

@@ -3,91 +3,109 @@ import 'dart:async';
 import 'package:just_audio/just_audio.dart';
 
 import '../../domain/entities/reciter.dart';
-
+import 'quran_audio_engine.dart';
 enum AudioPlayerState { idle, loading, ready, playing, paused, completed, error }
 
+/// Owns one audio engine for a single playback session.
+///
+/// This service is scoped to the cubit that owns it: it is created together
+/// with its cubit and disposed with it. Registering it as an application
+/// singleton while a screen disposes it would hand a disposed engine to the
+/// next screen that resolves the same instance.
 class QuranAudioPlayerService {
-  final AudioPlayer _player = AudioPlayer();
+  QuranAudioPlayerService({QuranAudioEngineFactory? engineFactory})
+    : _engine = (engineFactory ?? JustAudioEngine.new)();
+
+  final QuranAudioEngine _engine;
+
   AudioPlayerState _state = AudioPlayerState.idle;
   String? _currentUrl;
   bool _disposed = false;
 
   AudioPlayerState get state => _state;
-  Stream<Duration> get positionStream => _player.positionStream;
+  Stream<Duration> get positionStream => _engine.positionStream;
   Stream<Duration> get durationStream =>
-      _player.durationStream.where((d) => d != null).cast<Duration>();
-  Stream<AudioPlayerState> get stateStream => _player.playerStateStream.map(
-    (p) {
-      if (_disposed) return AudioPlayerState.idle;
-      switch (p.processingState) {
-        case ProcessingState.idle:
-          return AudioPlayerState.idle;
-        case ProcessingState.loading:
-          return AudioPlayerState.loading;
-        case ProcessingState.buffering:
-          return AudioPlayerState.loading;
-        case ProcessingState.ready:
-          if (p.playing) return AudioPlayerState.playing;
-          return AudioPlayerState.paused;
-        case ProcessingState.completed:
-          return AudioPlayerState.completed;
-      }
-    },
-  );
-  Duration get currentPosition => _player.position;
-  Duration? get duration => _player.duration;
+      _engine.durationStream.where((d) => d != null).cast<Duration>();
+  Stream<AudioPlayerState> get stateStream =>
+      _engine.processingStateStream.map(_mapEngineState);
 
-  StreamSubscription<dynamic>? _positionSub;
+  Duration get currentPosition => _engine.position;
+  Duration? get duration => _engine.duration;
+
+  /// Whether this service has already been disposed.
+  bool get isDisposed => _disposed;
 
   Future<void> loadSurah(int surahNumber, Reciter reciter) async {
+    if (_disposed) {
+      throw StateError('QuranAudioPlayerService has been disposed.');
+    }
+
     final url = reciter.surahUrl(surahNumber);
-    if (url == _currentUrl && _player.duration != null) {
-      await _player.seek(Duration.zero);
+    if (url == _currentUrl && _engine.duration != null) {
+      await _engine.seek(Duration.zero);
       return;
     }
-    _state = AudioPlayerState.loading;
+
+    _setState(AudioPlayerState.loading);
     _currentUrl = url;
-    await _player.setAudioSource(AudioSource.uri(Uri.parse(url)));
-    _state = AudioPlayerState.ready;
+    await _engine.setSource(url);
+    _setState(AudioPlayerState.ready);
   }
 
   Future<void> play() async {
     if (_disposed) return;
-    await _player.play();
-    _state = AudioPlayerState.playing;
+    await _engine.play();
+    _setState(AudioPlayerState.playing);
   }
 
   Future<void> pause() async {
     if (_disposed) return;
-    await _player.pause();
-    _state = AudioPlayerState.paused;
+    await _engine.pause();
+    _setState(AudioPlayerState.paused);
   }
 
   Future<void> stop() async {
     if (_disposed) return;
-    await _player.stop();
-    _state = AudioPlayerState.idle;
+    await _engine.stop();
+    _setState(AudioPlayerState.idle);
     _currentUrl = null;
   }
 
   Future<void> seek(Duration position) async {
     if (_disposed) return;
-    await _player.seek(position);
+    await _engine.seek(position);
   }
 
   Future<void> setVolume(double volume) async {
     if (_disposed) return;
-    await _player.setVolume(volume.clamp(0.0, 1.0));
+    await _engine.setVolume(volume.clamp(0.0, 1.0));
   }
 
   Future<void> setSpeed(double speed) async {
     if (_disposed) return;
-    await _player.setSpeed(speed.clamp(0.5, 2.0));
+    await _engine.setSpeed(speed.clamp(0.5, 2.0));
+  }
+
+  void _setState(AudioPlayerState next) {
+    _state = next;
+  }
+
+  AudioPlayerState _mapEngineState(ProcessingState engineState) {
+    if (_disposed) return AudioPlayerState.idle;
+    return switch (engineState) {
+      ProcessingState.idle => AudioPlayerState.idle,
+      ProcessingState.loading => AudioPlayerState.loading,
+      ProcessingState.buffering => AudioPlayerState.loading,
+      ProcessingState.ready => AudioPlayerState.playing,
+      ProcessingState.completed => AudioPlayerState.completed,
+    };
   }
 
   void dispose() {
+    if (_disposed) {
+      return;
+    }
     _disposed = true;
-    _positionSub?.cancel();
-    _player.dispose();
+    _engine.dispose();
   }
 }

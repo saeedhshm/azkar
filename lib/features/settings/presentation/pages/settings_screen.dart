@@ -10,6 +10,8 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/time_formatter.dart';
 import '../../../prayer_times/data/services/prayer_settings_provider.dart';
 import '../../../prayer_times/domain/entities/prayer_settings.dart';
+import '../../../prayer_times/presentation/cubit/prayer_times_cubit.dart';
+import '../../../prayer_times/presentation/cubit/prayer_times_state.dart';
 import '../cubit/notification_settings_cubit.dart';
 import '../cubit/notification_settings_state.dart';
 import '../cubit/theme_cubit.dart';
@@ -213,19 +215,39 @@ class _PrayerCalculationSection extends StatefulWidget {
 
 class _PrayerCalculationSectionState
     extends State<_PrayerCalculationSection> {
-  late final PrayerSettingsProvider _provider;
   late PrayerSettings _settings;
 
   @override
   void initState() {
     super.initState();
-    _provider = getIt<PrayerSettingsProvider>();
-    _settings = _provider.load();
+    _settings = _readSettings();
+  }
+
+  PrayerSettings _readSettings() {
+    // The cubit owns prayer calculation settings so every dependent output is
+    // recalculated. Fall back to the persisted settings before the cubit has
+    // finished its first load.
+    final cubit = getIt<PrayerTimesCubit>();
+    if (cubit.state.status != PrayerTimesStatus.initial) {
+      return cubit.state.settings;
+    }
+    return getIt<PrayerSettingsProvider>().load();
   }
 
   Future<void> _save(PrayerSettings settings) async {
     setState(() => _settings = settings);
-    await _provider.save(settings);
+
+    final cubit = getIt<PrayerTimesCubit>();
+    await cubit.updateSettings(
+      method: settings.method,
+      madhab: settings.madhab,
+      offsets: settings.offsets,
+      customSound: settings.customAdhanSound,
+      setCustomSound: true,
+    );
+
+    if (!mounted) return;
+    setState(() => _settings = cubit.state.settings);
   }
 
   @override

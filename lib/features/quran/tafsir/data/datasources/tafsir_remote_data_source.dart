@@ -1,14 +1,22 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
 import '../../domain/entities/tafsir_entry.dart';
+import '../../utils/tafsir_text_sanitizer.dart';
 
 class TafsirRemoteDataSource {
-  TafsirRemoteDataSource({http.Client? client})
-    : _client = client ?? http.Client();
+  TafsirRemoteDataSource({http.Client? client, Duration? timeout})
+    : _client = client ?? http.Client(),
+      _ownsClient = client == null,
+      _timeout = timeout ?? requestTimeout;
+
+  static const Duration requestTimeout = Duration(seconds: 20);
 
   final http.Client _client;
+  final bool _ownsClient;
+  final Duration _timeout;
 
   Future<TafsirEntry> fetchTafsir({
     required int surahNumber,
@@ -21,10 +29,16 @@ class TafsirRemoteDataSource {
     final ayahKey = '$surahNumber:$ayahNumber';
     final url = '$apiEndpoint/$ayahKey';
 
-    final response = await _client.get(
-      Uri.parse(url),
-      headers: {'Accept': 'application/json'},
-    );
+    final http.Response response;
+    try {
+      response = await _client
+          .get(Uri.parse(url), headers: {'Accept': 'application/json'})
+          .timeout(_timeout);
+    } on TimeoutException {
+      throw TafsirException(
+        'Timed out loading tafsir for surah $surahNumber ayah $ayahNumber.',
+      );
+    }
 
     if (response.statusCode != 200) {
       throw TafsirException('Failed to load tafsir: ${response.statusCode}');
@@ -63,12 +77,15 @@ class TafsirRemoteDataSource {
       ayahNumber: ayahNumber,
       sourceName: sourceName,
       sourceLanguage: sourceLanguage,
-      text: text,
+      // Sanitize once here so the cache and every display get clean text.
+      text: TafsirTextSanitizer.clean(text),
     );
   }
 
   void dispose() {
-    _client.close();
+    if (_ownsClient) {
+      _client.close();
+    }
   }
 }
 

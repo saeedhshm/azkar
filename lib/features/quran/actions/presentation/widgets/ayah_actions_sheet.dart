@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/di/service_locator.dart';
 import '../../../domain/entities/quran_selected_ayah.dart';
 import '../../../tafsir/domain/entities/tafsir_entry.dart';
+import '../../../tafsir/presentation/utils/default_tafsir_source.dart';
 import '../../../tafsir/presentation/widgets/tafsir_reader_sheet.dart';
 import '../cubit/ayah_actions_cubit.dart';
 import '../cubit/ayah_actions_state.dart';
@@ -47,7 +48,10 @@ class AyahActionsSheet extends StatelessWidget {
         top: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
-          child: Column(
+          // A long ayah text plus the tafsir preview can exceed the sheet's
+          // max height: scroll instead of overflowing.
+          child: SingleChildScrollView(
+            child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -79,6 +83,7 @@ class AyahActionsSheet extends StatelessWidget {
                 theme: theme,
               ),
             ],
+            ),
           ),
         ),
       ),
@@ -187,17 +192,18 @@ class _ActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
+    // Five fixed buttons can exceed narrow sheets with long translations or
+    // large text scales: shrink the row uniformly instead of overflowing.
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
         _ActionButton(
           icon: Icons.auto_stories_rounded,
           label: 'quran.tafsir'.tr(),
           color: const Color(0xFF6C63FF),
-          onTap: () {
-            Navigator.pop(context);
-            _openTafsir(context);
-          },
+          onTap: () => _openTafsir(context),
         ),
         _ActionButton(
           icon: Icons.copy_rounded,
@@ -238,21 +244,34 @@ class _ActionRow extends StatelessWidget {
             onPlayAyah();
           },
         ),
-      ],
+        ],
+      ),
     );
   }
 
   void _openTafsir(BuildContext context) {
+    // Capture everything up front: after pop() the sheet's own context is
+    // unusable. The new sheet gets a FRESH cubit owned by its own route:
+    // reusing this route's cubit would hand over an instance that pop() is
+    // about to close, crashing the first emit with "Cannot emit new states
+    // after calling close". Already-fetched tafsirs resolve instantly from
+    // the shared repository cache.
+    final navigator = Navigator.of(context);
+    final backgroundColor = Theme.of(context).scaffoldBackgroundColor;
+    navigator.pop();
     showModalBottomSheet<void>(
-      context: context,
+      context: navigator.context,
       isScrollControlled: true,
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: backgroundColor,
       showDragHandle: true,
-      builder: (_) => TafsirReaderSheet(
-        surahNumber: selectedAyah.surahNumber,
-        ayahNumber: selectedAyah.ayahNumber,
-        surahName: surahName,
-        ayahText: ayahText,
+      builder: (_) => BlocProvider(
+        create: (_) => getIt<AyahActionsCubit>(),
+        child: TafsirReaderSheet(
+          surahNumber: selectedAyah.surahNumber,
+          ayahNumber: selectedAyah.ayahNumber,
+          surahName: surahName,
+          ayahText: ayahText,
+        ),
       ),
     );
   }
@@ -338,6 +357,7 @@ class _TafsirPreview extends StatelessWidget {
             onRetry: () => context.read<AyahActionsCubit>().loadTafsir(
               surahNumber: selectedAyah.surahNumber,
               ayahNumber: selectedAyah.ayahNumber,
+              sourceId: defaultTafsirSourceId(context),
             ),
             theme: theme,
           );
@@ -348,13 +368,18 @@ class _TafsirPreview extends StatelessWidget {
             onTap: () => context.read<AyahActionsCubit>().loadTafsir(
               surahNumber: selectedAyah.surahNumber,
               ayahNumber: selectedAyah.ayahNumber,
+              sourceId: defaultTafsirSourceId(context),
             ),
             theme: theme,
           );
         }
 
         if (state.hasTafsir) {
-          final entry = state.tafsirEntries.last;
+          // Show the entry of the source that was actually requested, not
+          // merely the most recently loaded one.
+          final entry =
+              state.entryForSource(state.activeSourceId ?? '') ??
+              state.tafsirEntries.last;
           return _TafsirContent(
             entry: entry,
             onViewMore: () {
@@ -363,11 +388,15 @@ class _TafsirPreview extends StatelessWidget {
                 isScrollControlled: true,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 showDragHandle: true,
-                builder: (_) => TafsirReaderSheet(
-                  surahNumber: selectedAyah.surahNumber,
-                  ayahNumber: selectedAyah.ayahNumber,
-                  surahName: surahName,
-                  ayahText: ayahText,
+                // Fresh cubit owned by the new route (see _openTafsir).
+                builder: (_) => BlocProvider(
+                  create: (_) => getIt<AyahActionsCubit>(),
+                  child: TafsirReaderSheet(
+                    surahNumber: selectedAyah.surahNumber,
+                    ayahNumber: selectedAyah.ayahNumber,
+                    surahName: surahName,
+                    ayahText: ayahText,
+                  ),
                 ),
               );
             },

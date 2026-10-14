@@ -16,6 +16,9 @@ class AyahActionsCubit extends Cubit<AyahActionsState> {
     required int ayahNumber,
     String sourceId = 'jalalayn',
   }) async {
+    // The sheet can be closed while a fetch is still in flight; emitting
+    // afterwards throws "Cannot emit new states after calling close".
+    if (isClosed) return;
     emit(
       state.copyWith(
         status: AyahActionStatus.loadingTafsir,
@@ -30,6 +33,7 @@ class AyahActionsCubit extends Cubit<AyahActionsState> {
         ayahNumber: ayahNumber,
         sourceId: sourceId,
       );
+      if (isClosed) return;
 
       final entries = List<TafsirEntry>.from(state.tafsirEntries);
       entries.removeWhere((e) => e.id.startsWith(sourceId));
@@ -42,6 +46,7 @@ class AyahActionsCubit extends Cubit<AyahActionsState> {
         ),
       );
     } catch (e) {
+      if (isClosed) return;
       emit(
         state.copyWith(
           status: AyahActionStatus.tafsirError,
@@ -68,8 +73,10 @@ class AyahActionsCubit extends Cubit<AyahActionsState> {
   }
 
   Future<void> copyAyahText(String ayahText) async {
+    if (isClosed) return;
     emit(state.copyWith(status: AyahActionStatus.executing));
     await Clipboard.setData(ClipboardData(text: ayahText));
+    if (isClosed) return;
     emit(state.copyWith(status: AyahActionStatus.idle));
   }
 
@@ -78,9 +85,11 @@ class AyahActionsCubit extends Cubit<AyahActionsState> {
     required String surahName,
     required int ayahNumber,
   }) async {
+    if (isClosed) return;
     emit(state.copyWith(status: AyahActionStatus.executing));
     final text = '$surahName $ayahNumber: $ayahText';
     await SharePlus.instance.share(ShareParams(text: text));
+    if (isClosed) return;
     emit(state.copyWith(status: AyahActionStatus.idle));
   }
 

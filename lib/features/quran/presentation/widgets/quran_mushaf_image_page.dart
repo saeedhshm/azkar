@@ -9,6 +9,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../services/quran_svg_page_service.dart';
 import 'quran_mushaf_frame.dart';
+import 'quran_page_zoom_controller.dart';
 
 class QuranMushafImagePage extends StatefulWidget {
   const QuranMushafImagePage({
@@ -50,10 +51,7 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
 
   late Future<Object> _future;
   final PhotoViewController _photoViewController = PhotoViewController();
-  double _currentScale = 1.0;
-  double _targetScale = 1.0;
-  late AnimationController _zoomController;
-  late Animation<double> _zoomAnimation;
+  late final QuranPageZoomController _zoom;
   DateTime _lastTapTime = DateTime.now();
   bool _isDoubleTap = false;
 
@@ -64,15 +62,10 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
   void initState() {
     super.initState();
     _future = _loadPage(widget.pageNumber);
-    _zoomController = AnimationController(
+    _zoom = QuranPageZoomController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      photoViewController: _photoViewController,
     );
-    _zoomAnimation = CurvedAnimation(
-      parent: _zoomController,
-      curve: Curves.easeOutCubic,
-    );
-    _zoomController.addListener(_onZoomAnimation);
   }
 
   @override
@@ -85,10 +78,7 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
   }
 
   void _resetZoom() {
-    _currentScale = 1.0;
-    _targetScale = 1.0;
-    _zoomController.reset();
-    _photoViewController.position = Offset.zero;
+    _zoom.reset();
   }
 
   Future<Object> _loadPage(int pageNumber) async {
@@ -100,14 +90,21 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
     return file;
   }
 
+  /// User-facing description of why a page could not be loaded.
+  String _describeLoadError(Object error) {
+    final message = error.toString();
+    if (message.contains('Timed out')) {
+      return 'quran.download_timeout'.tr(
+        namedArgs: {'page': widget.pageNumber.toString()},
+      );
+    }
+    return 'quran.download_page_error'.tr();
+  }
+
   void _retry() {
     setState(() {
       _future = _loadPage(widget.pageNumber);
     });
-  }
-
-  void _onZoomAnimation() {
-    _currentScale = 1.0 + (_targetScale - 1.0) * _zoomAnimation.value;
   }
 
   void _handleDoubleTap(TapUpDetails details) {
@@ -117,14 +114,7 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
     if (diff.inMilliseconds < 300) {
       _isDoubleTap = true;
       HapticFeedback.lightImpact();
-
-      if (_currentScale > 1.5) {
-        _targetScale = 1.0;
-        _photoViewController.position = Offset.zero;
-      } else {
-        _targetScale = 2.8;
-      }
-      _zoomController.forward(from: 0);
+      _zoom.toggle();
     }
 
     _lastTapTime = now;
@@ -136,8 +126,7 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
 
   @override
   void dispose() {
-    _zoomController.removeListener(_onZoomAnimation);
-    _zoomController.dispose();
+    _zoom.dispose();
     _photoViewController.dispose();
     super.dispose();
   }
@@ -161,15 +150,13 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
                   _pageCanvasSize.height * fitScale,
                 );
 
-                final zoomScale = _currentScale;
-
                 return RepaintBoundary(
                   child: PhotoView.customChild(
                     controller: _photoViewController,
                     backgroundDecoration: const BoxDecoration(
                       color: Colors.transparent,
                     ),
-                    initialScale: PhotoViewComputedScale.contained * zoomScale,
+                    initialScale: PhotoViewComputedScale.contained,
                     minScale: PhotoViewComputedScale.contained,
                     maxScale: PhotoViewComputedScale.contained * 4.0,
                     basePosition: Alignment.topCenter,
@@ -241,14 +228,18 @@ class _QuranMushafImagePageState extends State<QuranMushafImagePage>
         }
 
         if (snapshot.hasError) {
+          final errorMessage = _describeLoadError(snapshot.error!);
           return QuranMushafFrame(
             child: _MushafStatusContent(
               icon: Icon(Icons.cloud_off_rounded, color: gold, size: 36),
-              message: 'quran.download_page_error'.tr(),
-            messageStyle: theme.textTheme.bodyMedium?.copyWith(
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
-              fontWeight: FontWeight.w700,
-            ),
+              message: errorMessage,
+              messageStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                fontWeight: FontWeight.w700,
+              ),
+              subtitle: 'quran.downloading_page'.tr(
+                namedArgs: {'page': widget.pageNumber.toString()},
+              ),
               action: FilledButton.icon(
                 onPressed: _retry,
                 style: FilledButton.styleFrom(
@@ -354,15 +345,18 @@ class _MushafStatusContent extends StatelessWidget {
     required this.message,
     required this.messageStyle,
     this.action,
+    this.subtitle,
   });
 
   final Widget icon;
   final String message;
   final TextStyle? messageStyle;
   final Widget? action;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final minHeight =
@@ -388,6 +382,16 @@ class _MushafStatusContent extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: messageStyle,
                   ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      subtitle!,
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
+                    ),
+                  ],
                   if (action != null) ...[const SizedBox(height: 12), action!],
                 ],
               ),

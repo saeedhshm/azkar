@@ -71,6 +71,13 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
   Axis _scrollDirection = Axis.horizontal;
   QuranCubit? _quranCubit;
 
+  /// Overlay style used outside immersive modes.
+  ///
+  /// Captured while the context is still usable so disposal can restore it
+  /// without reading the theme from a defunct context.
+  SystemUiOverlayStyle _defaultOverlayStyle =
+      const SystemUiOverlayStyle(statusBarColor: Colors.transparent);
+
   @override
   void initState() {
     super.initState();
@@ -105,6 +112,12 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     });
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _defaultOverlayStyle = _buildDefaultOverlayStyle();
+  }
+
   void _showInitialZoomHint() {
     _showZoomHint = true;
     _zoomHintTimer = Timer(const Duration(seconds: 3), () {
@@ -119,6 +132,12 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
     _zoomHintTimer?.cancel();
     _searchController.dispose();
     _pageController.dispose();
+    // Leaving the reader must never leave the system bars hidden behind the
+    // next route, whether reading mode or fullscreen mode was active.
+    // setState must not be called from dispose, so only the system UI is reset
+    // using the overlay style captured while the context was still valid.
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(_defaultOverlayStyle);
     super.dispose();
   }
 
@@ -214,13 +233,16 @@ class _QuranReaderScreenState extends State<QuranReaderScreen>
 
   void _restoreSystemUI() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    SystemChrome.setSystemUIOverlayStyle(_buildDefaultOverlayStyle());
+  }
+
+  SystemUiOverlayStyle _buildDefaultOverlayStyle() {
+    return SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness:
-          Theme.of(context).brightness == Brightness.dark
-              ? Brightness.light
-              : Brightness.dark,
-    ));
+      statusBarIconBrightness: Theme.of(context).brightness == Brightness.dark
+          ? Brightness.light
+          : Brightness.dark,
+    );
   }
 
   void _toggleDimmed() {

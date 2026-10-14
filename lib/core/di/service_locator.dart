@@ -80,7 +80,10 @@ Future<void> setupLocator() async {
 
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<PrayerSettingsProvider>(
-    PrayerSettingsProvider(prefs),
+    PrayerSettingsProvider(
+      prefs,
+      localStorage: getIt<LocalStorageService>(),
+    ),
   );
 
   getIt.registerLazySingleton<PrayerService>(PrayerService.new);
@@ -142,9 +145,9 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton<RecitationTimingDataSource>(
     RecitationTimingDataSource.new,
   );
-  getIt.registerLazySingleton<QuranAudioPlayerService>(
-    QuranAudioPlayerService.new,
-  );
+  // Factory scoped: each Quran reader session owns its player and disposes it,
+  // so a disposed engine is never handed to the next session.
+  getIt.registerFactory<QuranAudioPlayerService>(QuranAudioPlayerService.new);
   getIt.registerLazySingleton<RecitationRepository>(
     () => RecitationRepositoryImpl(getIt<RecitationTimingDataSource>()),
   );
@@ -175,7 +178,10 @@ Future<void> setupLocator() async {
   );
 
   getIt.registerFactory<TimeFormatCubit>(
-    () => TimeFormatCubit(getIt<LocalStorageService>()),
+    () => TimeFormatCubit(
+      getIt<LocalStorageService>(),
+      getIt<PrayerSettingsProvider>(),
+    ),
   );
 
   getIt.registerFactory<AdhkarCubit>(
@@ -205,7 +211,7 @@ Future<void> setupLocator() async {
     ),
   );
 
-  getIt.registerFactory<PrayerTimesCubit>(
+  getIt.registerLazySingleton<PrayerTimesCubit>(
     () => PrayerTimesCubit(
       prayerService: getIt<PrayerService>(),
       locationService: getIt<LocationService>(),

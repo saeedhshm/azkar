@@ -1,12 +1,17 @@
+import 'dart:async';
+
 import 'package:adhan/adhan.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../core/storage/local_storage_service.dart';
 import '../../domain/entities/prayer_settings.dart';
 
 class PrayerSettingsProvider {
-  PrayerSettingsProvider(this._prefs);
+  PrayerSettingsProvider(this._prefs, {LocalStorageService? localStorage})
+    : _localStorage = localStorage;
 
   final SharedPreferences _prefs;
+  final LocalStorageService? _localStorage;
 
   static const _methodKey = 'prayer_calc_method';
   static const _madhabKey = 'prayer_madhab';
@@ -19,6 +24,7 @@ class PrayerSettingsProvider {
   static const _cachedLabelKey = 'prayer_cached_label';
   static const _customSoundKey = 'prayer_custom_sound';
   static const _offsetPrefix = 'prayer_offset_';
+  static const legacyTimeFormatKey = 'use_24_hour_format';
 
   PrayerSettings load() {
     final method = _methodFromKey(_prefs.getString(_methodKey));
@@ -127,7 +133,39 @@ class PrayerSettingsProvider {
 
   String? getCustomSound() => _prefs.getString(_customSoundKey);
 
-  bool getUse24HourFormat() => _prefs.getBool('use_24_hour_format') ?? false;
+  /// Returns the stored 24-hour clock preference.
+  ///
+  /// The value is read from the same Hive box the settings screen writes to,
+  /// so app UI and the home widget always agree. Values saved by earlier
+  /// releases under the legacy SharedPreferences key are migrated once.
+  bool getUse24HourFormat() {
+    final storage = _localStorage;
+    if (storage != null) {
+      return storage.getUse24HourFormat();
+    }
+
+    final legacyValue = _prefs.getBool(legacyTimeFormatKey);
+    return legacyValue ?? false;
+  }
+
+  /// Migrates a legacy SharedPreferences value into Hive.
+  ///
+  /// Returns whether a value was migrated, so callers can clear the old key.
+  bool migrateLegacyTimeFormat() {
+    final storage = _localStorage;
+    if (storage == null) {
+      return false;
+    }
+
+    final legacyValue = _prefs.getBool(legacyTimeFormatKey);
+    if (legacyValue == null) {
+      return false;
+    }
+
+    unawaited(storage.saveUse24HourFormat(legacyValue));
+    unawaited(_prefs.remove(legacyTimeFormatKey));
+    return true;
+  }
 
   String _methodToKey(CalculationMethod method) {
     return switch (method) {

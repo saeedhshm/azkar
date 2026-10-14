@@ -26,6 +26,20 @@ class AyahActionsState extends Equatable {
   bool get isLoading => status == AyahActionStatus.loadingTafsir;
   bool get hasTafsir => tafsirEntries.isNotEmpty;
 
+  /// Returns the loaded entry for [sourceId], or `null` if it is absent.
+  ///
+  /// Callers must use this instead of `tafsirEntries.last`: entries accumulate
+  /// across sources, so the last one may belong to a different source than
+  /// the one currently selected.
+  TafsirEntry? entryForSource(String sourceId) {
+    for (final entry in tafsirEntries) {
+      if (entry.id.startsWith(sourceId)) {
+        return entry;
+      }
+    }
+    return null;
+  }
+
   AyahActionsState copyWith({
     AyahActionStatus? status,
     List<TafsirEntry>? tafsirEntries,
