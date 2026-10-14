@@ -176,7 +176,9 @@ class _TafsirHeader extends StatelessWidget {
       children: [
         Text(
           '$surahName • ${'quran.ayah_number'.tr()} $ayahNumber',
-          style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w900),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w900,
+          ),
         ),
         const SizedBox(height: 8),
         Container(
@@ -228,17 +230,23 @@ class _SourceSelector extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 14),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF6C63FF) : theme.colorScheme.surfaceContainerLow,
+                color: isSelected
+                    ? theme.colorScheme.primary
+                    : theme.colorScheme.surfaceContainerLow,
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF6C63FF) : theme.colorScheme.outlineVariant,
+                  color: isSelected
+                      ? theme.colorScheme.primary
+                      : theme.colorScheme.outlineVariant,
                 ),
               ),
               alignment: Alignment.center,
               child: Text(
                 source.name,
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: isSelected ? Colors.white : theme.colorScheme.onSurface,
+                  color: isSelected
+                      ? theme.colorScheme.onPrimary
+                      : theme.colorScheme.onSurface,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -278,9 +286,16 @@ class _TafsirBody extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.cloud_off_rounded, size: 48, color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+                Icon(
+                  Icons.cloud_off_rounded,
+                  size: 48,
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
                 const SizedBox(height: 12),
-                Text('quran.tafsir_load_failed'.tr(), style: theme.textTheme.bodyMedium),
+                Text(
+                  'quran.tafsir_load_failed'.tr(),
+                  style: theme.textTheme.bodyMedium,
+                ),
                 const SizedBox(height: 8),
                 FilledButton.tonal(
                   onPressed: () {
@@ -302,7 +317,9 @@ class _TafsirBody extends StatelessWidget {
           return Center(
             child: Text(
               'quran.tafsir_empty'.tr(),
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           );
         }
@@ -315,7 +332,9 @@ class _TafsirBody extends StatelessWidget {
           controller: scrollController,
           child: SelectableText(
             entry.text,
-            textDirection: entry.sourceLanguage == 'ar' ? ui.TextDirection.rtl : ui.TextDirection.ltr,
+            textDirection: entry.sourceLanguage == 'ar'
+                ? ui.TextDirection.rtl
+                : ui.TextDirection.ltr,
             style: theme.textTheme.bodyLarge?.copyWith(height: 1.8),
           ),
         );

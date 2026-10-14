@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-class PrayerTimeTile extends StatefulWidget {
+class PrayerTimeTile extends StatelessWidget {
   const PrayerTimeTile({
     super.key,
     required this.name,
@@ -20,155 +20,107 @@ class PrayerTimeTile extends StatefulWidget {
   final bool isPast;
 
   @override
-  State<PrayerTimeTile> createState() => _PrayerTimeTileState();
-}
-
-class _PrayerTimeTileState extends State<PrayerTimeTile> {
-  bool _pressed = false;
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final isHighlighted = widget.isCurrent || widget.isNext;
-    final opacity = widget.isPast && !isHighlighted ? 0.72 : 1.0;
-
-    final currentBg =
-        Color.alphaBlend(
-          theme.colorScheme.primary.withValues(alpha: isDark ? 0.22 : 0.12),
-          theme.colorScheme.surfaceContainerLow,
-        );
-    final currentFg = theme.colorScheme.onSurface;
-    final nextBg = Color.alphaBlend(
-      theme.colorScheme.primary.withValues(
-        alpha: isDark ? 0.18 : 0.2,
-      ),
-      theme.colorScheme.surfaceContainerLow,
-    );
-    final nextFg = isDark ? theme.colorScheme.onSurface : theme.colorScheme.onSurface.withValues(alpha: 0.6);
-
-    final badgeBg = widget.isCurrent
-        ? theme.colorScheme.primary
-        : theme.colorScheme.primary.withValues(
-            alpha: isDark ? 0.24 : 0.18,
-          );
-    final badgeFg = widget.isCurrent
-        ? (isDark ? const Color(0xFF1A1F15) : const Color(0xFF3B2A12))
-        : theme.colorScheme.primary;
-    final foreground = widget.isCurrent
-        ? currentFg
-        : widget.isNext
-        ? nextFg
-        : theme.colorScheme.onSurface;
-
+    final scheme = theme.colorScheme;
+    final accent = isNext ? scheme.tertiary : scheme.primary;
+    final foreground = isCurrent ? scheme.onPrimary : scheme.onSurface;
     return Semantics(
-      label: '${widget.name}, ${widget.time}',
-      child: GestureDetector(
-        onTapDown: (_) => setState(() => _pressed = true),
-        onTapCancel: () => setState(() => _pressed = false),
-        onTapUp: (_) => setState(() => _pressed = false),
-        child: AnimatedScale(
-          duration: const Duration(milliseconds: 120),
-          scale: _pressed ? 0.98 : 1,
-          curve: Curves.easeOutCubic,
-          child: AnimatedOpacity(
-            duration: const Duration(milliseconds: 220),
-            opacity: opacity,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 280),
-              curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: widget.isCurrent
-                    ? currentBg
-                    : widget.isNext
-                    ? nextBg
-                    : theme.colorScheme.surfaceContainerLow,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: isHighlighted
-                      ? theme.colorScheme.primary
-                            .withValues(alpha: isDark ? 0.58 : 0.46)
-                      : theme.colorScheme.outlineVariant,
-                  width: isHighlighted ? 2 : 1,
+      label:
+          '$name, $time${isCurrent
+              ? ', ${'common.now'.tr()}'
+              : isNext
+              ? ', ${'common.next'.tr()}'
+              : ''}',
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isCurrent ? scheme.primary : scheme.surfaceContainerLow,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(
+            color: isCurrent
+                ? Colors.transparent
+                : isNext
+                ? accent.withValues(alpha: .45)
+                : scheme.outlineVariant.withValues(alpha: .65),
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  icon,
+                  size: 19,
+                  color: isCurrent ? foreground.withValues(alpha: .85) : accent,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: isHighlighted
-                        ? theme.colorScheme.primary
-                              .withValues(alpha: isDark ? 0.28 : 0.18)
-                        : Colors.black.withValues(alpha: isDark ? 0.16 : 0.06),
-                    blurRadius: isHighlighted ? 16 : 10,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  if (isHighlighted)
-                    PositionedDirectional(
-                      top: 0,
-                      end: 0,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: badgeBg,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          widget.isCurrent
-                              ? 'common.now'.tr()
-                              : 'common.next'.tr(),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: badgeFg,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 9,
-                          ),
-                        ),
-                      ),
-                    ),
-                  Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          widget.icon,
-                          size: 24,
-                          color: isHighlighted ? foreground : theme.colorScheme.onSurface.withValues(alpha: 0.6),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          widget.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: isHighlighted ? foreground : null,
-                            fontWeight: FontWeight.w900,
-                            height: 1.1,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.time,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: isHighlighted
-                                ? foreground.withValues(alpha: 0.92)
-                                : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: foreground.withValues(alpha: .85),
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
-                ],
+                ),
+              ],
+            ),
+            const Spacer(),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: AlignmentDirectional.centerStart,
+              child: Text(
+                time,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: foreground,
+                  fontWeight: FontWeight.w800,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: 5),
+            if (isCurrent || isNext)
+              Row(
+                children: [
+                  Container(
+                    width: 5,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: isCurrent ? foreground : accent,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      isCurrent ? 'common.now'.tr() : 'common.next'.tr(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        fontSize: 10,
+                        color: isCurrent
+                            ? foreground.withValues(alpha: .8)
+                            : accent,
+                      ),
+                    ),
+                  ),
+                ],
+              )
+            else
+              Container(
+                width: 22,
+                height: 2,
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: isPast ? .2 : .5),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+          ],
         ),
       ),
     );

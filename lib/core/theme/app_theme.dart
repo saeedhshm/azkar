@@ -3,23 +3,23 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  // ─── Olive Green / Golden Palette ────────────────────────────────────────────
+  // ─── Ivory, antique gold and deep evergreen ──────────────────────────────────
   // Light mode primaries
   static const _lightBackground = Color(0xFFF5F0E6);
-  static const _lightSurface = Color(0xFFFFFFFF);
-  static const _lightPrimary = Color(0xFF4A5D23);
-  static const _lightPrimaryContainer = Color(0xFFD4DBC4);
-  static const _lightSecondary = Color(0xFF5D4E37);
-  static const _lightAccent = Color(0xFFD4AF37);
-  static const _lightCountdown = Color(0xFFB8860B);
+  static const _lightSurface = Color(0xFFFFFCF6);
+  static const _lightPrimary = Color(0xFF24483E);
+  static const _lightPrimaryContainer = Color(0xFFE8EBDF);
+  static const _lightSecondary = Color(0xFF75654B);
+  static const _lightAccent = Color(0xFF96702F);
+  static const _lightCountdown = Color(0xFF8F672B);
 
   // Dark mode primaries
-  static const _darkBackground = Color(0xFF1A1F15);
-  static const _darkSurface = Color(0xFF1A1A1A);
-  static const _darkPrimary = Color(0xFF8FBC8F);
-  static const _darkPrimaryContainer = Color(0xFF2D3B1F);
-  static const _darkSecondary = Color(0xFFD4C4B0);
-  static const _darkAccent = Color(0xFFDAA520);
+  static const _darkBackground = Color(0xFF171C18);
+  static const _darkSurface = Color(0xFF222B24);
+  static const _darkPrimary = Color(0xFFCED8BF);
+  static const _darkPrimaryContainer = Color(0xFF203D32);
+  static const _darkSecondary = Color(0xFFBACDC3);
+  static const _darkAccent = Color(0xFFE0BA78);
 
   // ─── Light Theme ─────────────────────────────────────────────────────────────
   static final ThemeData light = ThemeData(
@@ -41,10 +41,12 @@ class AppTheme {
       errorContainer: Color(0xFFFDE8E8),
       onErrorContainer: Color(0xFFB3261E),
       surface: _lightSurface,
+      surfaceContainerLow: Color(0xFFFFFCF6),
+      surfaceContainer: Color(0xFFF0E9DC),
       onSurface: Color(0xFF1F1F1F),
-      surfaceContainerHighest: Color(0xFFF0F2F1),
-      outline: Color(0xFFE1E5E2),
-      outlineVariant: Color(0xFFD9D4C5),
+      surfaceContainerHighest: Color(0xFFECE4D5),
+      outline: Color(0xFFB3A58D),
+      outlineVariant: Color(0xFFE1D5BE),
       shadow: Colors.black,
       inverseSurface: Color(0xFF1F1F1F),
       onInverseSurface: Colors.white,
@@ -56,27 +58,27 @@ class AppTheme {
       AppThemeColors(
         // Backgrounds
         heroCardBackground: _lightPrimaryContainer,
-        cardSurface: Color(0xFFFAF8F3),
-        cardSurfaceTint: Color(0xFF6B7B4C),
-        inputSurface: Colors.white,
-        navBarBg: Colors.white,
+        cardSurface: _lightSurface,
+        cardSurfaceTint: _lightAccent,
+        inputSurface: _lightSurface,
+        navBarBg: _lightSurface,
         pillBg: Color(0xFFF0EDE4),
         shimmerBase: Color(0xFFE8E3D8),
         shimmerHighlight: Color(0xFFFAF8F3),
         // Text
         secondaryText: _lightSecondary,
-        mutedText: Color(0xFF7A6F5B),
+        mutedText: Color(0xFF80745F),
         countdownText: _lightCountdown,
         // Borders
-        softBorder: Color(0xFFD9D4C5),
+        softBorder: Color(0xFFE1D5BE),
         // Icons
         prayerIcon: _lightSecondary,
         // Accents
         accentColor: _lightAccent,
         successColor: Color(0xFF4A7C59),
         // Prayer specific
-        currentPrayerBg: Color(0xFFE7C75A),
-        currentPrayerFg: Color(0xFF3B2A12),
+        currentPrayerBg: _lightPrimaryContainer,
+        currentPrayerFg: _lightPrimary,
       ),
     ],
     textTheme: ThemeData.light().textTheme.apply(
@@ -125,10 +127,10 @@ class AppTheme {
       elevation: 0,
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.black.withValues(alpha: 0.08),
-      color: const Color(0xFFFAF8F3),
+      color: _lightSurface,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: const BorderSide(color: Color(0xFFD9D4C5), width: 1),
+        borderRadius: BorderRadius.circular(24),
+        side: const BorderSide(color: Color(0xFFE1D5BE), width: 1),
       ),
       margin: EdgeInsets.zero,
     ),
@@ -203,10 +205,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: Color(0xFFB3261E)),
       ),
-      hintStyle: const TextStyle(
-        color: Color(0xFF9E9E9E),
-        fontFamily: 'Cairo',
-      ),
+      hintStyle: const TextStyle(color: Color(0xFF9E9E9E), fontFamily: 'Cairo'),
     ),
     listTileTheme: const ListTileThemeData(
       iconColor: _lightSecondary,
@@ -301,10 +300,12 @@ class AppTheme {
       errorContainer: Color(0xFF3B1412),
       onErrorContainer: Color(0xFFF2B8B5),
       surface: _darkSurface,
+      surfaceContainerLow: Color(0xFF14251F),
+      surfaceContainer: Color(0xFF1B3028),
       onSurface: Color(0xFFF5F5F5),
-      surfaceContainerHighest: Color(0xFF232323),
+      surfaceContainerHighest: Color(0xFF243D33),
       outline: Color(0xFF2D3730),
-      outlineVariant: Color(0xFF3D4A35),
+      outlineVariant: Color(0xFF2D493C),
       shadow: Colors.black,
       inverseSurface: Color(0xFFF5F5F5),
       onInverseSurface: Color(0xFF1F1F1F),
@@ -316,10 +317,10 @@ class AppTheme {
       AppThemeColors(
         // Backgrounds
         heroCardBackground: _darkPrimaryContainer,
-        cardSurface: Color(0xFF1E2618),
-        cardSurfaceTint: Color(0xFF2A3A1F),
-        inputSurface: Color(0xFF242424),
-        navBarBg: Color(0xFF181818),
+        cardSurface: _darkSurface,
+        cardSurfaceTint: Color(0xFF203D32),
+        inputSurface: Color(0xFF1B3028),
+        navBarBg: _darkSurface,
         pillBg: Color(0xFF252B1E),
         shimmerBase: Color(0xFF232323),
         shimmerHighlight: Color(0xFF2E2E2E),
@@ -383,7 +384,7 @@ class AppTheme {
     ),
     cardTheme: CardThemeData(
       elevation: 0,
-      color: const Color(0xFF1E2618),
+      color: _darkSurface,
       surfaceTintColor: Colors.transparent,
       shadowColor: Colors.black.withValues(alpha: 0.28),
       shape: RoundedRectangleBorder(
@@ -463,10 +464,7 @@ class AppTheme {
         borderRadius: BorderRadius.circular(16),
         borderSide: const BorderSide(color: Color(0xFFF2B8B5)),
       ),
-      hintStyle: const TextStyle(
-        color: Color(0xFF666666),
-        fontFamily: 'Cairo',
-      ),
+      hintStyle: const TextStyle(color: Color(0xFF666666), fontFamily: 'Cairo'),
     ),
     listTileTheme: const ListTileThemeData(
       iconColor: _darkSecondary,
@@ -509,8 +507,7 @@ class AppTheme {
     ),
     switchTheme: SwitchThemeData(
       thumbColor: WidgetStateProperty.resolveWith(
-        (states) =>
-            states.contains(WidgetState.selected) ? _darkPrimary : null,
+        (states) => states.contains(WidgetState.selected) ? _darkPrimary : null,
       ),
       trackColor: WidgetStateProperty.resolveWith(
         (states) => states.contains(WidgetState.selected)
@@ -520,8 +517,7 @@ class AppTheme {
     ),
     checkboxTheme: CheckboxThemeData(
       fillColor: WidgetStateProperty.resolveWith(
-        (states) =>
-            states.contains(WidgetState.selected) ? _darkPrimary : null,
+        (states) => states.contains(WidgetState.selected) ? _darkPrimary : null,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
     ),
@@ -650,8 +646,11 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
   AppThemeColors lerp(ThemeExtension<AppThemeColors>? other, double t) {
     if (other is! AppThemeColors) return this;
     return AppThemeColors(
-      heroCardBackground:
-          Color.lerp(heroCardBackground, other.heroCardBackground, t)!,
+      heroCardBackground: Color.lerp(
+        heroCardBackground,
+        other.heroCardBackground,
+        t,
+      )!,
       secondaryText: Color.lerp(secondaryText, other.secondaryText, t)!,
       countdownText: Color.lerp(countdownText, other.countdownText, t)!,
       prayerIcon: Color.lerp(prayerIcon, other.prayerIcon, t)!,
@@ -663,15 +662,16 @@ class AppThemeColors extends ThemeExtension<AppThemeColors> {
       navBarBg: Color.lerp(navBarBg, other.navBarBg, t)!,
       pillBg: Color.lerp(pillBg, other.pillBg, t)!,
       shimmerBase: Color.lerp(shimmerBase, other.shimmerBase, t)!,
-      shimmerHighlight:
-          Color.lerp(shimmerHighlight, other.shimmerHighlight, t)!,
+      shimmerHighlight: Color.lerp(
+        shimmerHighlight,
+        other.shimmerHighlight,
+        t,
+      )!,
       successColor: Color.lerp(successColor, other.successColor, t)!,
       cardRadius: cardRadius + (other.cardRadius - cardRadius) * t,
       accentColor: Color.lerp(accentColor, other.accentColor, t),
-      currentPrayerBg:
-          Color.lerp(currentPrayerBg, other.currentPrayerBg, t),
-      currentPrayerFg:
-          Color.lerp(currentPrayerFg, other.currentPrayerFg, t),
+      currentPrayerBg: Color.lerp(currentPrayerBg, other.currentPrayerBg, t),
+      currentPrayerFg: Color.lerp(currentPrayerFg, other.currentPrayerFg, t),
     );
   }
 }

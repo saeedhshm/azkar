@@ -22,7 +22,7 @@ class AppGlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final r = radius ?? AppRadius.lg;
+    final r = radius ?? 24;
 
     Widget card = Container(
       decoration: BoxDecoration(
@@ -31,11 +31,11 @@ class AppGlassCard extends StatelessWidget {
         border: Border.all(color: theme.colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(
-              alpha: theme.brightness == Brightness.dark ? 0.18 : 0.05,
+            color: theme.colorScheme.primary.withValues(
+              alpha: theme.brightness == Brightness.dark ? 0.08 : 0.035,
             ),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
+            blurRadius: 24,
+            offset: const Offset(0, 6),
           ),
         ],
       ),

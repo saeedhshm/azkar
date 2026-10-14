@@ -1,6 +1,7 @@
-import 'package:easy_localization/easy_localization.dart';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
+import '../../../../core/widgets/mosque_illustration.dart';
 import 'progress_prayer_bar.dart';
 
 class NextPrayerHeroCard extends StatelessWidget {
@@ -39,226 +40,186 @@ class NextPrayerHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final textScaler = MediaQuery.textScalerOf(context);
-    final compact = textScaler.scale(1) > 1.18;
-
-    return Semantics(
-      label: '$label $prayerName $countdown. $currentContext.',
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        constraints: BoxConstraints(minHeight: compact ? 210 : 178),
-        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              theme.colorScheme.surfaceContainerHighest,
-              Color.alphaBlend(
-                theme.colorScheme.primary
-                    .withValues(alpha: isDark ? 0.15 : 0.12),
-                theme.colorScheme.surfaceContainerHighest,
-              ),
-            ],
-          ),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: theme.colorScheme.primary
-                .withValues(alpha: isDark ? 0.3 : 0.25),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: theme.colorScheme.primary
-                  .withValues(alpha: isDark ? 0.25 : 0.12),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Radial glow behind countdown
-            Positioned(
-              bottom: 18,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      theme.colorScheme.primary
-                          .withValues(alpha: isDark ? 0.35 : 0.22),
-                      theme.colorScheme.primary
-                          .withValues(alpha: 0),
-                    ],
-                    radius: 0.6,
-                  ),
-                ),
-                child: const SizedBox(width: 250, height: 90),
-              ),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Row 1: hijri date | 📍 location
-                _HeroMetaRow(
-                  location: location,
-                  hijriDate: hijriDate,
-                  onLocationTap: onLocationTap,
-                ),
-                // Row 2: gregorian date
-                if (gregorianDate.isNotEmpty) ...[
-                  const SizedBox(height: 3),
-                Text(
-                  gregorianDate,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 10,
-                  ),
-                ),
-                ],
-                const SizedBox(height: 14),
-                // "You're in Asr time"
-                Text(
-                  currentContext,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    fontWeight: FontWeight.w800,
-                    height: 1,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                // Countdown timer
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 180),
-                  child: FittedBox(
-                    key: ValueKey(countdown),
-                    fit: BoxFit.scaleDown,
-                    child: Text(
-                      countdown,
-                      style: theme.textTheme.displayMedium?.copyWith(
-                        color: theme.colorScheme.primary,
-                        fontSize: 34,
-                        fontWeight: FontWeight.w900,
-                        height: 1.05,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                // "Maghrib at 6:12 PM"
-                Text(
-                  nextPrayerTimeLine,
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 13),
-                // Progress bar with start/end labels and times
-                ProgressPrayerBar(
-                  startLabel: progressStartLabel,
-                  endLabel: progressEndLabel,
-                  startTime: progressStartTime,
-                  endTime: progressEndTime,
-                  progress: progress,
-                ),
-              ],
-            ),
-          ],
-        ),
+    final baseTheme = Theme.of(context);
+    final heroTheme = baseTheme.copyWith(
+      colorScheme: baseTheme.colorScheme.copyWith(
+        primary: const Color(0xFFE6C894),
+        onSurface: const Color(0xFFF7FAF7),
       ),
     );
-  }
-}
-
-/// Row 1: "28 Shawwal 1447 | 📍 Cairo, Egypt"
-class _HeroMetaRow extends StatelessWidget {
-  const _HeroMetaRow({
-    required this.location,
-    required this.hijriDate,
-    required this.onLocationTap,
-  });
-
-  final String location;
-  final String hijriDate;
-  final VoidCallback? onLocationTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.bodySmall?.copyWith(
-      color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-      fontWeight: FontWeight.w700,
-      fontSize: 10,
-      height: 1.2,
-    );
-
-    return Column(
-      children: [
-        InkWell(
-          onTap: onLocationTap,
-          borderRadius: BorderRadius.circular(999),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (hijriDate.isNotEmpty) ...[
-                Flexible(
-                  child: Text(
-                    hijriDate,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                    style: style,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
-                  child: Text('|', style: style),
-                ),
-              ],
-              Icon(
-                Icons.location_on,
-                size: 11,
-                color: theme.colorScheme.primary,
-              ),
-              const SizedBox(width: 3),
-              Flexible(
-                child: Text(
-                  location,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: style,
-                ),
+    return Theme(
+      data: heroTheme,
+      child: Semantics(
+        label: '$label $prayerName $countdown. $currentContext.',
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(32),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF344C3F), Color(0xFF172F27)],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0A332D).withValues(alpha: 0.18),
+                blurRadius: 28,
+                offset: const Offset(0, 12),
               ),
             ],
           ),
-        ),
-        if (onLocationTap != null)
-          Tooltip(
-            message: 'prayer_times.change_location'.tr(),
-            child: const SizedBox.shrink(),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(32),
+            child: Stack(
+              children: [
+                if (MediaQuery.sizeOf(context).width >= 350 &&
+                    MediaQuery.textScalerOf(context).scale(1) < 1.4)
+                  const PositionedDirectional(
+                    top: 65,
+                    end: 12,
+                    width: 115,
+                    height: 170,
+                    child: MosqueIllustration(),
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              hijriDate.isEmpty ? gregorianDate : hijriDate,
+                              style: heroTheme.textTheme.labelMedium?.copyWith(
+                                color: const Color(0xFFD4E4DC),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Flexible(
+                            child: InkWell(
+                              onTap: onLocationTap,
+                              borderRadius: BorderRadius.circular(20),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.location_on_outlined,
+                                      color: Color(0xFFE6C894),
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Flexible(
+                                      child: Text(
+                                        location,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: heroTheme.textTheme.labelSmall
+                                            ?.copyWith(color: Colors.white),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      // Leave space for the illustration on typical phones;
+                      // at large text scales readability takes priority.
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          final showArt =
+                              constraints.maxWidth >= 270 &&
+                              MediaQuery.textScalerOf(context).scale(1) < 1.4;
+                          return Padding(
+                            padding: EdgeInsetsDirectional.only(
+                              end: showArt ? 100 : 0,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  label,
+                                  style: heroTheme.textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: const Color(0xFFC1D8CC),
+                                      ),
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  prayerName,
+                                  style: heroTheme.textTheme.headlineMedium
+                                      ?.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w800,
+                                        height: 1.3,
+                                      ),
+                                ),
+                                const SizedBox(height: 14),
+                                FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: Text(
+                                    countdown,
+                                    textDirection: ui.TextDirection.ltr,
+                                    style: heroTheme.textTheme.displaySmall
+                                        ?.copyWith(
+                                          color: const Color(0xFFE6C894),
+                                          fontSize: 38,
+                                          fontWeight: FontWeight.w500,
+                                          letterSpacing: 1,
+                                          fontFeatures: const [
+                                            ui.FontFeature.tabularFigures(),
+                                          ],
+                                        ),
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  nextPrayerTimeLine,
+                                  style: heroTheme.textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: const Color(0xFFD4E4DC),
+                                      ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 22),
+                      Container(
+                        padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.055),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.08),
+                          ),
+                        ),
+                        child: ProgressPrayerBar(
+                          startLabel: progressStartLabel,
+                          endLabel: progressEndLabel,
+                          startTime: progressStartTime,
+                          endTime: progressEndTime,
+                          progress: progress,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-      ],
+        ),
+      ),
     );
   }
 }

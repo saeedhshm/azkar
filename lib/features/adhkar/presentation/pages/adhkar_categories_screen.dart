@@ -6,6 +6,7 @@ import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/utils/app_categories.dart';
 import '../../../../core/widgets/app_loading.dart';
+import '../../../../core/widgets/islamic_ornament.dart';
 import '../../domain/repositories/adhkar_repository.dart';
 import '../widgets/category_card.dart';
 
@@ -45,7 +46,9 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
         toolbarHeight: 64,
         title: Text(
           'home.tabs.adhkar'.tr(),
-          style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
       body: SafeArea(
@@ -72,6 +75,14 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      if (sectionIndex == 0) ...[
+                        IslamicCollectionHeader(
+                          title: 'home.tabs.adhkar'.tr(),
+                          subtitle: section.subtitleKey.tr(),
+                          icon: Icons.auto_stories_outlined,
+                        ),
+                        const SizedBox(height: 24),
+                      ],
                       // Section Header
                       _SectionHeader(section: section),
                       const SizedBox(height: 14),
@@ -79,7 +90,11 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
                       LayoutBuilder(
                         builder: (context, constraints) {
                           final width = constraints.maxWidth;
-                          final crossCount = width >= 1000 ? 4 : width >= 700 ? 3 : 2;
+                          final crossCount = width >= 1000
+                              ? 4
+                              : width >= 700
+                              ? 3
+                              : 2;
 
                           return GridView.builder(
                             shrinkWrap: true,
@@ -87,11 +102,15 @@ class _AdhkarCategoriesScreenState extends State<AdhkarCategoriesScreen> {
                             itemCount: sectionItems.length,
                             gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: crossCount,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 1.05,
-                            ),
+                                  crossAxisCount: crossCount,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  mainAxisExtent:
+                                      180 *
+                                      MediaQuery.textScalerOf(
+                                        context,
+                                      ).scale(1).clamp(1.0, 2.0),
+                                ),
                             itemBuilder: (context, i) {
                               final category = sectionItems[i];
                               return CategoryCard(

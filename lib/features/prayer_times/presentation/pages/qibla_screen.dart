@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/islamic_ornament.dart';
 
 import '../widgets/qibla_card.dart';
 
@@ -21,8 +22,16 @@ class QiblaScreen extends StatelessWidget {
       body: SafeArea(
         top: false,
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
-          children: const [QiblaCard()],
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 120),
+          children: [
+            IslamicCollectionHeader(
+              title: 'prayer_times.qibla'.tr(),
+              subtitle: 'app.name'.tr(),
+              icon: Icons.explore_outlined,
+            ),
+            const SizedBox(height: 24),
+            const QiblaCard(),
+          ],
         ),
       ),
     );

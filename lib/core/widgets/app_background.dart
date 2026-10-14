@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'islamic_ornament.dart';
 
 /// خلفية موحّدة لجميع الشاشات — نظيفة وبسيطة
 class AppScaffoldBackground extends StatelessWidget {
@@ -29,7 +30,30 @@ class AppScaffoldBackground extends StatelessWidget {
           ],
         ),
       ),
-      child: const SizedBox.expand(),
+      child: Stack(
+        children: [
+          const SizedBox.expand(),
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 260,
+            child: ShaderMask(
+              shaderCallback: (bounds) => const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Colors.white, Colors.transparent],
+              ).createShader(bounds),
+              blendMode: BlendMode.dstIn,
+              child: IslamicOrnament(
+                color: theme.colorScheme.tertiary.withValues(
+                  alpha: isDark ? 0.08 : 0.045,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

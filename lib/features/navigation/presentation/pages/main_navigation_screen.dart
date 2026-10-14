@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/theme/app_radius.dart';
 import '../../../../core/widgets/app_background.dart';
+import '../../../../core/widgets/islamic_icon.dart';
 import '../../../adhkar/presentation/pages/adhkar_categories_screen.dart';
 import '../../../adhkar/presentation/pages/home_screen.dart';
 import '../../../prayer_times/presentation/pages/qibla_screen.dart';
@@ -17,48 +17,24 @@ class MainNavigationScreen extends StatefulWidget {
   State<MainNavigationScreen> createState() => _MainNavigationScreenState();
 }
 
-class _MainNavigationScreenState extends State<MainNavigationScreen>
-    with TickerProviderStateMixin {
+class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _index = 0;
-  late final List<AnimationController> _iconControllers;
-
-  static const _pageCount = 5;
-
-  @override
-  void initState() {
-    super.initState();
-    _iconControllers = List.generate(
-      _pageCount,
-      (_) => AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 200),
-        lowerBound: 1.0,
-        upperBound: 1.22,
-      ),
-    );
-    // Trigger bounce for initial selection
-    _iconControllers[0].forward().then((_) => _iconControllers[0].reverse());
-  }
-
-  @override
-  void dispose() {
-    for (final c in _iconControllers) {
-      c.dispose();
-    }
-    super.dispose();
-  }
-
-  void _onTabSelected(int index) {
-    if (index == _index) return;
-    HapticFeedback.lightImpact();
-    setState(() => _index = index);
-    _iconControllers[index]
-        .forward()
-        .then((_) => _iconControllers[index].reverse());
-  }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final destinations = [
+      (Icons.home_outlined, Icons.home_rounded, 'home.tabs.home'),
+      (Icons.explore_outlined, Icons.explore_rounded, 'home.tabs.qibla'),
+      (Icons.menu_book_outlined, Icons.menu_book_rounded, 'home.tabs.quran'),
+      (
+        Icons.auto_stories_outlined,
+        Icons.auto_stories_rounded,
+        'home.tabs.adhkar',
+      ),
+      (Icons.tune_rounded, Icons.tune_rounded, 'home.tabs.settings'),
+    ];
     return Scaffold(
       extendBody: true,
       body: Stack(
@@ -69,314 +45,115 @@ class _MainNavigationScreenState extends State<MainNavigationScreen>
             children: const [
               HomeScreen(),
               QiblaScreen(),
-              SizedBox.shrink(), // placeholder for center Quran tab
+              SizedBox.shrink(),
               AdhkarCategoriesScreen(),
               SettingsScreen(),
             ],
           ),
         ],
       ),
-      bottomNavigationBar: _ShellNavigationBar(
-        selectedIndex: _index,
-        iconControllers: _iconControllers,
-        onSelected: _onTabSelected,
-      ),
-    );
-  }
-}
-
-// ─── Navigation Bar ───────────────────────────────────────────────────────────
-
-class _ShellNavigationBar extends StatelessWidget {
-  const _ShellNavigationBar({
-    required this.selectedIndex,
-    required this.iconControllers,
-    required this.onSelected,
-  });
-
-  final int selectedIndex;
-  final List<AnimationController> iconControllers;
-  final ValueChanged<int> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final accentColor = theme.colorScheme.primary;
-    final navBarBg = theme.colorScheme.surfaceContainerLow;
-    final softBorder = theme.colorScheme.outlineVariant;
-
-    final items = [
-      _NavItemData(Icons.home_rounded, Icons.home_outlined, 'home.tabs.home'.tr()),
-      _NavItemData(Icons.explore_rounded, Icons.explore_outlined, 'home.tabs.qibla'.tr()),
-      _NavItemData(Icons.menu_book_rounded, Icons.menu_book_outlined, 'home.tabs.quran'.tr()),
-      _NavItemData(Icons.auto_stories_rounded, Icons.auto_stories_outlined, 'home.tabs.adhkar'.tr()),
-      _NavItemData(Icons.settings_rounded, Icons.settings_outlined, 'home.tabs.settings'.tr()),
-    ];
-
-    return SafeArea(
-      top: false,
-      minimum: const EdgeInsets.fromLTRB(14, 0, 14, 10),
-      child: SizedBox(
-        height: 78,
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.bottomCenter,
-          children: [
-            // Nav bar background
-            Positioned.fill(
-              top: 10,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: navBarBg,
-                  borderRadius: BorderRadius.circular(AppRadius.xxl),
-                  border: Border.all(color: softBorder),
-                  boxShadow: [
-                    BoxShadow(
-                      color: accentColor.withValues(alpha: isDark ? 0.22 : 0.1),
-                      blurRadius: 24,
-                      offset: const Offset(0, 10),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.05),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+      bottomNavigationBar: SafeArea(
+        top: false,
+        minimum: const EdgeInsets.fromLTRB(18, 8, 18, 12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: scheme.outlineVariant.withValues(alpha: .7),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF0A332D).withValues(
+                  alpha: theme.brightness == Brightness.dark ? .3 : .08,
                 ),
+                blurRadius: 32,
+                offset: const Offset(0, 10),
               ),
-            ),
-            // Nav items
-            Positioned.fill(
-              top: 10,
-              child: Row(
-                children: [
-                  _NavItem(
-                    item: items[0], index: 0,
-                    selectedIndex: selectedIndex,
-                    controller: iconControllers[0],
-                    onSelected: onSelected,
-                  ),
-                  _NavItem(
-                    item: items[1], index: 1,
-                    selectedIndex: selectedIndex,
-                    controller: iconControllers[1],
-                    onSelected: onSelected,
-                  ),
-                  const Expanded(child: SizedBox()),
-                  _NavItem(
-                    item: items[3], index: 3,
-                    selectedIndex: selectedIndex,
-                    controller: iconControllers[3],
-                    onSelected: onSelected,
-                  ),
-                  _NavItem(
-                    item: items[4], index: 4,
-                    selectedIndex: selectedIndex,
-                    controller: iconControllers[4],
-                    onSelected: onSelected,
-                  ),
-                ],
-              ),
-            ),
-            // Center elevated Quran button
-            Positioned(
-              top: -4,
-              child: _CenterNavButton(
-                item: items[2],
-                selected: selectedIndex == 2,
-                controller: iconControllers[2],
-                accentColor: accentColor,
-                onTap: () => context.push('/quran'),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Center Elevated Button (Quran) ──────────────────────────────────────────
-
-class _CenterNavButton extends StatelessWidget {
-  const _CenterNavButton({
-    required this.item,
-    required this.selected,
-    required this.controller,
-    required this.accentColor,
-    required this.onTap,
-  });
-
-  final _NavItemData item;
-  final bool selected;
-  final AnimationController controller;
-  final Color accentColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: item.label,
-      child: GestureDetector(
-        onTap: () {
-          HapticFeedback.mediumImpact();
-          controller.forward().then((_) => controller.reverse());
-          onTap();
-        },
-        child: AnimatedBuilder(
-          animation: controller,
-          builder: (_, child) => Transform.scale(
-            scale: controller.value,
-            child: child,
+            ],
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Row(
             children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color.alphaBlend(
-                        Colors.white.withValues(alpha: 0.15),
-                        accentColor,
+              for (var i = 0; i < destinations.length; i++)
+                Expanded(
+                  child: Semantics(
+                    selected: i == _index,
+                    button: true,
+                    label: destinations[i].$3.tr(),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        if (i == 2) {
+                          context.push('/quran');
+                        } else {
+                          setState(() => _index = i);
+                        }
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            AnimatedContainer(
+                              duration: const Duration(milliseconds: 240),
+                              curve: Curves.easeOutCubic,
+                              width: 46,
+                              height: 34,
+                              decoration: BoxDecoration(
+                                color: i == 2
+                                    ? scheme.primary
+                                    : i == _index
+                                    ? scheme.primary.withValues(alpha: .09)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Center(
+                                child: i == 2
+                                    ? IslamicIcon(
+                                        type: IslamicIconType.quran,
+                                        color: scheme.onPrimary,
+                                        size: 23,
+                                      )
+                                    : Icon(
+                                        i == _index
+                                            ? destinations[i].$2
+                                            : destinations[i].$1,
+                                        size: 23,
+                                        color: i == _index
+                                            ? scheme.primary
+                                            : scheme.onSurface.withValues(
+                                                alpha: .5,
+                                              ),
+                                      ),
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              destinations[i].$3.tr(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                fontSize: 10,
+                                fontWeight: i == _index
+                                    ? FontWeight.w800
+                                    : FontWeight.w500,
+                                color: i == _index
+                                    ? scheme.primary
+                                    : scheme.onSurface.withValues(alpha: .6),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      accentColor,
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: accentColor.withValues(alpha: isDark ? 0.5 : 0.4),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
                     ),
-                    BoxShadow(
-                      color: accentColor.withValues(alpha: 0.2),
-                      blurRadius: 30,
-                    ),
-                  ],
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: isDark ? 0.25 : 0.35),
-                    width: 1.5,
                   ),
                 ),
-                child: Icon(
-                  selected ? item.selectedIcon : item.icon,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                item.label,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  color: selected
-                      ? accentColor
-                      : theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                  fontWeight: FontWeight.w800,
-                  fontSize: 9,
-                ),
-              ),
             ],
           ),
         ),
       ),
     );
   }
-}
-
-// ─── Regular Nav Item ─────────────────────────────────────────────────────────
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.item,
-    required this.index,
-    required this.selectedIndex,
-    required this.controller,
-    required this.onSelected,
-  });
-
-  final _NavItemData item;
-  final int index;
-  final int selectedIndex;
-  final AnimationController controller;
-  final ValueChanged<int> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final accentColor = theme.colorScheme.primary;
-    final muted = theme.colorScheme.onSurface.withValues(alpha: 0.5);
-    final selected = index == selectedIndex;
-
-    return Expanded(
-      child: Semantics(
-        button: true,
-        selected: selected,
-        label: item.label,
-        child: InkWell(
-          onTap: () => onSelected(index),
-          borderRadius: BorderRadius.circular(22),
-          child: AnimatedBuilder(
-            animation: controller,
-            builder: (_, child) => Transform.scale(
-              scale: selected ? controller.value : 1.0,
-              child: child,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 10, bottom: 5),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: Icon(
-                      selected ? item.selectedIcon : item.icon,
-                      key: ValueKey(selected),
-                      size: 22,
-                      color: selected
-                          ? accentColor
-                          : muted.withValues(alpha: 0.75),
-                    ),
-                  ),
-                  const SizedBox(height: 3),
-                  AnimatedDefaultTextStyle(
-                    duration: const Duration(milliseconds: 200),
-                    style: (theme.textTheme.labelSmall ?? const TextStyle()).copyWith(
-                      color: selected
-                          ? accentColor
-                          : muted.withValues(alpha: 0.82),
-                      fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                      fontSize: 9.5,
-                    ),
-                    child: Text(item.label, maxLines: 1, overflow: TextOverflow.ellipsis),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Data ─────────────────────────────────────────────────────────────────────
-
-class _NavItemData {
-  const _NavItemData(this.selectedIcon, this.icon, this.label);
-
-  final IconData selectedIcon;
-  final IconData icon;
-  final String label;
 }

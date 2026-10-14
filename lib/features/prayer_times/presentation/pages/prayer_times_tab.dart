@@ -4,6 +4,7 @@ import 'package:adhan/adhan.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/service_locator.dart';
 import '../../../../core/theme/app_radius.dart';
@@ -11,6 +12,7 @@ import '../../../../core/utils/coordinate_validator.dart';
 import '../../../../core/utils/time_formatter.dart';
 import '../../../../core/widgets/app_bottom_sheet.dart';
 import '../../../../core/widgets/app_empty_state.dart';
+import '../../../../core/widgets/islamic_icon.dart';
 import '../../data/models/city_entry.dart';
 import '../../data/services/location_service.dart';
 import '../../../settings/presentation/cubit/time_format_cubit.dart';
@@ -81,9 +83,10 @@ class _PrayerTimesLoadingSkeletonState
       vsync: this,
       duration: const Duration(milliseconds: 1400),
     )..repeat();
-    _anim = Tween<double>(begin: -1, end: 2).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOutSine),
-    );
+    _anim = Tween<double>(
+      begin: -1,
+      end: 2,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOutSine));
   }
 
   @override
@@ -96,8 +99,12 @@ class _PrayerTimesLoadingSkeletonState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final shimmerBase = isDark ? const Color(0xFF303030) : const Color(0xFFE0E0E0);
-    final shimmerHighlight = isDark ? const Color(0xFF424242) : const Color(0xFFF5F5F5);
+    final shimmerBase = isDark
+        ? const Color(0xFF303030)
+        : const Color(0xFFE0E0E0);
+    final shimmerHighlight = isDark
+        ? const Color(0xFF424242)
+        : const Color(0xFFF5F5F5);
 
     return AnimatedBuilder(
       animation: _anim,
@@ -105,11 +112,7 @@ class _PrayerTimesLoadingSkeletonState
         shaderCallback: (bounds) => LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [
-            shimmerBase,
-            shimmerHighlight,
-            shimmerBase,
-          ],
+          colors: [shimmerBase, shimmerHighlight, shimmerBase],
           stops: [
             (_anim.value - 0.3).clamp(0.0, 1.0),
             _anim.value.clamp(0.0, 1.0),
@@ -190,10 +193,15 @@ class _PrayerTimesContent extends StatelessWidget {
     final use24h = context.watch<TimeFormatCubit>().state.use24h;
     final locale = context.locale.toString();
     final now = DateTime.now();
-    final window = _buildPrayerWindow(times, state.nextPrayerTime,
-        use24h: use24h, locale: locale);
-    final currentLabel =
-        _prayerLabel(state.currentPrayer ?? window.currentPrayer);
+    final window = _buildPrayerWindow(
+      times,
+      state.nextPrayerTime,
+      use24h: use24h,
+      locale: locale,
+    );
+    final currentLabel = _prayerLabel(
+      state.currentPrayer ?? window.currentPrayer,
+    );
     final nextPrayerLabel = _prayerLabel(state.nextPrayer);
     final nextTime = state.nextPrayerTime == null
         ? '--:--'
@@ -203,8 +211,8 @@ class _PrayerTimesContent extends StatelessWidget {
             locale: locale,
           );
 
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
       child: Column(
         children: [
           NextPrayerHeroCard(
@@ -227,24 +235,43 @@ class _PrayerTimesContent extends StatelessWidget {
             gregorianDate: state.gregorianDate ?? '',
             onLocationTap: () => _showLocationSheet(context, state),
           ),
-          const SizedBox(height: 14),
-          Expanded(
-            child: PrayerTimesGrid(
-              items: items.map((item) {
-                return PrayerTimeTileData(
-                  name: _prayerLabel(item.prayer),
-                  time: TimeFormatter.formatDateTime(
-                    item.time,
-                    use24h: use24h,
-                    locale: locale,
+          const SizedBox(height: 24),
+          const _DailyShortcuts(),
+          const SizedBox(height: 28),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'home.tabs.prayer_times'.tr(),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
                   ),
-                  icon: _prayerIcon(item.prayer),
-                  isCurrent: state.currentPrayer == item.prayer,
-                  isNext: state.nextPrayer == item.prayer,
-                  isPast: item.time.isBefore(now),
-                );
-              }).toList(),
-            ),
+                ),
+              ),
+              Icon(
+                Icons.schedule_rounded,
+                size: 19,
+                color: Theme.of(context).colorScheme.tertiary,
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          PrayerTimesGrid(
+            embedded: true,
+            items: items.map((item) {
+              return PrayerTimeTileData(
+                name: _prayerLabel(item.prayer),
+                time: TimeFormatter.formatDateTime(
+                  item.time,
+                  use24h: use24h,
+                  locale: locale,
+                ),
+                icon: _prayerIcon(item.prayer),
+                isCurrent: state.currentPrayer == item.prayer,
+                isNext: state.nextPrayer == item.prayer,
+                isPast: item.time.isBefore(now),
+              );
+            }).toList(),
           ),
         ],
       ),
@@ -311,7 +338,8 @@ class _PrayerTimesContent extends StatelessWidget {
     if (startDateTime != null &&
         endDateTime != null &&
         endDateTime.isAfter(startDateTime)) {
-      progress = now.difference(startDateTime).inSeconds /
+      progress =
+          now.difference(startDateTime).inSeconds /
           endDateTime.difference(startDateTime).inSeconds;
     }
 
@@ -323,12 +351,18 @@ class _PrayerTimesContent extends StatelessWidget {
       endLabel: _prayerLabel(nextPrayer),
       startTime: startDateTime == null
           ? ''
-          : TimeFormatter.formatDateTime(startDateTime,
-              use24h: use24h, locale: locale),
+          : TimeFormatter.formatDateTime(
+              startDateTime,
+              use24h: use24h,
+              locale: locale,
+            ),
       endTime: endDateTime == null
           ? ''
-          : TimeFormatter.formatDateTime(endDateTime,
-              use24h: use24h, locale: locale),
+          : TimeFormatter.formatDateTime(
+              endDateTime,
+              use24h: use24h,
+              locale: locale,
+            ),
       progress: progress,
     );
   }
@@ -345,13 +379,15 @@ class _PrayerTimesContent extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-            Text(
-              'prayer_times.location_hint'.tr(),
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                  ),
+          Text(
+            'prayer_times.location_hint'.tr(),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
+          ),
           const SizedBox(height: 16),
           AppSheetActionButton(
             label: 'prayer_times.use_device_location'.tr(),
@@ -500,7 +536,9 @@ class _ManualCoordinatesFormState extends State<_ManualCoordinatesForm> {
               child: TextField(
                 controller: _latController,
                 keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true, signed: true),
+                  decimal: true,
+                  signed: true,
+                ),
                 decoration: InputDecoration(
                   labelText: 'prayer_times.latitude'.tr(),
                   prefixIcon: const Icon(Icons.north_rounded, size: 20),
@@ -513,7 +551,9 @@ class _ManualCoordinatesFormState extends State<_ManualCoordinatesForm> {
               child: TextField(
                 controller: _lngController,
                 keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true, signed: true),
+                  decimal: true,
+                  signed: true,
+                ),
                 decoration: InputDecoration(
                   labelText: 'prayer_times.longitude'.tr(),
                   prefixIcon: const Icon(Icons.east_rounded, size: 20),
@@ -633,7 +673,9 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
             const SizedBox(height: 16),
             Text(
               'prayer_times.downloading_cities'.tr(),
-              style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurface.withValues(alpha: 0.5)),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -691,15 +733,15 @@ class _CitySearchSheetState extends State<_CitySearchSheet> {
             child: ListView.separated(
               shrinkWrap: true,
               itemCount: _results.length,
-              separatorBuilder: (_, _) => Divider(
-                height: 1,
-                color: theme.colorScheme.outlineVariant,
-              ),
+              separatorBuilder: (_, _) =>
+                  Divider(height: 1, color: theme.colorScheme.outlineVariant),
               itemBuilder: (context, index) {
                 final city = _results[index];
                 return ListTile(
                   contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 4, vertical: 2),
+                    horizontal: 4,
+                    vertical: 2,
+                  ),
                   leading: Container(
                     width: 36,
                     height: 36,
@@ -781,11 +823,13 @@ class _PermissionCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: accentColor.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
-                  border:
-                      Border.all(color: accentColor.withValues(alpha: 0.3)),
+                  border: Border.all(color: accentColor.withValues(alpha: 0.3)),
                 ),
-                child: Icon(Icons.location_off_rounded,
-                    color: accentColor, size: 34),
+                child: Icon(
+                  Icons.location_off_rounded,
+                  color: accentColor,
+                  size: 34,
+                ),
               ),
               const SizedBox(height: 20),
               Text(
@@ -803,14 +847,15 @@ class _PermissionCard extends StatelessWidget {
                 alignment: WrapAlignment.center,
                 children: [
                   FilledButton.icon(
-                    onPressed: () =>
-                        context.read<PrayerTimesCubit>().refresh(),
+                    onPressed: () => context.read<PrayerTimesCubit>().refresh(),
                     icon: const Icon(Icons.refresh_rounded, size: 16),
                     label: Text('common.retry'.tr()),
                   ),
                   OutlinedButton.icon(
                     onPressed: () => _showManualDialog(
-                        context, context.read<PrayerTimesCubit>()),
+                      context,
+                      context.read<PrayerTimesCubit>(),
+                    ),
                     icon: const Icon(Icons.edit_location_rounded, size: 16),
                     label: Text('prayer_times.manual_location'.tr()),
                   ),
@@ -838,7 +883,9 @@ class _PermissionCard extends StatelessWidget {
   }
 
   Future<void> _showManualDialog(
-      BuildContext context, PrayerTimesCubit cubit) async {
+    BuildContext context,
+    PrayerTimesCubit cubit,
+  ) async {
     final labelController = TextEditingController();
     final latController = TextEditingController();
     final lngController = TextEditingController();
@@ -861,7 +908,9 @@ class _PermissionCard extends StatelessWidget {
             TextField(
               controller: latController,
               keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true, signed: true),
+                decimal: true,
+                signed: true,
+              ),
               decoration: InputDecoration(
                 labelText: 'prayer_times.latitude'.tr(),
               ),
@@ -870,7 +919,9 @@ class _PermissionCard extends StatelessWidget {
             TextField(
               controller: lngController,
               keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true, signed: true),
+                decimal: true,
+                signed: true,
+              ),
               decoration: InputDecoration(
                 labelText: 'prayer_times.longitude'.tr(),
               ),
@@ -891,7 +942,10 @@ class _PermissionCard extends StatelessWidget {
                   ? '${lat.toStringAsFixed(2)}, ${lng.toStringAsFixed(2)}'
                   : labelController.text.trim();
               await cubit.setManualLocation(
-                  latitude: lat, longitude: lng, label: label);
+                latitude: lat,
+                longitude: lng,
+                label: label,
+              );
               if (context.mounted) Navigator.pop(context);
             },
             child: Text('common.save'.tr()),
@@ -903,6 +957,91 @@ class _PermissionCard extends StatelessWidget {
 }
 
 // ─── Internal helpers ─────────────────────────────────────────────────────────
+
+class _DailyShortcuts extends StatelessWidget {
+  const _DailyShortcuts();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final shortcuts = [
+      (
+        'categories.morning_adhkar.title',
+        '/adhkar/morning_adhkar',
+        Icons.wb_sunny_outlined,
+      ),
+      (
+        'categories.evening_adhkar.title',
+        '/adhkar/evening_adhkar',
+        Icons.nights_stay_outlined,
+      ),
+      ('categories.tasbeeh.title', '/tasbeeh', Icons.touch_app_outlined),
+    ];
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < shortcuts.length; i++) ...[
+          if (i > 0) const SizedBox(width: 10),
+          Expanded(
+            child: Material(
+              color: scheme.surfaceContainerLow,
+              borderRadius: BorderRadius.circular(22),
+              child: InkWell(
+                onTap: () => context.push(shortcuts[i].$2),
+                borderRadius: BorderRadius.circular(22),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: (i == 0 ? scheme.tertiary : scheme.primary)
+                              .withValues(alpha: .09),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: i == 2
+                              ? IslamicIcon(
+                                  type: IslamicIconType.tasbeeh,
+                                  size: 23,
+                                  color: scheme.primary,
+                                )
+                              : Icon(
+                                  shortcuts[i].$3,
+                                  size: 23,
+                                  color: i == 0
+                                      ? scheme.tertiary
+                                      : scheme.primary,
+                                ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        shortcuts[i].$1.tr(),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                          height: 1.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
 
 class _PrayerItem {
   const _PrayerItem(this.prayer, this.time);

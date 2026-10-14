@@ -3,20 +3,28 @@ import 'package:flutter/material.dart';
 import 'prayer_time_tile.dart';
 
 class PrayerTimesGrid extends StatelessWidget {
-  const PrayerTimesGrid({super.key, required this.items});
+  const PrayerTimesGrid({
+    super.key,
+    required this.items,
+    this.embedded = false,
+  });
 
   final List<PrayerTimeTileData> items;
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 104),
+      shrinkWrap: embedded,
+      physics: embedded ? const NeverScrollableScrollPhysics() : null,
+      padding: EdgeInsets.only(bottom: embedded ? 0 : 104),
       itemCount: items.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio: 1.48,
+        mainAxisExtent:
+            132 * MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0),
       ),
       itemBuilder: (context, index) {
         final item = items[index];
